@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.localization",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.Localization.dll",
+  "name": { "en": "Localization", "zh-TW": "語言" },
+  "description": {
+    "en": "Interface languages and live language switching.",
+    "zh-TW": "介面語言與即時切換。"
+  },
+  "author": "Magpienest contributors",
+  "essential": true,
+  "enabledByDefault": true
+}

@@ -1,0 +1,9 @@
+{
+  "Shell.Nav.Toggle": "Collapse or expand the navigation",
+  "Shell.Empty.NoPages": "No pages yet. Turn on a plugin in Settings.",
+  "Shell.Dialog.Ok": "OK",
+  "Shell.Dialog.Cancel": "Cancel",
+  "Shell.Toast.Close": "Dismiss",
+  "Shell.Status.More": "+{0}",
+  "Shell.Error.PageFailed": "The page could not be opened. See the log for details."
+}

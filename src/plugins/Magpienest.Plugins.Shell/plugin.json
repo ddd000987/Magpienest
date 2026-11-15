@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.shell",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.Shell.dll",
+  "name": { "en": "Main window", "zh-TW": "主視窗" },
+  "description": {
+    "en": "Main window, navigation, notifications, dialogs and theme.",
+    "zh-TW": "主視窗、導覽、通知、對話框與主題。"
+  },
+  "author": "Magpienest contributors",
+  "essential": true,
+  "enabledByDefault": true
+}

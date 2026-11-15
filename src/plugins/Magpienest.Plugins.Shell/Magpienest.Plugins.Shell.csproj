@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PluginId>magpienest.shell</PluginId>
+  </PropertyGroup>
+  <Import Project="$(RepoRoot)build\Plugin.props" />
+</Project>

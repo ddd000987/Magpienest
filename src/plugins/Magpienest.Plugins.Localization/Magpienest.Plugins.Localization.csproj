@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PluginId>magpienest.localization</PluginId>
+  </PropertyGroup>
+  <Import Project="$(RepoRoot)build\Plugin.props" />
+  <ItemGroup>
+    <InternalsVisibleTo Include="Magpienest.Plugins.Localization.Tests" />
+  </ItemGroup>
+</Project>

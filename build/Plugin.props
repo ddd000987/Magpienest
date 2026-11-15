@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <OutDir>$(RepoRoot)artifacts\bin\$(Configuration)\plugins\$(PluginId)\</OutDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRoot)src\Magpienest.Sdk\Magpienest.Sdk.csproj">
+      <Private>false</Private>
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </ProjectReference>
+    <!-- Compile-time only (source generators); the host supplies the runtime copy through the SDK. -->
+    <PackageReference Include="CommunityToolkit.Mvvm" ExcludeAssets="runtime" />
+    <Content Include="plugin.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="lang\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

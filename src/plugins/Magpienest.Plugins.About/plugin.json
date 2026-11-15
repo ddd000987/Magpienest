@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.about",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.About.dll",
+  "name": { "en": "About", "zh-TW": "關於" },
+  "description": {
+    "en": "Shows the version, licence and data folder.",
+    "zh-TW": "顯示版本、授權與資料夾位置。"
+  },
+  "author": "Magpienest contributors",
+  "essential": false,
+  "enabledByDefault": true
+}

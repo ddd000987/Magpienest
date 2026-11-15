@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.devtools",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.DevTools.dll",
+  "name": { "en": "Developer tools", "zh-TW": "開發工具" },
+  "description": {
+    "en": "Command-line screenshots for automated checks. Does nothing in normal use.",
+    "zh-TW": "供自動檢查用的命令列截圖工具，平常使用時不會做任何事。"
+  },
+  "author": "Magpienest contributors",
+  "essential": false,
+  "enabledByDefault": true
+}

@@ -1,0 +1,9 @@
+{
+  "Shell.Nav.Toggle": "收合或展開導覽列",
+  "Shell.Empty.NoPages": "目前沒有頁面。請到「設定」開啟插件。",
+  "Shell.Dialog.Ok": "確定",
+  "Shell.Dialog.Cancel": "取消",
+  "Shell.Toast.Close": "關閉",
+  "Shell.Status.More": "+{0}",
+  "Shell.Error.PageFailed": "無法開啟此頁面，詳情請查看記錄檔。"
+}

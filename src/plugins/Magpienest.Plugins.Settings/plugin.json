@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.settings",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.Settings.dll",
+  "name": { "en": "Settings", "zh-TW": "設定" },
+  "description": {
+    "en": "The Settings page: language, theme and plugins.",
+    "zh-TW": "設定頁：語言、主題與插件。"
+  },
+  "author": "Magpienest contributors",
+  "essential": true,
+  "enabledByDefault": true
+}

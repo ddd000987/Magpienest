@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/plugins/">
+    <Project Path="src/plugins/Magpienest.Plugins.About/Magpienest.Plugins.About.csproj" />
+    <Project Path="src/plugins/Magpienest.Plugins.DevTools/Magpienest.Plugins.DevTools.csproj" />
+    <Project Path="src/plugins/Magpienest.Plugins.Localization/Magpienest.Plugins.Localization.csproj" />
+    <Project Path="src/plugins/Magpienest.Plugins.Settings/Magpienest.Plugins.Settings.csproj" />
+    <Project Path="src/plugins/Magpienest.Plugins.Shell/Magpienest.Plugins.Shell.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Magpienest.App/Magpienest.App.csproj" />
+    <Project Path="src/Magpienest.Core/Magpienest.Core.csproj" />
+    <Project Path="src/Magpienest.Sdk/Magpienest.Sdk.csproj" />
+  </Folder>
+  <Folder Name="/src/plugins/" />
+  <Folder Name="/tests/">
+    <Project Path="tests/Magpienest.Core.Tests/Magpienest.Core.Tests.csproj" />
+    <Project Path="tests/Magpienest.Localization.Tests/Magpienest.Localization.Tests.csproj" />
+    <Project Path="tests/Magpienest.Plugins.Localization.Tests/Magpienest.Plugins.Localization.Tests.csproj" />
+  </Folder>
+</Solution>

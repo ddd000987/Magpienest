@@ -1,0 +1,46 @@
+<UserControl x:Class="Magpienest.Plugins.Settings.GeneralSectionView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sdk="clr-namespace:Magpienest.Sdk.Localization;assembly=Magpienest.Sdk">
+  <UserControl.Resources>
+    <Style x:Key="Card" TargetType="Border">
+      <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+      <Setter Property="Padding" Value="16,12" />
+      <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+  </UserControl.Resources>
+  <StackPanel>
+    <Border Style="{StaticResource Card}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel VerticalAlignment="Center">
+          <TextBlock Text="{sdk:Loc Settings.General.Language}" />
+          <TextBlock Text="{sdk:Loc Settings.General.LanguageHint}" Style="{DynamicResource CaptionTextBlockStyle}"
+                     Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+        <ComboBox Grid.Column="1" MinWidth="240" VerticalAlignment="Center"
+                  ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" DisplayMemberPath="Display"
+                  ToolTip="{sdk:Loc Settings.General.Language}" />
+      </Grid>
+    </Border>
+    <Border Style="{StaticResource Card}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="{sdk:Loc Settings.General.Theme}" VerticalAlignment="Center" />
+        <ComboBox Grid.Column="1" MinWidth="240" VerticalAlignment="Center"
+                  ItemsSource="{Binding Themes}" SelectedItem="{Binding SelectedTheme}" DisplayMemberPath="Display"
+                  ToolTip="{sdk:Loc Settings.General.Theme}" />
+      </Grid>
+    </Border>
+  </StackPanel>
+</UserControl>
