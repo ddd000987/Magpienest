@@ -4,8 +4,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Magpienest.Sdk;
+using Magpienest.Sdk.Library;
 using Magpienest.Sdk.Localization;
 using Magpienest.Sdk.Shell;
+using Magpienest.Sdk.Thumbnails;
 
 namespace Magpienest.Plugins.DevTools;
 
@@ -14,7 +16,7 @@ namespace Magpienest.Plugins.DevTools;
 /// Does nothing when the argument is absent.
 /// </summary>
 [Requires(typeof(IShellService))]
-[Optional(typeof(ILocalizationService))]
+[Optional(typeof(ILocalizationService), typeof(ILibraryService), typeof(IThumbnailService))]
 public sealed class DevToolsPlugin : Plugin
 {
     private static readonly TimeSpan Watchdog = TimeSpan.FromSeconds(90);
@@ -87,6 +89,11 @@ public sealed class DevToolsPlugin : Plugin
             }
 
             Directory.CreateDirectory(options.OutputDirectory);
+            if (options.Sources.Count > 0 && !await AddSourcesAsync(ctx, options.Sources))
+            {
+                exitCode = 1;
+            }
+
             var pages = options.Pages ?? [.. shell.Pages.Select(p => p.Id)];
             if (pages.Count == 0)
             {
@@ -108,7 +115,7 @@ public sealed class DevToolsPlugin : Plugin
                 }
 
                 await Idle(dispatcher);
-                await Task.Delay(500, ctx.Deactivating);
+                await Task.Delay(options.Sources.Count > 0 ? 2000 : 500, ctx.Deactivating);
                 await Idle(dispatcher);
                 var file = parameter is null ? id : $"{id}-{parameter}";
                 if (!await Capture(ctx, shell, dispatcher, Path.Combine(options.OutputDirectory, file + ".png")))
@@ -146,6 +153,50 @@ public sealed class DevToolsPlugin : Plugin
 
         ctx.Log.Info($"Screenshot run finished with exit code {exitCode}; output '{options.OutputDirectory}'.");
         ctx.Environment.RequestShutdown(exitCode);
+    }
+
+    /// <summary>
+    /// <c>--add-source kind=path</c>: adds the folder (or reuses it), scans it and warms the thumbnails of the first
+    /// items so the captured grid shows content.
+    /// </summary>
+    private static async Task<bool> AddSourcesAsync(IPluginContext ctx, IReadOnlyList<(string Kind, string Path)> sources)
+    {
+        if (!ctx.TryGet<ILibraryService>(out var library))
+        {
+            ctx.Log.Error("--add-source: no library service.");
+            return false;
+        }
+
+        ctx.TryGet<IThumbnailService>(out var thumbnails);
+        var ok = true;
+        foreach (var (kind, path) in sources)
+        {
+            try
+            {
+                var full = Path.GetFullPath(path);
+                var source = (await library.GetSourcesAsync(kind))
+                                 .FirstOrDefault(s => string.Equals(s.Path, full.TrimEnd('\\'), StringComparison.OrdinalIgnoreCase))
+                             ?? await library.AddSourceAsync(kind, full);
+                var result = await library.ScanAsync(source.Id, null, ctx.Deactivating);
+                ctx.Log.Info($"--add-source {kind}={full}: {result.Added} added, {result.Total} total.");
+                if (thumbnails is not null)
+                {
+                    var items = await library.QueryAsync(new ItemQuery { Kind = kind, Limit = 80 }, ctx.Deactivating);
+                    await Task.WhenAll(items.Select(item => thumbnails.GetAsync(item, ctx.Deactivating)));
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                ctx.Log.Error($"--add-source {kind}={path} failed.", ex);
+                ok = false;
+            }
+        }
+
+        return ok;
     }
 
     private static async Task<bool> Capture(IPluginContext ctx, IShellService shell, Dispatcher dispatcher, string path)
@@ -194,7 +245,8 @@ public sealed class DevToolsPlugin : Plugin
 }
 
 /// <summary>Parsed screenshot arguments.</summary>
-internal sealed record ScreenshotOptions(string OutputDirectory, IReadOnlyList<string>? Pages, string? Language, AppTheme? Theme)
+internal sealed record ScreenshotOptions(string OutputDirectory, IReadOnlyList<string>? Pages, string? Language, AppTheme? Theme,
+                                         IReadOnlyList<(string Kind, string Path)> Sources)
 {
     public static ScreenshotOptions? Parse(IReadOnlyList<string> args)
     {
@@ -219,6 +271,16 @@ internal sealed record ScreenshotOptions(string OutputDirectory, IReadOnlyList<s
 
         var pages = Value("--pages")?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         AppTheme? theme = Enum.TryParse<AppTheme>(Value("--theme"), ignoreCase: true, out var parsed) ? parsed : null;
-        return new ScreenshotOptions(Path.GetFullPath(output), pages, Value("--lang"), theme);
+        var sources = new List<(string Kind, string Path)>();
+        for (var i = 0; i < args.Count - 1; i++)
+        {
+            if (string.Equals(args[i], "--add-source", StringComparison.OrdinalIgnoreCase)
+                && args[i + 1].Split('=', 2) is [{ Length: > 0 } kind, { Length: > 0 } path])
+            {
+                sources.Add((kind, path));
+            }
+        }
+
+        return new ScreenshotOptions(Path.GetFullPath(output), pages, Value("--lang"), theme, sources);
     }
 }

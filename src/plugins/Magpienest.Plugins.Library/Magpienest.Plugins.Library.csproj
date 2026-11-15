@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PluginId>magpienest.library</PluginId>
+  </PropertyGroup>
+  <Import Project="$(RepoRoot)build\Plugin.props" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="VirtualizingWrapPanel" />
+    <InternalsVisibleTo Include="Magpienest.Plugins.Library.Tests" />
+    <Using Include="System.IO" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.illustration",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.Illustration.dll",
+  "name": { "en": "Illustrations", "zh-TW": "插畫" },
+  "description": {
+    "en": "Collect image files from your folders, then browse, tag and view them.",
+    "zh-TW": "收集資料夾中的圖片檔，瀏覽、加標籤並觀看。"
+  },
+  "author": "Magpienest contributors",
+  "essential": false,
+  "enabledByDefault": true
+}

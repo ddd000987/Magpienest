@@ -1,0 +1,24 @@
+{
+  "Viewer.TitleFormat": "{0} — {1} / {2}",
+  "Viewer.ZoomFormat": "{0} %",
+  "Viewer.PixelSize": "{0} × {1} px",
+  "Viewer.SizeKB": "{0} KB",
+  "Viewer.SizeMB": "{0} MB",
+  "Viewer.InfoFormat": "{0}   {1}   {2}   {3}",
+  "Viewer.DecodeFailed": "\"{0}\" cannot be displayed. The file may be damaged or in an unsupported format.",
+  "Viewer.FirstImage": "First image",
+  "Viewer.LastImage": "Last image",
+  "Viewer.Back": "Back (Esc, mouse back button)",
+  "Viewer.Close": "Close (Esc)",
+  "Viewer.FullScreen": "Full screen (F11 or F)",
+  "Viewer.Fit": "Fit to window (0)",
+  "Viewer.ActualSize": "Actual size, 100 % (1)",
+  "Viewer.ActualSizeShort": "1:1",
+
+  "Viewer.Settings.Title": "Viewer",
+  "Viewer.Settings.Budget": "Image memory",
+  "Viewer.Settings.BudgetHint": "How much memory decoded images may use for fast page turning.",
+  "Viewer.Settings.MB": "{0} MB",
+  "Viewer.Settings.GB": "{0} GB",
+  "Viewer.Settings.StretchSmall": "Stretch small images to fit the window"
+}

@@ -1,0 +1,43 @@
+<UserControl x:Class="Magpienest.Plugins.Library.Browser.TagEditorView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sdk="clr-namespace:Magpienest.Sdk.Localization;assembly=Magpienest.Sdk">
+  <StackPanel>
+    <ItemsControl ItemsSource="{Binding Tags}" Focusable="False">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <WrapPanel />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate>
+          <Border Margin="0,0,6,6" Padding="10,2,2,2" CornerRadius="12"
+                  Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                  BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="{Binding}" VerticalAlignment="Center" MaxWidth="220" TextTrimming="CharacterEllipsis" />
+              <Button Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                      CommandParameter="{Binding}" ToolTip="{sdk:Loc Library.Tags.Remove}"
+                      Background="Transparent" BorderThickness="0" Padding="6,2" MinWidth="0" MinHeight="0" Margin="2,0,0,0">
+                <TextBlock Text="&#xE711;" FontFamily="{DynamicResource SymbolThemeFontFamily}" FontSize="10" />
+              </Button>
+            </StackPanel>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+    <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <ComboBox x:Name="AddBox" IsEditable="True" IsTextSearchEnabled="True" StaysOpenOnEdit="True"
+                ItemsSource="{Binding Suggestions}" Text="{Binding NewTag, UpdateSourceTrigger=PropertyChanged}"
+                PreviewKeyDown="AddBox_PreviewKeyDown" ToolTip="{sdk:Loc Library.Tags.AddToolTip}" />
+      <Button Grid.Column="1" Margin="6,0,0,0" Command="{Binding AddCommand}" ToolTip="{sdk:Loc Library.Tags.Add}">
+        <TextBlock Text="&#xE710;" FontFamily="{DynamicResource SymbolThemeFontFamily}" FontSize="14" />
+      </Button>
+    </Grid>
+  </StackPanel>
+</UserControl>

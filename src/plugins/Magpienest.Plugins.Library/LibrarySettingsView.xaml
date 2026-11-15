@@ -1,0 +1,60 @@
+<UserControl x:Class="Magpienest.Plugins.Library.LibrarySettingsView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sdk="clr-namespace:Magpienest.Sdk.Localization;assembly=Magpienest.Sdk">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    <Style x:Key="Card" TargetType="Border">
+      <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+      <Setter Property="Padding" Value="16,12" />
+      <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+  </UserControl.Resources>
+  <StackPanel>
+    <Border Style="{StaticResource Card}">
+      <CheckBox Content="{sdk:Loc Library.Settings.ScanOnStartup}" IsChecked="{Binding ScanOnStartup}" />
+    </Border>
+
+    <Border Style="{StaticResource Card}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel VerticalAlignment="Center">
+          <TextBlock Text="{sdk:Loc Library.Settings.ThumbnailCache}" />
+          <TextBlock Text="{Binding CacheSizeText}" Style="{DynamicResource CaptionTextBlockStyle}"
+                     Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+        <Button Grid.Column="1" VerticalAlignment="Center" Content="{sdk:Loc Library.Settings.ClearCache}"
+                Command="{Binding ClearCacheCommand}" />
+      </Grid>
+    </Border>
+
+    <Border Style="{StaticResource Card}" Visibility="{Binding HasKinds, Converter={StaticResource BoolToVisibility}}">
+      <StackPanel>
+        <TextBlock Text="{sdk:Loc Library.Settings.MissingItems}" />
+        <TextBlock Text="{sdk:Loc Library.Settings.MissingItemsHint}" Style="{DynamicResource CaptionTextBlockStyle}"
+                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" Margin="0,0,0,8" />
+        <ItemsControl ItemsSource="{Binding Kinds}" Focusable="False">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Grid Margin="0,4">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                <Button Grid.Column="1" Content="{sdk:Loc Library.Settings.RemoveMissing}" Command="{Binding RemoveMissingCommand}" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>

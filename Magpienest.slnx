@@ -2,9 +2,14 @@
   <Folder Name="/plugins/">
     <Project Path="src/plugins/Magpienest.Plugins.About/Magpienest.Plugins.About.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.DevTools/Magpienest.Plugins.DevTools.csproj" />
+    <Project Path="src/plugins/Magpienest.Plugins.Illustration/Magpienest.Plugins.Illustration.csproj" />
+    <Project Path="src/plugins/Magpienest.Plugins.ImageViewer/Magpienest.Plugins.ImageViewer.csproj" />
+    <Project Path="src/plugins/Magpienest.Plugins.Imaging/Magpienest.Plugins.Imaging.csproj" />
+    <Project Path="src/plugins/Magpienest.Plugins.Library/Magpienest.Plugins.Library.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.Localization/Magpienest.Plugins.Localization.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.Settings/Magpienest.Plugins.Settings.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.Shell/Magpienest.Plugins.Shell.csproj" />
+    <Project Path="src/plugins/Magpienest.Plugins.Thumbnails/Magpienest.Plugins.Thumbnails.csproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Magpienest.App/Magpienest.App.csproj" />
@@ -15,6 +20,10 @@
   <Folder Name="/tests/">
     <Project Path="tests/Magpienest.Core.Tests/Magpienest.Core.Tests.csproj" />
     <Project Path="tests/Magpienest.Localization.Tests/Magpienest.Localization.Tests.csproj" />
+    <Project Path="tests/Magpienest.Plugins.ImageViewer.Tests/Magpienest.Plugins.ImageViewer.Tests.csproj" />
+    <Project Path="tests/Magpienest.Plugins.Imaging.Tests/Magpienest.Plugins.Imaging.Tests.csproj" />
+    <Project Path="tests/Magpienest.Plugins.Library.Tests/Magpienest.Plugins.Library.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.Localization.Tests/Magpienest.Plugins.Localization.Tests.csproj" />
+    <Project Path="tests/Magpienest.Plugins.Thumbnails.Tests/Magpienest.Plugins.Thumbnails.Tests.csproj" />
   </Folder>
 </Solution>

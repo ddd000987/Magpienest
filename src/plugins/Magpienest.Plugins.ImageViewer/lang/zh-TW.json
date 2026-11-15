@@ -1,0 +1,24 @@
+{
+  "Viewer.TitleFormat": "{0} — {1} / {2}",
+  "Viewer.ZoomFormat": "{0} %",
+  "Viewer.PixelSize": "{0} × {1} 像素",
+  "Viewer.SizeKB": "{0} KB",
+  "Viewer.SizeMB": "{0} MB",
+  "Viewer.InfoFormat": "{0}   {1}   {2}   {3}",
+  "Viewer.DecodeFailed": "無法顯示「{0}」。檔案可能已損壞，或是不支援的格式。",
+  "Viewer.FirstImage": "已是第一張",
+  "Viewer.LastImage": "已是最後一張",
+  "Viewer.Back": "返回（Esc、滑鼠上一頁鍵）",
+  "Viewer.Close": "關閉（Esc）",
+  "Viewer.FullScreen": "全螢幕（F11 或 F）",
+  "Viewer.Fit": "符合視窗（0）",
+  "Viewer.ActualSize": "實際大小 100 %（1）",
+  "Viewer.ActualSizeShort": "1:1",
+
+  "Viewer.Settings.Title": "看圖器",
+  "Viewer.Settings.Budget": "圖片記憶體",
+  "Viewer.Settings.BudgetHint": "已解碼的圖片最多可使用多少記憶體，用來加快翻頁。",
+  "Viewer.Settings.MB": "{0} MB",
+  "Viewer.Settings.GB": "{0} GB",
+  "Viewer.Settings.StretchSmall": "放大小圖片以符合視窗"
+}

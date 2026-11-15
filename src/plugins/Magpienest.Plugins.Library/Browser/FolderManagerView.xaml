@@ -1,0 +1,53 @@
+<UserControl x:Class="Magpienest.Plugins.Library.Browser.FolderManagerView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sdk="clr-namespace:Magpienest.Sdk.Localization;assembly=Magpienest.Sdk">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+  </UserControl.Resources>
+  <DockPanel MinHeight="200">
+    <Button DockPanel.Dock="Bottom" HorizontalAlignment="Left" Margin="0,12,0,0" Command="{Binding AddFolderCommand}">
+      <StackPanel Orientation="Horizontal">
+        <TextBlock Text="&#xE710;" FontFamily="{DynamicResource SymbolThemeFontFamily}" FontSize="14" VerticalAlignment="Center" />
+        <TextBlock Text="{sdk:Loc Library.Browser.AddFolder}" Margin="8,0,0,0" />
+      </StackPanel>
+    </Button>
+    <Grid>
+      <TextBlock Text="{sdk:Loc Library.Folders.Empty}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                 Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVisibility}}" />
+      <ScrollViewer MaxHeight="420" VerticalScrollBarVisibility="Auto">
+        <ItemsControl ItemsSource="{Binding Rows}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Border Margin="0,0,0,8" Padding="12,10" BorderThickness="1" CornerRadius="{DynamicResource ControlCornerRadius}"
+                      Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                      BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <StackPanel Margin="0,0,12,0">
+                    <TextBlock Text="{Binding Path}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Path}" FontWeight="SemiBold" />
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                      <TextBlock Text="{Binding CountText}" Style="{DynamicResource CaptionTextBlockStyle}"
+                                 Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                      <TextBlock Text="{Binding LastScanText}" Style="{DynamicResource CaptionTextBlockStyle}" Margin="16,0,0,0"
+                                 Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="{sdk:Loc Library.Folders.Rescan}" Command="{Binding RescanCommand}" Margin="0,0,8,0" />
+                    <Button Content="{sdk:Loc Library.Folders.Remove}" Command="{Binding RemoveCommand}" />
+                  </StackPanel>
+                </Grid>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </Grid>
+  </DockPanel>
+</UserControl>

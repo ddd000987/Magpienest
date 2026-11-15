@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.thumbnails",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.Thumbnails.dll",
+  "name": { "en": "Thumbnails", "zh-TW": "縮圖" },
+  "description": {
+    "en": "Creates and caches thumbnails for the library, and fetches Windows shell icons.",
+    "zh-TW": "為收藏庫建立並快取縮圖，並取得 Windows 殼層圖示。"
+  },
+  "author": "Magpienest contributors",
+  "essential": false,
+  "enabledByDefault": true
+}

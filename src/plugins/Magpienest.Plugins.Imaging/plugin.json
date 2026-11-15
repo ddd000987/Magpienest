@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.imaging",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.Imaging.dll",
+  "name": { "en": "Imaging", "zh-TW": "影像處理" },
+  "description": {
+    "en": "Decodes images off the UI thread, applies EXIF orientation and encodes JPEG.",
+    "zh-TW": "在背景執行緒解碼圖片、套用 EXIF 方向並輸出 JPEG。"
+  },
+  "author": "Magpienest contributors",
+  "essential": false,
+  "enabledByDefault": true
+}

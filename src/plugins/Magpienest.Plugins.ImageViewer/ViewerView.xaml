@@ -1,0 +1,98 @@
+<UserControl x:Class="Magpienest.Plugins.ImageViewer.ViewerView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sdk="clr-namespace:Magpienest.Sdk.Localization;assembly=Magpienest.Sdk"
+             Focusable="True" FocusVisualStyle="{x:Null}" KeyboardNavigation.TabNavigation="Cycle">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    <!-- The viewing surface is black in every theme (phase-1 T1.7). -->
+    <SolidColorBrush x:Key="ViewerSurfaceBrush" Color="Black" />
+
+    <Style x:Key="Glyph" TargetType="TextBlock">
+      <Setter Property="FontFamily" Value="{DynamicResource SymbolThemeFontFamily}" />
+      <Setter Property="FontSize" Value="16" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+    <Style x:Key="BarButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="10,6" />
+      <Setter Property="Margin" Value="2,0" />
+      <Setter Property="MinHeight" Value="36" />
+      <Setter Property="Focusable" Value="False" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+  </UserControl.Resources>
+
+  <Grid x:Name="Root" Background="{DynamicResource ViewerSurfaceBrush}">
+    <Canvas x:Name="Stage" ClipToBounds="True" Background="{DynamicResource ViewerSurfaceBrush}"
+            MouseLeftButtonDown="Stage_MouseLeftButtonDown" MouseLeftButtonUp="Stage_MouseLeftButtonUp"
+            MouseMove="Stage_MouseMove" LostMouseCapture="Stage_LostMouseCapture" SizeChanged="Stage_SizeChanged">
+      <Image x:Name="PageImage" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality"
+             Source="{Binding Current.Bitmap}" IsHitTestVisible="False">
+        <Image.RenderTransform>
+          <TransformGroup>
+            <RotateTransform x:Name="RotateXf" />
+            <TranslateTransform x:Name="RecentreXf" />
+            <ScaleTransform x:Name="ScaleXf" />
+            <TranslateTransform x:Name="OffsetXf" />
+          </TransformGroup>
+        </Image.RenderTransform>
+      </Image>
+    </Canvas>
+
+    <!-- Decode failure -->
+    <Border HorizontalAlignment="Center" VerticalAlignment="Center" Padding="24,16" MaxWidth="480"
+            CornerRadius="{DynamicResource OverlayCornerRadius}"
+            Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+            Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+      <StackPanel>
+        <TextBlock Text="&#xE91B;" Style="{StaticResource Glyph}" FontSize="36" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+        <TextBlock Text="{Binding ErrorText}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,12,0,0"
+                   Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+      </StackPanel>
+    </Border>
+
+    <!-- Loading -->
+    <ProgressBar Width="200" Height="4" IsIndeterminate="True" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 Visibility="{Binding ShowSpinner, Converter={StaticResource BoolToVisibility}}" />
+
+    <!-- Info line -->
+    <Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="16" Padding="12,6"
+            CornerRadius="{DynamicResource ControlCornerRadius}" Opacity="0.9"
+            Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+            Visibility="{Binding IsInfoVisible, Converter={StaticResource BoolToVisibility}}">
+      <TextBlock Text="{Binding InfoText}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+    </Border>
+
+    <!-- Top bar -->
+    <Border x:Name="TopBar" VerticalAlignment="Top" Padding="8,4" Opacity="0.92"
+            Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+            BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" BorderThickness="0,0,0,1"
+            TextElement.Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+      <DockPanel>
+        <Button DockPanel.Dock="Left" Style="{StaticResource BarButton}" Click="Close_Click" ToolTip="{sdk:Loc Viewer.Back}">
+          <TextBlock Text="&#xE72B;" Style="{StaticResource Glyph}" />
+        </Button>
+        <Button DockPanel.Dock="Right" Style="{StaticResource BarButton}" Click="Close_Click" ToolTip="{sdk:Loc Viewer.Close}">
+          <TextBlock Text="&#xE711;" Style="{StaticResource Glyph}" />
+        </Button>
+        <Button DockPanel.Dock="Right" Style="{StaticResource BarButton}" Click="FullScreen_Click" ToolTip="{sdk:Loc Viewer.FullScreen}">
+          <TextBlock x:Name="FullScreenGlyph" Text="&#xE740;" Style="{StaticResource Glyph}" />
+        </Button>
+        <Button DockPanel.Dock="Right" Style="{StaticResource BarButton}" Click="Actual_Click" ToolTip="{sdk:Loc Viewer.ActualSize}">
+          <TextBlock Text="{sdk:Loc Viewer.ActualSizeShort}" VerticalAlignment="Center" />
+        </Button>
+        <Button DockPanel.Dock="Right" Style="{StaticResource BarButton}" Click="Fit_Click" ToolTip="{sdk:Loc Viewer.Fit}">
+          <TextBlock Text="&#xE9A6;" Style="{StaticResource Glyph}" />
+        </Button>
+        <TextBlock DockPanel.Dock="Right" Text="{Binding ZoomText}" VerticalAlignment="Center" Margin="12,0" MinWidth="48"
+                   TextAlignment="Right" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        <TextBlock Text="{Binding TitleText}" VerticalAlignment="Center" Margin="8,0" TextTrimming="CharacterEllipsis" />
+      </DockPanel>
+    </Border>
+  </Grid>
+</UserControl>

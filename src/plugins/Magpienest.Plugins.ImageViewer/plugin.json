@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.imageviewer",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.ImageViewer.dll",
+  "name": { "en": "Image viewer", "zh-TW": "看圖器" },
+  "description": {
+    "en": "Full-window image viewer with zoom, pan and fast page turning.",
+    "zh-TW": "全視窗看圖器，可縮放、拖曳並快速翻頁。"
+  },
+  "author": "Magpienest contributors",
+  "essential": false,
+  "enabledByDefault": true
+}
