@@ -1,0 +1,20 @@
+{
+  "ImageWindow.Settings.Title": "Image Window",
+  "ImageWindow.Settings.Topmost": "New windows stay on top of other apps",
+  "ImageWindow.Settings.Hint": "Right-click a picture and choose \"Open in borderless window\". Drag to move, scroll to resize, double-click or Esc to close.",
+  "ImageWindow.CloseTip": "Close (Esc)",
+  "ImageWindow.Menu.Topmost": "Always on top",
+  "ImageWindow.Menu.ActualSize": "Actual size",
+  "ImageWindow.Menu.Fit": "Fit to screen",
+  "ImageWindow.Menu.Copy": "Copy image",
+  "ImageWindow.Menu.ShowInExplorer": "Show in Explorer",
+  "ImageWindow.Menu.Close": "Close",
+  "ImageWindow.Gesture.Topmost": "Ctrl+T",
+  "ImageWindow.Gesture.ActualSize": "1",
+  "ImageWindow.Gesture.Fit": "0",
+  "ImageWindow.Gesture.Copy": "Ctrl+C",
+  "ImageWindow.Gesture.Close": "Esc",
+  "ImageWindow.Toast.TopmostOn": "Always on top: on",
+  "ImageWindow.Toast.TopmostOff": "Always on top: off",
+  "ImageWindow.Toast.Copied": "Image copied"
+}

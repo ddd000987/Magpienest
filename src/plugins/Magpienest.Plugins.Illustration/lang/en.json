@@ -1,5 +1,8 @@
 {
   "Illustration.Kind": "Illustrations",
   "Illustration.Page.Title": "Illustrations",
-  "Illustration.Missing": "This file was not found by the last scan."
+  "Illustration.Missing": "This file was not found by the last scan.",
+  "Illustration.OpenInWindow": "Open in borderless window",
+  "Illustration.TooManyWindows": "Select at most {0} pictures to open in windows.",
+  "Illustration.WindowFailed": "\"{0}\" could not be opened. The file may be damaged or in an unsupported format."
 }

@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.archives",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.Archives.dll",
+  "name": { "en": "Archives", "zh-TW": "壓縮檔" },
+  "description": {
+    "en": "Reads pages from zip, rar and 7z files, so comics can stay compressed.",
+    "zh-TW": "讀取 zip、rar、7z 壓縮檔裡的頁面，漫畫不必解壓縮也能看。"
+  },
+  "author": "Magpienest contributors",
+  "essential": false,
+  "enabledByDefault": true
+}

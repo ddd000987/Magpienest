@@ -114,7 +114,6 @@ internal sealed partial class BrowserView : UserControl
             e.Handled = true;
         }
     }
-
     private void Tiles_PreviewKeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None && CurrentTile() is { } tile)

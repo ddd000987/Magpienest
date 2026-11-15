@@ -40,6 +40,15 @@ public enum SpreadMode
     Double,
 }
 
+/// <summary>How pages follow each other on screen.</summary>
+public enum PageFlow
+{
+    /// <summary>One frame at a time.</summary>
+    Paged,
+    /// <summary>All pages edge to edge in one continuous strip.</summary>
+    Strip,
+}
+
 /// <summary>A viewer request.</summary>
 public sealed record ViewerRequest
 {
@@ -65,7 +74,9 @@ public sealed record ViewerRequest
 /// <param name="Direction">Reading direction.</param>
 /// <param name="Spread">Spread mode.</param>
 /// <param name="CoverAlone">First page shown alone.</param>
-public sealed record BookSettings(ReadingDirection Direction, SpreadMode Spread, bool CoverAlone);
+/// <param name="Flow">Paged or continuous strip.</param>
+public sealed record BookSettings(ReadingDirection Direction, SpreadMode Spread, bool CoverAlone,
+                                  PageFlow Flow = PageFlow.Paged);
 
 /// <summary>Viewing progress.</summary>
 /// <param name="PageIndex">First page of the current frame.</param>

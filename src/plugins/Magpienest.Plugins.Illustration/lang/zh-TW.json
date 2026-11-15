@@ -1,5 +1,8 @@
 {
   "Illustration.Kind": "插畫",
   "Illustration.Page.Title": "插畫",
-  "Illustration.Missing": "上次掃描時找不到這個檔案。"
+  "Illustration.Missing": "上次掃描時找不到這個檔案。",
+  "Illustration.OpenInWindow": "在無邊框視窗開啟",
+  "Illustration.TooManyWindows": "一次最多選 {0} 張圖片開成視窗。",
+  "Illustration.WindowFailed": "無法開啟「{0}」。檔案可能已損壞，或是不支援的格式。"
 }

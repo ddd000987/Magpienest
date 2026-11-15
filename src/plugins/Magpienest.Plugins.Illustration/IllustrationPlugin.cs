@@ -13,10 +13,14 @@ namespace Magpienest.Plugins.Illustration;
 /// <summary>The "Illustrations" page: image files in library folders, browsed and viewed one by one.</summary>
 [Requires(typeof(IShellService), typeof(ILibraryService), typeof(ILibraryBrowserFactory),
           typeof(IImagingService), typeof(IThumbnailService), typeof(IImageViewerService))]
+[Optional(typeof(IImageWindowService))]
 public sealed class IllustrationPlugin : Plugin
 {
     /// <summary>Kind and page id.</summary>
     public const string Kind = "illustration";
+
+    /// <summary>Most borderless windows one command opens.</summary>
+    internal const int MaxWindows = 20;
 
     /// <inheritdoc />
     public override void Activate(IPluginContext ctx)
@@ -26,6 +30,7 @@ public sealed class IllustrationPlugin : Plugin
         var browsers = ctx.Get<ILibraryBrowserFactory>();
         var imaging = ctx.Get<IImagingService>();
         var viewer = ctx.Get<IImageViewerService>();
+        ctx.TryGet<IImageWindowService>(out var windows);
 
         library.RegisterKind(ctx, new ItemKindDescriptor
         {
@@ -49,8 +54,43 @@ public sealed class IllustrationPlugin : Plugin
                 ThumbnailStretch = Stretch.Uniform,
                 Sorts = [ItemSort.Title, ItemSort.AddedAt, ItemSort.FileModified, ItemSort.Rating, ItemSort.FileSize],
                 DefaultSort = ItemSort.Title,
+                Commands = windows is null ? [] : [WindowCommand(windows, shell, ctx.Log)],
             }),
         });
+    }
+
+    /// <summary>"Open in borderless window": one window per selected picture (only when the Image Window plugin is on).</summary>
+    internal static BrowserCommand WindowCommand(IImageWindowService windows, IShellService shell, ILog log) =>
+        new("Illustration.OpenInWindow", "", items => OpenWindowsAsync(items, windows, shell, log),
+            items => items.Any(i => !i.IsMissing));
+
+    private static async Task OpenWindowsAsync(IReadOnlyList<LibraryItem> items, IImageWindowService windows, IShellService shell, ILog log)
+    {
+        var present = items.Where(i => !i.IsMissing).ToList();
+        if (present.Count > MaxWindows)
+        {
+            shell.Notify(Loc.Format("Illustration.TooManyWindows", MaxWindows), NotifySeverity.Warning);
+            return;
+        }
+
+        foreach (var item in present)
+        {
+            try
+            {
+                await windows.OpenAsync(new ImageWindowRequest
+                {
+                    Name = Path.GetFileName(item.Path),
+                    FilePath = item.Path,
+                    Open = _ => Task.FromResult<Stream>(new FileStream(item.Path, FileMode.Open, FileAccess.Read,
+                        FileShare.ReadWrite | FileShare.Delete, 64 * 1024, useAsync: true)),
+                });
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ImageDecodeException)
+            {
+                log.Warn($"Opening {item.Path} in a window failed.", ex);
+                shell.Notify(Loc.Format("Illustration.WindowFailed", item.Title), NotifySeverity.Error);
+            }
+        }
     }
 
     /// <summary>Opens the viewer over the grid's visible, non-missing items so paging follows the grid's sort and filter.</summary>

@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PluginId>magpienest.archives</PluginId>
+  </PropertyGroup>
+  <Import Project="$(RepoRoot)build\Plugin.props" />
+  <ItemGroup>
+    <PackageReference Include="SharpCompress" />
+    <InternalsVisibleTo Include="Magpienest.Plugins.Archives.Tests" />
+    <Using Include="System.IO" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PluginId>magpienest.imagewindow</PluginId>
+  </PropertyGroup>
+  <Import Project="$(RepoRoot)build\Plugin.props" />
+  <ItemGroup>
+    <InternalsVisibleTo Include="Magpienest.Plugins.ImageWindow.Tests" />
+    <Using Include="System.IO" />
+  </ItemGroup>
+</Project>

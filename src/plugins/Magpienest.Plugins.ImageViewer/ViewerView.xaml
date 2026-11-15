@@ -30,17 +30,23 @@
     <Canvas x:Name="Stage" ClipToBounds="True" Background="{DynamicResource ViewerSurfaceBrush}"
             MouseLeftButtonDown="Stage_MouseLeftButtonDown" MouseLeftButtonUp="Stage_MouseLeftButtonUp"
             MouseMove="Stage_MouseMove" LostMouseCapture="Stage_LostMouseCapture" SizeChanged="Stage_SizeChanged">
-      <Image x:Name="PageImage" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality"
-             Source="{Binding Current.Bitmap}" IsHitTestVisible="False">
-        <Image.RenderTransform>
+      <!-- The frame: one page, or two pages edge to edge. Transforms apply to the pair as one content rectangle. -->
+      <Canvas x:Name="Spread" IsHitTestVisible="False">
+        <Canvas.RenderTransform>
           <TransformGroup>
             <RotateTransform x:Name="RotateXf" />
             <TranslateTransform x:Name="RecentreXf" />
             <ScaleTransform x:Name="ScaleXf" />
             <TranslateTransform x:Name="OffsetXf" />
           </TransformGroup>
-        </Image.RenderTransform>
-      </Image>
+        </Canvas.RenderTransform>
+        <Image x:Name="PageImage" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality"
+               Source="{Binding Current.Bitmap}" />
+        <Image x:Name="PageImage2" Stretch="Fill" RenderOptions.BitmapScalingMode="HighQuality"
+               Source="{Binding Second.Bitmap}" />
+      </Canvas>
+      <!-- Strip mode: every page edge to edge; children are placed by StripPresenter. -->
+      <Canvas x:Name="StripCanvas" IsHitTestVisible="False" Visibility="Collapsed" ClipToBounds="True" />
     </Canvas>
 
     <!-- Decode failure -->
@@ -61,7 +67,7 @@
                  Visibility="{Binding ShowSpinner, Converter={StaticResource BoolToVisibility}}" />
 
     <!-- Info line -->
-    <Border HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="16" Padding="12,6"
+    <Border x:Name="InfoLine" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="16" Padding="12,6"
             CornerRadius="{DynamicResource ControlCornerRadius}" Opacity="0.9"
             Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
             Visibility="{Binding IsInfoVisible, Converter={StaticResource BoolToVisibility}}">
@@ -83,15 +89,63 @@
         <Button DockPanel.Dock="Right" Style="{StaticResource BarButton}" Click="FullScreen_Click" ToolTip="{sdk:Loc Viewer.FullScreen}">
           <TextBlock x:Name="FullScreenGlyph" Text="&#xE740;" Style="{StaticResource Glyph}" />
         </Button>
-        <Button DockPanel.Dock="Right" Style="{StaticResource BarButton}" Click="Actual_Click" ToolTip="{sdk:Loc Viewer.ActualSize}">
+        <Button DockPanel.Dock="Right" Style="{StaticResource BarButton}" Click="Info_Click" ToolTip="{sdk:Loc Viewer.Info}">
+          <TextBlock Text="&#xE946;" Style="{StaticResource Glyph}" />
+        </Button>
+        <Button DockPanel.Dock="Right" Style="{StaticResource BarButton}" Click="Rotate_Click" ToolTip="{sdk:Loc Viewer.Rotate}"
+                IsEnabled="{Binding IsPaged}">
+          <TextBlock Text="&#xE7AD;" Style="{StaticResource Glyph}" />
+        </Button>
+        <Button DockPanel.Dock="Right" Style="{StaticResource BarButton}" Click="Actual_Click" ToolTip="{sdk:Loc Viewer.ActualSize}"
+                IsEnabled="{Binding IsPaged}">
           <TextBlock Text="{sdk:Loc Viewer.ActualSizeShort}" VerticalAlignment="Center" />
         </Button>
         <Button DockPanel.Dock="Right" Style="{StaticResource BarButton}" Click="Fit_Click" ToolTip="{sdk:Loc Viewer.Fit}">
           <TextBlock Text="&#xE9A6;" Style="{StaticResource Glyph}" />
         </Button>
-        <TextBlock DockPanel.Dock="Right" Text="{Binding ZoomText}" VerticalAlignment="Center" Margin="12,0" MinWidth="48"
-                   TextAlignment="Right" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        <Button DockPanel.Dock="Right" Style="{StaticResource BarButton}" Click="ZoomIn_Click" ToolTip="{sdk:Loc Viewer.ZoomIn}">
+          <TextBlock Text="&#xE8A3;" Style="{StaticResource Glyph}" />
+        </Button>
+        <TextBlock DockPanel.Dock="Right" Text="{Binding ZoomText}" VerticalAlignment="Center" Margin="4,0" MinWidth="48"
+                   TextAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        <Button DockPanel.Dock="Right" Style="{StaticResource BarButton}" Click="ZoomOut_Click" ToolTip="{sdk:Loc Viewer.ZoomOut}">
+          <TextBlock Text="&#xE71F;" Style="{StaticResource Glyph}" />
+        </Button>
         <TextBlock Text="{Binding TitleText}" VerticalAlignment="Center" Margin="8,0" TextTrimming="CharacterEllipsis" />
+      </DockPanel>
+    </Border>
+
+    <!-- Bottom bar: page slider, page numbers, pages shown (and reading toggles for books) -->
+    <Border x:Name="BottomBar" VerticalAlignment="Bottom" Padding="12,6" Opacity="0.92" Visibility="Collapsed"
+            Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+            BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" BorderThickness="0,1,0,0"
+            TextElement.Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Style="{StaticResource BarButton}" Click="Cover_Click" ToolTip="{sdk:Loc Viewer.Book.CoverTip}"
+                IsEnabled="{Binding IsPaged}" Visibility="{Binding IsBook, Converter={StaticResource BoolToVisibility}}">
+          <TextBlock Text="{Binding CoverText}" VerticalAlignment="Center" />
+        </Button>
+        <Button DockPanel.Dock="Right" Style="{StaticResource BarButton}" Click="Direction_Click" ToolTip="{sdk:Loc Viewer.Book.DirectionTip}"
+                Visibility="{Binding IsBook, Converter={StaticResource BoolToVisibility}}">
+          <TextBlock Text="{Binding DirectionText}" VerticalAlignment="Center" />
+        </Button>
+        <Button DockPanel.Dock="Right" Style="{StaticResource BarButton}" Click="Spread_Click" ToolTip="{Binding LayoutTip}">
+          <TextBlock Text="{Binding SpreadText}" VerticalAlignment="Center" />
+        </Button>
+        <TextBlock DockPanel.Dock="Right" Text="{Binding PageText}" VerticalAlignment="Center" Margin="16,0" MinWidth="96"
+                   TextAlignment="Center" />
+        <Grid VerticalAlignment="Center" Margin="8,0">
+          <Slider x:Name="PageSlider" Minimum="0" SmallChange="1" LargeChange="10" IsSnapToTickEnabled="True"
+                  TickFrequency="1" Focusable="False" IsMoveToPointEnabled="True" />
+          <Popup x:Name="SliderPopup" PlacementTarget="{Binding ElementName=PageSlider}" Placement="Top"
+                 AllowsTransparency="True" IsHitTestVisible="False">
+            <Border Padding="10,4" CornerRadius="{DynamicResource ControlCornerRadius}"
+                    Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+              <TextBlock x:Name="SliderPopupText" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+            </Border>
+          </Popup>
+        </Grid>
       </DockPanel>
     </Border>
   </Grid>

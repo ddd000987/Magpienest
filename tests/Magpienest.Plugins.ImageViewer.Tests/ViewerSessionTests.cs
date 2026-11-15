@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -58,9 +59,9 @@ public sealed class ViewerSessionTests
                 await WaitFor(() => vm.HasImage);
                 Assert.Equal(4, vm.Index);
 
-                vm.Next(); // at the end: stays and tells the user
+                vm.Next(); // at the end: stays, without a notification
                 Assert.Equal(4, vm.Index);
-                Assert.Single(shell.Toasts);
+                Assert.Empty(shell.Toasts);
 
                 vm.First();
                 await WaitFor(() => vm.HasImage && vm.Index == 0);
@@ -79,6 +80,268 @@ public sealed class ViewerSessionTests
                 window.Close();
             }
         });
+    }
+
+    [Fact]
+    public void BookModePairsPagesAndFollowsReadingDirection()
+    {
+        RunOnSta(async () =>
+        {
+            var shell = new FakeShell();
+            var imaging = new FakeImaging { SizeOf = i => i == 3 ? (80, 60) : (60, 80) }; // page 3 is a landscape spread
+            var pages = new FakePages(7);
+            var progress = new List<ViewerProgress>();
+            var changed = new List<BookSettings>();
+            var request = new ViewerRequest
+            {
+                Pages = pages,
+                Mode = ViewerMode.Book,
+                Title = "Book",
+                Book = new BookSettings(ReadingDirection.RightToLeft, SpreadMode.Double, CoverAlone: true),
+                OnProgress = progress.Add,
+                OnBookSettingsChanged = changed.Add,
+            };
+            var vm = new ViewerViewModel(request, imaging, shell, new ViewerSettings(512, false), new NullLog());
+            var view = new ViewerView(vm);
+            var window = new Window { Content = view, Width = 800, Height = 600, ShowInTaskbar = false, WindowStyle = WindowStyle.None };
+            window.Show();
+            try
+            {
+                async Task Expect(int first, int last)
+                {
+                    await WaitFor(() => vm.Frame == new PageFrame(first, last) && !vm.IsLoading);
+                }
+
+                vm.Start();
+                await Expect(0, 0); // cover alone
+                vm.Next();
+                await Expect(1, 2);
+                Assert.True(vm.IsSpread);
+
+                // Right-to-left: the lower page is on the right.
+                Assert.True(Canvas.GetLeft(view.PageImage) > Canvas.GetLeft(view.PageImage2));
+                Assert.Equal(view.PageImage.Height, view.PageImage2.Height);
+
+                vm.Next();
+                await Expect(3, 3); // the wide page stands alone once its size is known
+                vm.Next();
+                await Expect(4, 5);
+                vm.Next();
+                await Expect(6, 6);
+                vm.Next();
+                Assert.Equal(new PageFrame(6, 6), vm.Frame);
+                Assert.Empty(shell.Toasts); // last page: no notification
+
+                vm.Previous();
+                await Expect(4, 5);
+                vm.Previous();
+                await Expect(3, 3);
+                vm.Previous();
+                await Expect(1, 2);
+                vm.Previous();
+                await Expect(0, 0);
+
+                // D cycles two pages → strip → one page → two pages, keeping the current page; M flips the layout.
+                vm.GoTo(1);
+                await Expect(1, 2);
+                vm.ToggleSpread();
+                Assert.True(vm.IsStrip);
+                Assert.Equal(1, vm.StripCurrent);
+                vm.ToggleSpread();
+                await Expect(1, 1);
+                vm.ToggleSpread();
+                vm.ToggleDirection();
+                await Expect(1, 2);
+                Assert.True(Canvas.GetLeft(view.PageImage) < Canvas.GetLeft(view.PageImage2));
+                Assert.Equal(
+                    [new BookSettings(ReadingDirection.RightToLeft, SpreadMode.Double, true, PageFlow.Strip),
+                     new BookSettings(ReadingDirection.RightToLeft, SpreadMode.Single, true),
+                     new BookSettings(ReadingDirection.RightToLeft, SpreadMode.Double, true),
+                     new BookSettings(ReadingDirection.LeftToRight, SpreadMode.Double, true)],
+                    changed);
+
+                vm.Last(); // End: the frame that ends at the last page
+                await Expect(5, 6);
+                await vm.CloseAsync();
+                Assert.True(progress[^1].ReachedEnd);
+                Assert.Equal(5, progress[^1].PageIndex);
+                Assert.Equal(7, progress[^1].PageCount);
+            }
+            finally
+            {
+                window.Close();
+            }
+        });
+    }
+
+    [Fact]
+    public void BookStripRunsRightToLeftWithoutGapsAndKeepsThePage()
+    {
+        RunOnSta(async () =>
+        {
+            var imaging = new FakeImaging { SizeOf = i => i == 3 ? (80, 60) : (60, 80) };
+            var progress = new List<ViewerProgress>();
+            var changed = new List<BookSettings>();
+            var request = new ViewerRequest
+            {
+                Pages = new FakePages(40),
+                Mode = ViewerMode.Book,
+                StartIndex = 2,
+                Book = new BookSettings(ReadingDirection.RightToLeft, SpreadMode.Double, true, PageFlow.Strip),
+                OnProgress = progress.Add,
+                OnBookSettingsChanged = changed.Add,
+            };
+            var vm = new ViewerViewModel(request, imaging, new FakeShell(), new ViewerSettings(512, false), new NullLog());
+            var view = new ViewerView(vm);
+            var window = new Window { Content = view, Width = 800, Height = 600, ShowInTaskbar = false, WindowStyle = WindowStyle.None };
+            window.Show();
+            try
+            {
+                var strip = view.StripView;
+                vm.Start();
+                await WaitFor(() => strip.IsActive && strip.Slots.Count > 0 && strip.Slots.Values.All(s => s.Source is not null));
+                Assert.True(vm.IsStrip);
+                Assert.Equal(2, vm.StripCurrent);
+                Assert.False(view.Spread.IsVisible);
+
+                // Right-to-left: page 2's reading-start (right) edge is the viewport's right edge.
+                var stageWidth = view.Stage.ActualWidth;
+                Assert.Equal(stageWidth, Canvas.GetLeft(strip.Slots[2]) + strip.Slots[2].Width, 0);
+                AssertAdjacent(strip, rightToLeft: true);
+                Assert.True(strip.Slots.Count <= 8, $"{strip.Slots.Count} slots for a two-page view");
+
+                // Forward moves the content right (the reader looks further left).
+                var before = Canvas.GetLeft(strip.Slots[2]);
+                strip.ScrollBy(1, animate: false);
+                Assert.True(vm.StripCurrent > 2);
+                if (strip.Slots.TryGetValue(2, out var stillThere))
+                {
+                    Assert.True(Canvas.GetLeft(stillThere) > before);
+                }
+
+                await WaitFor(() => strip.Slots.Values.All(s => s.Source is not null));
+                AssertAdjacent(strip, rightToLeft: true);
+
+                // "Pages shown" (D): strip → one page → two pages → strip, keeping the page.
+                var page = vm.StripCurrent;
+                vm.ToggleSpread();
+                Assert.False(vm.IsStrip);
+                Assert.False(strip.IsActive);
+                Assert.Equal(page, vm.Frame.First);
+                vm.ToggleSpread();
+                Assert.False(vm.IsStrip);
+                vm.ToggleSpread();
+                Assert.True(strip.IsActive);
+                Assert.Equal(page, vm.StripCurrent);
+                Assert.Equal(
+                    [new BookSettings(ReadingDirection.RightToLeft, SpreadMode.Single, true, PageFlow.Paged),
+                     new BookSettings(ReadingDirection.RightToLeft, SpreadMode.Double, true, PageFlow.Paged),
+                     new BookSettings(ReadingDirection.RightToLeft, SpreadMode.Double, true, PageFlow.Strip)],
+                    changed);
+
+                // "Cover alone" does nothing in a strip.
+                vm.ToggleCoverAlone();
+                Assert.Equal(3, changed.Count);
+
+                strip.End();
+                await vm.CloseAsync();
+                Assert.True(progress[^1].ReachedEnd);
+                Assert.Equal(40, progress[^1].PageCount);
+            }
+            finally
+            {
+                window.Close();
+            }
+        });
+    }
+
+    [Fact]
+    public void GalleryStripRunsLeftToRightAndSizesArrivingDoNotMoveThePage()
+    {
+        RunOnSta(async () =>
+        {
+            // Pages before 10 are wide: their sizes differ from the portrait placeholder.
+            var imaging = new FakeImaging { SizeOf = i => i < 10 ? (120, 80) : (60, 80) };
+            var request = new ViewerRequest { Pages = new FakePages(30), StartIndex = 10 };
+            var vm = new ViewerViewModel(request, imaging, new FakeShell(),
+                                         new ViewerSettings(512, false, GalleryFlow: PageFlow.Strip), new NullLog());
+            var view = new ViewerView(vm);
+            var window = new Window { Content = view, Width = 800, Height = 600, ShowInTaskbar = false, WindowStyle = WindowStyle.None };
+            window.Show();
+            try
+            {
+                var strip = view.StripView;
+                vm.Start();
+                await WaitFor(() => strip.IsActive && Enumerable.Range(0, 10).All(i => vm.Strip!.HasSize(i))
+                                    && strip.Slots.Values.All(s => s.Source is not null));
+                Assert.Equal(10, vm.StripCurrent);
+                Assert.Equal(0, Canvas.GetLeft(strip.Slots[10]), 0); // still at the left edge
+                AssertAdjacent(strip, rightToLeft: false);
+
+                var before = Canvas.GetLeft(strip.Slots[10]);
+                strip.ScrollBy(0.25, animate: false);
+                Assert.True(Canvas.GetLeft(strip.Slots[10]) < before); // forward = content moves left
+
+                strip.Home();
+                Assert.Equal(0, vm.StripCurrent);
+                strip.ScrollBy(-0.25, animate: false); // at the start: stays and tells the user
+                Assert.Equal(0, vm.StripCurrent);
+            }
+            finally
+            {
+                await vm.CloseAsync();
+                window.Close();
+            }
+        });
+    }
+
+    /// <summary>Every slot touches its neighbour (within half a pixel), in reading order.</summary>
+    private static void AssertAdjacent(StripPresenter strip, bool rightToLeft)
+    {
+        var slots = strip.Slots.OrderBy(p => p.Key).ToList();
+        for (var k = 1; k < slots.Count; k++)
+        {
+            Assert.Equal(slots[k - 1].Key + 1, slots[k].Key);
+            var previous = slots[k - 1].Value;
+            var next = slots[k].Value;
+            var gap = rightToLeft
+                ? Canvas.GetLeft(previous) - (Canvas.GetLeft(next) + next.Width)
+                : Canvas.GetLeft(next) - (Canvas.GetLeft(previous) + previous.Width);
+            Assert.True(Math.Abs(gap) <= 0.5, $"gap {gap} between pages {slots[k - 1].Key} and {slots[k].Key}");
+        }
+    }
+
+    [Fact]
+    public void RightClickSendsThePageToTheImageWindow()
+    {
+        RunOnSta(async () =>
+        {
+            var windows = new FakeWindows();
+            var request = new ViewerRequest { Pages = new FakePages(3), StartIndex = 2 };
+            var vm = new ViewerViewModel(request, new FakeImaging(), new FakeShell(), new ViewerSettings(512, false), new NullLog())
+            {
+                ImageWindows = windows,
+            };
+            vm.Start();
+            await vm.OpenInWindowAsync(2);
+            var sent = Assert.Single(windows.Requests);
+            Assert.Equal("page2.png", sent.Name);
+            Assert.Null(sent.FilePath);
+            await using var stream = await sent.Open(CancellationToken.None);
+            Assert.Equal(2, stream.ReadByte());
+            await vm.CloseAsync();
+        });
+    }
+
+    private sealed class FakeWindows : IImageWindowService
+    {
+        public List<ImageWindowRequest> Requests { get; } = [];
+
+        public Task OpenAsync(ImageWindowRequest request, CancellationToken ct = default)
+        {
+            Requests.Add(request);
+            return Task.CompletedTask;
+        }
     }
 
     private static async Task WaitFor(Func<bool> condition)
@@ -162,12 +425,23 @@ public sealed class ViewerSessionTests
             }
         }
 
+        /// <summary>Pixel size of a page by index.</summary>
+        public Func<int, (int Width, int Height)> SizeOf { get; init; } = _ => (400, 300);
+
         public IReadOnlySet<string> SupportedExtensions { get; } = new HashSet<string> { ".png" };
 
         public bool IsSupported(string pathOrExtension) => true;
 
-        public Task<ImageInfo?> ReadInfoAsync(Stream seekable, CancellationToken ct = default) =>
-            Task.FromResult<ImageInfo?>(seekable.Length == 0 ? null : new ImageInfo(400, 300));
+        public Task<ImageInfo?> ReadInfoAsync(Stream seekable, CancellationToken ct = default)
+        {
+            if (seekable.Length == 0)
+            {
+                return Task.FromResult<ImageInfo?>(null);
+            }
+
+            var (width, height) = SizeOf(seekable.ReadByte());
+            return Task.FromResult<ImageInfo?>(new ImageInfo(width, height));
+        }
 
         public Task<BitmapSource> DecodeAsync(Stream seekable, DecodeOptions options, CancellationToken ct = default)
         {
@@ -182,7 +456,8 @@ public sealed class ViewerSessionTests
                 _decoded.Add(index);
             }
 
-            var bitmap = BitmapSource.Create(400, 300, 96, 96, PixelFormats.Bgr32, null, new byte[400 * 300 * 4], 400 * 4);
+            var (w, h) = SizeOf(index);
+            var bitmap = BitmapSource.Create(w, h, 96, 96, PixelFormats.Bgr32, null, new byte[w * h * 4], w * 4);
             bitmap.Freeze();
             return Task.FromResult<BitmapSource>(bitmap);
         }

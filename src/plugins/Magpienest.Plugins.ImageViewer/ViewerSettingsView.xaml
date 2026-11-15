@@ -33,5 +33,53 @@
     <Border Style="{StaticResource Card}">
       <CheckBox Content="{sdk:Loc Viewer.Settings.StretchSmall}" IsChecked="{Binding StretchSmall}" />
     </Border>
+    <Border Style="{StaticResource Card}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+          <TextBlock Text="{sdk:Loc Viewer.Settings.GalleryFlow}" />
+          <TextBlock Text="{sdk:Loc Viewer.Settings.FlowHint}" Style="{DynamicResource CaptionTextBlockStyle}" TextWrapping="Wrap"
+                     Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+        <ComboBox Grid.Column="1" MinWidth="160" VerticalAlignment="Center"
+                  ItemsSource="{Binding GalleryFlows}" SelectedItem="{Binding GalleryFlow}" DisplayMemberPath="Label"
+                  ToolTip="{sdk:Loc Viewer.Settings.GalleryFlow}" />
+      </Grid>
+    </Border>
+    <TextBlock Text="{sdk:Loc Viewer.Settings.BookHeader}" Style="{DynamicResource BodyStrongTextBlockStyle}" Margin="0,12,0,8" />
+    <Border Style="{StaticResource Card}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="{sdk:Loc Viewer.Settings.Direction}" VerticalAlignment="Center" Margin="0,0,16,0" />
+        <ComboBox Grid.Column="1" MinWidth="160" VerticalAlignment="Center"
+                  ItemsSource="{Binding Directions}" SelectedItem="{Binding Direction}" DisplayMemberPath="Label"
+                  ToolTip="{sdk:Loc Viewer.Settings.Direction}" />
+      </Grid>
+    </Border>
+    <Border Style="{StaticResource Card}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="{sdk:Loc Viewer.Settings.Spread}" VerticalAlignment="Center" Margin="0,0,16,0" />
+        <ComboBox Grid.Column="1" MinWidth="160" VerticalAlignment="Center"
+                  ItemsSource="{Binding Layouts}" SelectedItem="{Binding Layout}" DisplayMemberPath="Label"
+                  ToolTip="{sdk:Loc Viewer.Settings.Spread}" />
+      </Grid>
+    </Border>
+    <Border Style="{StaticResource Card}">
+      <StackPanel>
+        <CheckBox Content="{sdk:Loc Viewer.Settings.CoverAlone}" IsChecked="{Binding CoverAlone}" />
+        <TextBlock Text="{sdk:Loc Viewer.Settings.CoverAloneHint}" Style="{DynamicResource CaptionTextBlockStyle}" TextWrapping="Wrap"
+                   Margin="28,2,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+      </StackPanel>
+    </Border>
   </StackPanel>
 </UserControl>

@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.comic",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.Comic.dll",
+  "name": { "en": "Comics", "zh-TW": "漫畫" },
+  "description": {
+    "en": "A bookshelf of comic folders and archives, with a two-page reader that remembers where you stopped.",
+    "zh-TW": "漫畫資料夾與壓縮檔的書櫃，提供雙頁閱讀，並記住上次讀到哪裡。"
+  },
+  "author": "Magpienest contributors",
+  "essential": false,
+  "enabledByDefault": true
+}

@@ -18,8 +18,11 @@
   <!-- Every built-in plugin: built into artifacts/bin/<cfg>/plugins/<id>/, never referenced. -->
   <ItemGroup>
     <ProjectReference Include="..\plugins\Magpienest.Plugins.About\Magpienest.Plugins.About.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\plugins\Magpienest.Plugins.Archives\Magpienest.Plugins.Archives.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\plugins\Magpienest.Plugins.Comic\Magpienest.Plugins.Comic.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\plugins\Magpienest.Plugins.Imaging\Magpienest.Plugins.Imaging.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\plugins\Magpienest.Plugins.ImageViewer\Magpienest.Plugins.ImageViewer.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\plugins\Magpienest.Plugins.ImageWindow\Magpienest.Plugins.ImageWindow.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\plugins\Magpienest.Plugins.Illustration\Magpienest.Plugins.Illustration.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\plugins\Magpienest.Plugins.Library\Magpienest.Plugins.Library.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\plugins\Magpienest.Plugins.Localization\Magpienest.Plugins.Localization.csproj" ReferenceOutputAssembly="false" />

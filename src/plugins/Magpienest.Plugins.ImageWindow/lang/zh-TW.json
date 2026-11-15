@@ -1,0 +1,20 @@
+{
+  "ImageWindow.Settings.Title": "圖片視窗",
+  "ImageWindow.Settings.Topmost": "新視窗永遠在其他程式上層",
+  "ImageWindow.Settings.Hint": "在圖片上按右鍵，選「在無邊框視窗開啟」。拖曳可移動，滾輪可縮放，按兩下或 Esc 關閉。",
+  "ImageWindow.CloseTip": "關閉（Esc）",
+  "ImageWindow.Menu.Topmost": "永遠在最上層",
+  "ImageWindow.Menu.ActualSize": "原始大小",
+  "ImageWindow.Menu.Fit": "符合螢幕",
+  "ImageWindow.Menu.Copy": "複製圖片",
+  "ImageWindow.Menu.ShowInExplorer": "在檔案總管中顯示",
+  "ImageWindow.Menu.Close": "關閉",
+  "ImageWindow.Gesture.Topmost": "Ctrl+T",
+  "ImageWindow.Gesture.ActualSize": "1",
+  "ImageWindow.Gesture.Fit": "0",
+  "ImageWindow.Gesture.Copy": "Ctrl+C",
+  "ImageWindow.Gesture.Close": "Esc",
+  "ImageWindow.Toast.TopmostOn": "永遠在最上層：開",
+  "ImageWindow.Toast.TopmostOff": "永遠在最上層：關",
+  "ImageWindow.Toast.Copied": "已複製圖片"
+}

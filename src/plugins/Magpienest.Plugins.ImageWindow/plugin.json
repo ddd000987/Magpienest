@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.imagewindow",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.ImageWindow.dll",
+  "name": { "en": "Image Window", "zh-TW": "圖片視窗" },
+  "description": {
+    "en": "Opens a picture in its own borderless window that you can move, resize and keep on top.",
+    "zh-TW": "把圖片開在獨立的無邊框視窗裡，可以移動、縮放，也能一直放在最上層。"
+  },
+  "author": "Magpienest contributors",
+  "essential": false,
+  "enabledByDefault": true
+}

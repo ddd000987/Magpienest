@@ -1,0 +1,17 @@
+<UserControl x:Class="Magpienest.Plugins.ImageWindow.ImageWindowSettingsView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sdk="clr-namespace:Magpienest.Sdk.Localization;assembly=Magpienest.Sdk">
+  <StackPanel>
+    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+            CornerRadius="{DynamicResource ControlCornerRadius}" Padding="16,12" Margin="0,0,0,8">
+      <StackPanel>
+        <CheckBox Content="{sdk:Loc ImageWindow.Settings.Topmost}" IsChecked="{Binding Topmost}" />
+        <TextBlock Text="{sdk:Loc ImageWindow.Settings.Hint}" Style="{DynamicResource CaptionTextBlockStyle}" TextWrapping="Wrap"
+                   Margin="28,2,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>
