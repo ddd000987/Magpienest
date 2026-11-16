@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="WebUi.Web.AppName"></title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/app.css">
+  <script type="module" src="/js/login.js"></script>
+</head>
+<body class="login-page">
+  <main>
+    <h1 data-i18n="WebUi.Web.AppName"></h1>
+    <form id="form" class="login-form" autocomplete="on">
+      <label for="password" data-i18n="WebUi.Web.SignIn.Password"></label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required autofocus>
+      <button id="submit" type="submit" data-i18n="WebUi.Web.SignIn.Submit"></button>
+      <p id="message" class="login-message" role="alert"></p>
+    </form>
+  </main>
+</body>
+</html>

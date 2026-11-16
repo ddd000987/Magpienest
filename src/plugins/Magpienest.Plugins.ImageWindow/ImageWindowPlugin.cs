@@ -32,7 +32,8 @@ public sealed class ImageWindowPlugin : Plugin
 }
 
 /// <summary>Reads the image into memory, decodes it off the UI thread and shows an <see cref="ImageWindow"/>.</summary>
-internal sealed class ImageWindowService(IUiDispatcher ui, IImagingService imaging, IPluginConfig config, ILog log)
+internal sealed class ImageWindowService(IUiDispatcher ui, IImagingService imaging, IPluginConfig config, ILog log,
+                                         TimeProvider? clock = null)
     : IImageWindowService
 {
     internal const string TopmostKey = "topmost";
@@ -82,7 +83,7 @@ internal sealed class ImageWindowService(IUiDispatcher ui, IImagingService imagi
 
     private void Show(ImageWindowRequest request, BitmapSource bitmap, Size size)
     {
-        var now = DateTime.UtcNow;
+        var now = (clock ?? TimeProvider.System).GetUtcNow().UtcDateTime;
         _cascade = now - _lastShown < BatchWindow ? _cascade + 1 : 0;
         _lastShown = now;
         var cursor = NativeMethods.CursorPosition();

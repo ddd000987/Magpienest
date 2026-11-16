@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.webui",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.WebUi.dll",
+  "name": { "en": "Web interface", "zh-TW": "網頁介面" },
+  "description": {
+    "en": "Open your library in a web browser — on this computer, and if you allow it on your phone or other devices.",
+    "zh-TW": "在網頁瀏覽器裡開啟你的收藏：在這台電腦上，經你允許後也能用手機或其他裝置。"
+  },
+  "author": "Magpienest contributors",
+  "essential": false,
+  "enabledByDefault": true
+}

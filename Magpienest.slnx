@@ -16,6 +16,7 @@
     <Project Path="src/plugins/Magpienest.Plugins.Settings/Magpienest.Plugins.Settings.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.Shell/Magpienest.Plugins.Shell.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.Thumbnails/Magpienest.Plugins.Thumbnails.csproj" />
+    <Project Path="src/plugins/Magpienest.Plugins.WebUi/Magpienest.Plugins.WebUi.csproj" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Magpienest.App/Magpienest.App.csproj" />
@@ -41,6 +42,7 @@
     <Project Path="tests/Magpienest.Plugins.Library.Tests/Magpienest.Plugins.Library.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.Localization.Tests/Magpienest.Plugins.Localization.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.Thumbnails.Tests/Magpienest.Plugins.Thumbnails.Tests.csproj" />
+    <Project Path="tests/Magpienest.Plugins.WebUi.Tests/Magpienest.Plugins.WebUi.Tests.csproj" />
     <Project Path="tests/Magpienest.Sdk.Tests/Magpienest.Sdk.Tests.csproj" />
   </Folder>
 </Solution>

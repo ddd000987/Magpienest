@@ -1,0 +1,187 @@
+<UserControl x:Class="Magpienest.Plugins.WebUi.WebUiSettingsView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sdk="clr-namespace:Magpienest.Sdk.Localization;assembly=Magpienest.Sdk">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="Visible" />
+    <Style x:Key="Card" TargetType="Border">
+      <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+      <Setter Property="Padding" Value="16,12" />
+      <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+    <Style x:Key="Hint" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+      <Setter Property="Margin" Value="0,2,0,8" />
+    </Style>
+    <Style x:Key="Choice" TargetType="RadioButton" BasedOn="{StaticResource {x:Type RadioButton}}">
+      <Setter Property="Margin" Value="0,4,0,0" />
+    </Style>
+  </UserControl.Resources>
+  <StackPanel>
+    <!-- Status and the link on this PC -->
+    <Border Style="{StaticResource Card}">
+      <StackPanel>
+        <TextBlock Text="{sdk:Loc WebUi.Settings.ThisPc}" Style="{DynamicResource BodyStrongTextBlockStyle}" />
+        <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap" Margin="0,4,0,0">
+          <TextBlock.Style>
+            <Style TargetType="TextBlock">
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasProblem}" Value="True">
+                  <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+        <TextBlock Text="{sdk:Loc WebUi.Settings.LinkHint}" Style="{StaticResource Hint}" Margin="0,4,0,8" />
+        <WrapPanel IsEnabled="{Binding IsRunning}">
+          <Button Content="{sdk:Loc WebUi.Settings.OpenInBrowser}" Command="{Binding OpenInBrowserCommand}"
+                  Style="{DynamicResource AccentButtonStyle}" Margin="0,0,8,4" />
+          <Button Content="{sdk:Loc WebUi.Settings.CopyLink}" Command="{Binding CopyLinkCommand}" Margin="0,0,8,4" />
+        </WrapPanel>
+        <CheckBox IsChecked="{Binding ShowPage}" Content="{sdk:Loc WebUi.Settings.ShowPage}" Margin="0,8,0,0" />
+      </StackPanel>
+    </Border>
+
+    <!-- Who can connect -->
+    <Border Style="{StaticResource Card}">
+      <StackPanel>
+        <TextBlock Text="{sdk:Loc WebUi.Settings.Access}" Style="{DynamicResource BodyStrongTextBlockStyle}" />
+        <RadioButton GroupName="access" IsChecked="{Binding IsLocal}" Content="{sdk:Loc WebUi.Settings.Access.Local}" Style="{StaticResource Choice}" />
+        <RadioButton GroupName="access" IsChecked="{Binding IsHome}" Content="{sdk:Loc WebUi.Settings.Access.Home}" Style="{StaticResource Choice}" />
+        <RadioButton GroupName="access" IsChecked="{Binding IsInternet}" Content="{sdk:Loc WebUi.Settings.Access.Internet}" Style="{StaticResource Choice}" />
+        <TextBlock Text="{sdk:Loc WebUi.Settings.Access.InternetHint}" Style="{StaticResource Hint}" Margin="28,0,0,0" />
+        <StackPanel Visibility="{Binding IsShared, Converter={StaticResource Visible}}" Margin="0,8,0,0">
+          <CheckBox IsChecked="{Binding RequirePasswordAtHome}" Content="{sdk:Loc WebUi.Settings.RequirePassword}" />
+          <TextBlock Text="{sdk:Loc WebUi.Settings.RequirePasswordHint}" Style="{StaticResource Hint}" Margin="28,0,0,4" />
+          <CheckBox IsChecked="{Binding TailscaleIsHome}" Content="{sdk:Loc WebUi.Settings.Tailscale}" />
+          <TextBlock Text="{sdk:Loc WebUi.Settings.TailscaleHint}" Style="{StaticResource Hint}" Margin="28,0,0,4" />
+          <TextBlock Text="{sdk:Loc WebUi.Settings.Firewall}" Style="{StaticResource Hint}" Margin="0,4,0,0" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <!-- Password: only while some device has to sign in. -->
+    <Border Style="{StaticResource Card}" Visibility="{Binding PasswordInUse, Converter={StaticResource Visible}}">
+      <StackPanel>
+        <TextBlock Text="{sdk:Loc WebUi.Settings.Password}" Style="{DynamicResource BodyStrongTextBlockStyle}" />
+        <TextBlock Text="{Binding PasswordStatus}" Style="{StaticResource Hint}" />
+        <Button Content="{Binding PasswordButtonText}" Command="{Binding SetPasswordCommand}" HorizontalAlignment="Left" />
+      </StackPanel>
+    </Border>
+
+    <!-- Links for other devices -->
+    <Border Style="{StaticResource Card}" Visibility="{Binding IsShared, Converter={StaticResource Visible}}">
+      <StackPanel>
+        <TextBlock Text="{sdk:Loc WebUi.Settings.OtherDevices}" Style="{DynamicResource BodyStrongTextBlockStyle}" />
+        <TextBlock Text="{sdk:Loc WebUi.Settings.OtherDevicesHint}" Style="{StaticResource Hint}" />
+        <TextBlock Text="{sdk:Loc WebUi.Settings.NoAddress}" Style="{StaticResource Hint}"
+                   Visibility="{Binding NoLinks, Converter={StaticResource Visible}}" />
+        <ItemsControl ItemsSource="{Binding Links}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Margin="0,0,24,8" Width="200">
+                <Image Source="{Binding Code}" Width="160" Height="160" HorizontalAlignment="Left"
+                       RenderOptions.BitmapScalingMode="NearestNeighbor" AutomationProperties.Name="{Binding Url}" />
+                <TextBox Text="{Binding Url, Mode=OneWay}" IsReadOnly="True" Margin="0,4,0,4" />
+                <Button Content="{sdk:Loc WebUi.Settings.CopyAddress}" HorizontalAlignment="Left"
+                        Command="{Binding DataContext.CopyAddressCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                        CommandParameter="{Binding Url}" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Text="{Binding InternetHint}" Style="{StaticResource Hint}" />
+      </StackPanel>
+    </Border>
+
+    <!-- HTTPS -->
+    <Border Style="{StaticResource Card}">
+      <StackPanel>
+        <TextBlock Text="{sdk:Loc WebUi.Settings.Https}" Style="{DynamicResource BodyStrongTextBlockStyle}" />
+        <TextBlock Text="{sdk:Loc WebUi.Settings.HttpsHint}" Style="{StaticResource Hint}" />
+        <RadioButton GroupName="https" IsChecked="{Binding HttpsOff}" Content="{sdk:Loc WebUi.Settings.Https.Off}" Style="{StaticResource Choice}" />
+        <RadioButton GroupName="https" IsChecked="{Binding HttpsAutomatic}" Content="{sdk:Loc WebUi.Settings.Https.Automatic}" Style="{StaticResource Choice}" />
+        <RadioButton GroupName="https" IsChecked="{Binding HttpsOwn}" Content="{sdk:Loc WebUi.Settings.Https.Own}" Style="{StaticResource Choice}" />
+        <TextBlock Text="{sdk:Loc WebUi.Settings.HttpsForced}" Style="{StaticResource Hint}" Margin="0,8,0,0"
+                   Visibility="{Binding HttpsForced, Converter={StaticResource Visible}}" />
+        <StackPanel Visibility="{Binding UsesAutomaticCertificate, Converter={StaticResource Visible}}" Margin="0,8,0,0">
+          <TextBlock Text="{sdk:Loc WebUi.Settings.AutomaticHint}" Style="{StaticResource Hint}" />
+          <Button Content="{sdk:Loc WebUi.Settings.Renew}" Command="{Binding RenewCertificateCommand}" HorizontalAlignment="Left" />
+        </StackPanel>
+        <StackPanel Visibility="{Binding HttpsOwn, Converter={StaticResource Visible}}" Orientation="Horizontal" Margin="0,8,0,0">
+          <TextBlock Text="{Binding OwnCertificateName}" VerticalAlignment="Center" Margin="0,0,8,0" />
+          <Button Content="{sdk:Loc WebUi.Settings.ChooseCertificate}" Command="{Binding ChooseCertificateCommand}" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <!-- Signed-in devices -->
+    <Border Style="{StaticResource Card}">
+      <StackPanel>
+        <TextBlock Text="{sdk:Loc WebUi.Settings.Devices}" Style="{DynamicResource BodyStrongTextBlockStyle}" />
+        <TextBlock Text="{sdk:Loc WebUi.Settings.NoDevices}" Style="{StaticResource Hint}"
+                   Visibility="{Binding NoDevices, Converter={StaticResource Visible}}" />
+        <ItemsControl ItemsSource="{Binding Devices}" Margin="0,4,0,0">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                  <TextBlock Text="{Binding Name}" />
+                  <TextBlock Text="{Binding Detail}" Style="{StaticResource Hint}" Margin="0" />
+                </StackPanel>
+                <Button Grid.Column="1" Content="{sdk:Loc WebUi.Settings.SignOut}" VerticalAlignment="Center"
+                        Command="{Binding DataContext.SignOutDeviceCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                        CommandParameter="{Binding Id}" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Button Content="{sdk:Loc WebUi.Settings.SignOutAll}" Command="{Binding SignOutAllCommand}" HorizontalAlignment="Left"
+                Visibility="{Binding HasDevices, Converter={StaticResource Visible}}" />
+      </StackPanel>
+    </Border>
+
+    <!-- Port and host names -->
+    <Border Style="{StaticResource Card}">
+      <StackPanel>
+        <TextBlock Text="{sdk:Loc WebUi.Settings.Port}" Style="{DynamicResource BodyStrongTextBlockStyle}" />
+        <TextBlock Text="{sdk:Loc WebUi.Settings.PortHint}" Style="{StaticResource Hint}" />
+        <StackPanel Orientation="Horizontal">
+          <TextBox Text="{Binding PortText, UpdateSourceTrigger=PropertyChanged}" Width="120" IsEnabled="{Binding CanEditPort}"
+                   AutomationProperties.Name="{sdk:Loc WebUi.Settings.Port}" />
+          <Button Content="{sdk:Loc WebUi.Settings.Apply}" Command="{Binding ApplyPortCommand}" Margin="8,0,0,0" />
+        </StackPanel>
+        <TextBlock Text="{Binding PortError}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0"
+                   Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+        <TextBlock Text="{sdk:Loc WebUi.Settings.ExtraHosts}" Style="{DynamicResource BodyStrongTextBlockStyle}" Margin="0,12,0,0" />
+        <TextBlock Text="{sdk:Loc WebUi.Settings.ExtraHostsHint}" Style="{StaticResource Hint}" />
+        <TextBox Text="{Binding ExtraHostsText, UpdateSourceTrigger=LostFocus}" AutomationProperties.Name="{sdk:Loc WebUi.Settings.ExtraHosts}" />
+      </StackPanel>
+    </Border>
+
+    <!-- Access link -->
+    <Border Style="{StaticResource Card}">
+      <StackPanel>
+        <TextBlock Text="{sdk:Loc WebUi.Settings.ResetLink}" Style="{DynamicResource BodyStrongTextBlockStyle}" />
+        <TextBlock Text="{sdk:Loc WebUi.Settings.ResetHint}" Style="{StaticResource Hint}" />
+        <Button Content="{sdk:Loc WebUi.Settings.ResetLink}" Command="{Binding ResetLinkCommand}" HorizontalAlignment="Left" />
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</UserControl>

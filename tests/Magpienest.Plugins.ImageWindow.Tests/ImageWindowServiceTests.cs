@@ -52,7 +52,8 @@ public sealed class ImageWindowServiceTests
         RunOnSta(async dispatcher =>
         {
             var config = new MemoryConfig();
-            var service = new ImageWindowService(new StaDispatcher(dispatcher), new FakeImaging(), config, new NullLog());
+            // A stopped clock: both windows belong to one batch however slow the machine is.
+            var service = new ImageWindowService(new StaDispatcher(dispatcher), new FakeImaging(), config, new NullLog(), new StoppedClock());
             try
             {
                 await service.OpenAsync(Request("a.png", 400, 300, "C:\\pictures\\a.png"), ct);
@@ -226,5 +227,12 @@ public sealed class ImageWindowServiceTests
         public void Warn(string message, Exception? ex = null) { }
 
         public void Error(string message, Exception? ex = null) { }
+    }
+
+    private sealed class StoppedClock : TimeProvider
+    {
+        private readonly DateTimeOffset _now = DateTimeOffset.UtcNow;
+
+        public override DateTimeOffset GetUtcNow() => _now;
     }
 }

@@ -18,6 +18,8 @@
     <ProjectReference Include="..\..\src\Magpienest.Sdk\Magpienest.Sdk.csproj" />
     <!-- Built first so that artifacts/bin/<cfg>/plugins exists for the disk-loading test. -->
     <ProjectReference Include="..\..\src\Magpienest.App\Magpienest.App.csproj" ReferenceOutputAssembly="false" />
+    <!-- External plugins: their build output must be a valid package (phase 7 T7.2). -->
+    <ProjectReference Include="..\..\src\plugins\Magpienest.Plugins.WebUi\Magpienest.Plugins.WebUi.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title data-i18n="WebUi.Web.AppName"></title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/app.css">
+  <script type="module" src="/js/main.js"></script>
+</head>
+<body>
+  <header class="topbar" id="topbar" hidden>
+    <span class="brand" data-i18n="WebUi.Web.AppName"></span>
+    <nav class="tabs" id="tabs" role="tablist" data-i18n-aria-label="WebUi.Web.Kinds"></nav>
+    <div class="tools">
+      <label class="search">
+        <span class="icon" data-icon="search"></span>
+        <input class="field" id="search" type="search" enterkeyhint="search" autocomplete="off"
+               data-i18n-placeholder="WebUi.Web.Search" data-i18n-aria-label="WebUi.Web.Search">
+      </label>
+      <select class="field" id="sort" data-i18n-aria-label="WebUi.Web.Sort.Label" data-i18n-title="WebUi.Web.Sort.Label"></select>
+      <button class="icon-button" id="order" type="button"></button>
+      <button class="button" id="filter-button" type="button" aria-expanded="false" aria-controls="filters"
+              data-i18n-title="WebUi.Web.Filter.Button">
+        <span class="icon" data-icon="filter"></span>
+        <span class="filter-label" data-i18n="WebUi.Web.Filter.Button"></span>
+        <span class="badge" id="filter-count" hidden></span>
+      </button>
+    </div>
+    <div class="account">
+      <button class="icon-button flat" id="logout" type="button" hidden
+              data-i18n-title="WebUi.Web.SignOut" data-i18n-aria-label="WebUi.Web.SignOut">
+        <span class="icon" data-icon="logout"></span>
+      </button>
+    </div>
+  </header>
+
+  <section class="filters" id="filters" hidden>
+    <label class="check">
+      <input type="checkbox" id="filter-favorites">
+      <span data-i18n="WebUi.Web.Filter.Favorites"></span>
+    </label>
+    <label class="stack">
+      <span data-i18n="WebUi.Web.Filter.MinRating"></span>
+      <select class="field" id="filter-rating"></select>
+    </label>
+    <label class="stack">
+      <span data-i18n="WebUi.Web.Filter.Status"></span>
+      <select class="field" id="filter-status"></select>
+    </label>
+    <label class="stack">
+      <span data-i18n="WebUi.Web.Filter.Folder"></span>
+      <select class="field" id="filter-folder"></select>
+    </label>
+    <div class="tag-filter">
+      <span class="heading" data-i18n="WebUi.Web.Filter.Tags"></span>
+      <input class="field" id="filter-tag-search" type="search" autocomplete="off"
+             data-i18n-placeholder="WebUi.Web.Filter.FindTag" data-i18n-aria-label="WebUi.Web.Filter.FindTag">
+      <div class="chips" id="filter-tags"></div>
+      <p class="summary" id="filter-no-tags" data-i18n="WebUi.Web.Filter.NoTags" hidden></p>
+    </div>
+    <div class="filter-actions">
+      <button class="button flat" id="filter-clear" type="button" data-i18n="WebUi.Web.Filter.Clear"></button>
+      <button class="button" id="filter-close" type="button" data-i18n="WebUi.Web.Close"></button>
+    </div>
+  </section>
+
+  <main class="browse" id="browse" hidden>
+    <p class="summary" id="summary" aria-live="polite"></p>
+    <div class="grid" id="grid"></div>
+    <p class="empty" id="empty" data-i18n="WebUi.Web.Empty" hidden></p>
+    <div class="more" id="more"></div>
+  </main>
+
+  <aside class="details" id="details" hidden data-i18n-aria-label="WebUi.Web.Details.Title"></aside>
+  <div class="overlay" id="overlay" hidden></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <p class="loading" id="loading" data-i18n="WebUi.Web.Loading"></p>
+</body>
+</html>

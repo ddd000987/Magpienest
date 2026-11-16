@@ -106,7 +106,7 @@ internal sealed class LibVlcPlayer : IMediaPlayer
         get => _volume;
         set
         {
-            _volume = Math.Clamp(value, 0, 100);
+            _volume = Math.Clamp(value, 0, 200); // LibVLC amplifies above 100.
             _player.Volume = _volume;
             RaiseState();
         }

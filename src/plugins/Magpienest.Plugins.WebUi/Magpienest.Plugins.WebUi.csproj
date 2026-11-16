@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PluginId>magpienest.webui</PluginId>
+    <!-- Not built in: packed as Magpienest.WebUi-<version>.zip and installed by the user (phase 7). -->
+    <ExternalPlugin>true</ExternalPlugin>
+  </PropertyGroup>
+  <Import Project="$(RepoRoot)build\Plugin.props" />
+  <ItemGroup>
+    <PackageReference Include="GenHTTP.Engine.Internal" />
+    <PackageReference Include="QRCoder" />
+    <PackageReference Include="Microsoft.Web.WebView2" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="www\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Magpienest.Plugins.WebUi.Tests" />
+    <Using Include="System.IO" />
+  </ItemGroup>
+</Project>

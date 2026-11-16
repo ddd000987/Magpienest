@@ -19,6 +19,18 @@ Test-only packages (xUnit, Microsoft.NET.Test.Sdk) are not part of the release a
 | [LibVLCSharp](https://code.videolan.org/videolan/LibVLCSharp) and LibVLCSharp.WPF | 3.9.4 | LGPL-2.1-or-later | Media engine plugin (.NET bindings for LibVLC) |
 | [LibVLC](https://www.videolan.org/vlc/libvlc.html), from the NuGet package [VideoLAN.LibVLC.Windows](https://code.videolan.org/videolan/libvlc-nuget) | 3.0.21 | LGPL-2.1-or-later | Media engine plugin (video and audio playback) |
 
+### Web interface plugin (separate package `Magpienest.WebUi-<version>.zip`)
+
+These ship only inside the optional web interface package, not in the main zip.
+
+| Component | Version | Licence | Where it is used |
+|---|---|---|---|
+| [GenHTTP](https://github.com/Kaliumhexacyanoferrat/GenHTTP) (`GenHTTP.Engine.Internal` and the GenHTTP packages it brings) | 11.3.0 | MIT | Web server |
+| [Glyph11](https://www.nuget.org/packages/Glyph11), [Cottle](https://github.com/r3c/cottle), [YamlDotNet](https://github.com/aaubry/YamlDotNet) | 0.4.0, 2.1.0, 18.1.0 | MIT | Dependencies of GenHTTP |
+| [Microsoft.Extensions.*](https://github.com/dotnet/runtime) (Logging, Options, Configuration, DependencyInjection, ObjectPool, Primitives) | 10.0 | MIT | Dependencies of GenHTTP |
+| [Microsoft Edge WebView2 SDK](https://www.nuget.org/packages/Microsoft.Web.WebView2) | 1.0.4314.35 | Microsoft WebView2 SDK licence (BSD-style, redistributable) | In-app "Web" page |
+| [QRCoder](https://github.com/Shane32/QRCoder) | 1.8.1 | MIT | QR codes of the home-network links |
+
 ## Licences in detail
 
 ### MIT licence

@@ -4,6 +4,9 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageVersion Include="GenHTTP.Engine.Internal" Version="11.3.0" />
+    <PackageVersion Include="QRCoder" Version="1.8.1" />
+    <PackageVersion Include="Microsoft.Web.WebView2" Version="1.0.4314.35" />
     <PackageVersion Include="LibVLCSharp.WPF" Version="3.9.4" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="11.0.0" />
     <PackageVersion Include="SharpCompress" Version="0.50.9" />

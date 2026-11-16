@@ -24,6 +24,24 @@ public sealed class VideoTests
     }
 
     [Fact]
+    public void VolumeLimitDefaultsTo200AndBoundsTheVolume()
+    {
+        var settings = new VideoSettings(new MemoryConfig());
+        Assert.Equal(200, settings.MaxVolume);
+        settings.Volume = 250;
+        Assert.Equal(200, settings.Volume);
+
+        settings.MaxVolume = 50;
+        Assert.Equal(100, settings.MaxVolume);
+        Assert.Equal(100, settings.Volume); // A lower limit also caps the stored volume.
+
+        settings.MaxVolume = 999;
+        Assert.Equal(200, settings.MaxVolume);
+        settings.Volume = -5;
+        Assert.Equal(0, settings.Volume);
+    }
+
+    [Fact]
     public void StatusGoesFromNoneToInProgressToCompletedAndUserStatusesStay()
     {
         var duration = TimeSpan.FromMinutes(10);

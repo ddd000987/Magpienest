@@ -117,6 +117,58 @@ public sealed partial class LocalizationHygieneTests
         Assert.True(problems.Count == 0, string.Join(Environment.NewLine, problems));
     }
 
+    [Fact]
+    public void EveryKeyUsedInWebFilesExistsInThatPluginsEnglish()
+    {
+        var problems = new List<string>();
+        var checkedFiles = 0;
+        foreach (var www in WebFolders())
+        {
+            var en = Path.Combine(Path.GetDirectoryName(www)!, "lang", "en.json");
+            var known = File.Exists(en) ? Keys(en) : [];
+
+            // Key-looking literals with the plugin's own prefix (for example "WebUi.") count too: lookup tables of keys.
+            var prefixes = known.Select(k => k.Split('.')[0] + ".").ToHashSet(StringComparer.Ordinal);
+            foreach (var file in Directory.GetFiles(www, "*.*", SearchOption.AllDirectories)
+                         .Where(f => f.EndsWith(".js", StringComparison.OrdinalIgnoreCase) ||
+                                     f.EndsWith(".html", StringComparison.OrdinalIgnoreCase)))
+            {
+                checkedFiles++;
+                var text = File.ReadAllText(file);
+                var used = WebKeyPattern().Matches(text).Select(m => m.Groups[1].Value)
+                    .Concat(WebLiteralPattern().Matches(text).Select(m => m.Groups[1].Value)
+                                .Where(v => prefixes.Any(p => v.StartsWith(p, StringComparison.Ordinal))));
+                problems.AddRange(used.Distinct().Where(k => !known.Contains(k))
+                                      .Select(k => $"{Relative(file)}: key '{k}' is not in {Relative(en)}"));
+            }
+        }
+
+        Assert.True(checkedFiles > 0, "No web files found.");
+        Assert.True(problems.Count == 0, string.Join(Environment.NewLine, problems));
+    }
+
+    [Fact]
+    public void WebPagesHaveNoLiteralText()
+    {
+        var problems = new List<string>();
+        foreach (var file in WebFolders().SelectMany(w => Directory.GetFiles(w, "*.html", SearchOption.AllDirectories)))
+        {
+            var html = HtmlSkippedPattern().Replace(File.ReadAllText(file), "");
+            problems.AddRange(HtmlTextPattern().Matches(html).Select(m => m.Groups[1].Value.Trim())
+                                  .Where(text => text.Any(char.IsLetter))
+                                  .Select(text => $"{Relative(file)}: text \"{text}\""));
+            problems.AddRange(HtmlAttributePattern().Matches(html)
+                                  .Select(m => $"{Relative(file)}: {m.Groups[1].Value}=\"{m.Groups[2].Value}\""));
+        }
+
+        Assert.True(problems.Count == 0, string.Join(Environment.NewLine, problems));
+    }
+
+    private static IEnumerable<string> WebFolders() =>
+        Directory.GetDirectories(Path.Combine(Src, "plugins"))
+            .Select(d => Path.Combine(d, "www"))
+            .Where(Directory.Exists);
+
     private static IEnumerable<string> PluginLangFiles(string name) =>
         Directory.GetDirectories(Path.Combine(Src, "plugins"))
             .Select(d => Path.Combine(d, "lang", name))
@@ -155,4 +207,23 @@ public sealed partial class LocalizationHygieneTests
     // A literal (starting with a letter) in a text-bearing attribute. Glyphs (&#x…;) and bindings ({…}) do not match.
     [GeneratedRegex(@"\b(Text|Content|Header|ToolTip)=""(\p{L}[^""]*)""")]
     private static partial Regex XamlLiteralPattern();
+
+    // t("key", …) in scripts, and data-i18n or data-i18n-<attribute> in markup and scripts.
+    [GeneratedRegex(@"(?:\bt\(\s*[""']|data-i18n(?:-[a-z-]+)?=[""'])([^""']+)[""']")]
+    private static partial Regex WebKeyPattern();
+
+    // A quoted dotted name such as "WebUi.Web.Back".
+    [GeneratedRegex(@"[""']([A-Z][A-Za-z0-9]*(?:\.[A-Za-z0-9_]+){2,})[""']")]
+    private static partial Regex WebLiteralPattern();
+
+    // Script and style bodies and comments may hold anything.
+    [GeneratedRegex(@"<script\b[^>]*>.*?</script>|<style\b[^>]*>.*?</style>|<!--.*?-->", RegexOptions.Singleline | RegexOptions.IgnoreCase)]
+    private static partial Regex HtmlSkippedPattern();
+
+    [GeneratedRegex(@">([^<]+)<")]
+    private static partial Regex HtmlTextPattern();
+
+    // Visible attribute text must come from data-i18n-<attribute>.
+    [GeneratedRegex(@"\s(placeholder|title|aria-label|alt)=""(\p{L}[^""]*)""")]
+    private static partial Regex HtmlAttributePattern();
 }

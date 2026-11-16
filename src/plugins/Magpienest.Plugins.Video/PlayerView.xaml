@@ -76,9 +76,11 @@
             <Button x:Name="MuteButton" Style="{StaticResource BarButton}" Click="Mute_Click">
               <TextBlock x:Name="MuteGlyph" Text="&#xE767;" Style="{StaticResource Glyph}" />
             </Button>
-            <Slider x:Name="VolumeSlider" Width="96" Minimum="0" Maximum="100" SmallChange="5" LargeChange="10"
+            <Slider x:Name="VolumeSlider" Width="96" Minimum="0" Maximum="200" SmallChange="5" LargeChange="10"
                     IsMoveToPointEnabled="True" VerticalAlignment="Center" Focusable="False"
                     AutomationProperties.Name="{sdk:Loc Video.Player.Volume}" ToolTip="{sdk:Loc Video.Player.Volume}" />
+            <!-- The volume as a number, shown briefly after it changes. -->
+            <TextBlock x:Name="VolumeBadgeText" VerticalAlignment="Center" Margin="8,0,0,0" Visibility="Collapsed" />
           </StackPanel>
 
           <!-- Centre: previous, play/pause, next. -->

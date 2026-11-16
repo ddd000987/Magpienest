@@ -38,6 +38,9 @@ internal sealed partial class PlayerView : UserControl
 
     private const int VolumeStep = 5;
 
+    /// <summary>How long the volume badge stays after the last change.</summary>
+    private static readonly TimeSpan VolumeBadgeTime = TimeSpan.FromSeconds(1.2);
+
     // Alpha 1: invisible, but keeps the layered overlay window hit-testable (alpha 0 lets clicks through).
     private static readonly Brush HitTestBrush = CreateHitTestBrush();
 
@@ -47,6 +50,7 @@ internal sealed partial class PlayerView : UserControl
     private readonly IPlayerHost _host;
     private readonly DispatcherTimer _saveTimer;
     private readonly DispatcherTimer _hideTimer;
+    private readonly DispatcherTimer _volumeBadgeTimer;
     private bool _updating;
     private bool _dragging;
     private DateTime _lastDragSeek;
@@ -68,6 +72,12 @@ internal sealed partial class PlayerView : UserControl
         _saveTimer.Tick += (_, _) => _session.Tick();
         _hideTimer = new DispatcherTimer { Interval = HideDelay };
         _hideTimer.Tick += (_, _) => TryHideBars();
+        _volumeBadgeTimer = new DispatcherTimer { Interval = VolumeBadgeTime };
+        _volumeBadgeTimer.Tick += (_, _) =>
+        {
+            _volumeBadgeTimer.Stop();
+            VolumeBadgeText.Visibility = Visibility.Collapsed;
+        };
 
         Player.StateChanged += (_, _) => UpdateState();
         Player.PositionChanged += (_, _) => UpdatePosition();
@@ -119,6 +129,7 @@ internal sealed partial class PlayerView : UserControl
         _closed = true;
         _saveTimer.Stop();
         _hideTimer.Stop();
+        _volumeBadgeTimer.Stop();
     }
 
     /// <summary>The host's fullscreen state changed from outside the controls.</summary>
@@ -143,7 +154,7 @@ internal sealed partial class PlayerView : UserControl
         PlayGlyph.Text = playing ? "" : "";
         PlayButton.ToolTip = Loc.Get(playing ? "Video.Player.Pause" : "Video.Player.Play");
         SpeedText.Text = Loc.Format("Video.Player.SpeedValue", Player.Rate.ToString("0.##", CultureInfo.CurrentCulture));
-        AudioButton.IsEnabled = Player.AudioTracks.Count > 1;
+        FitControls(ActualWidth);
         FullScreenGlyph.Text = _host.IsFullScreen ? "" : "";
         FullScreenButton.ToolTip = Loc.Get(_host.IsFullScreen ? "Video.Player.ExitFullScreen" : "Video.Player.FullScreen");
         UpdateVolume();
@@ -164,7 +175,8 @@ internal sealed partial class PlayerView : UserControl
         VolumeSlider.Visibility = width < 620 ? Visibility.Collapsed : Visibility.Visible;
         var extras = width < 500 ? Visibility.Collapsed : Visibility.Visible;
         SpeedButton.Visibility = extras;
-        AudioButton.Visibility = extras;
+        // Only offered when there is a choice; most videos have one audio track.
+        AudioButton.Visibility = Player.AudioTracks.Count > 1 ? extras : Visibility.Collapsed;
         SubtitleButton.Visibility = extras;
     }
 
@@ -197,6 +209,7 @@ internal sealed partial class PlayerView : UserControl
         _updating = true;
         try
         {
+            VolumeSlider.Maximum = Math.Max(_settings.MaxVolume, Player.Volume); // The limit may change in settings.
             VolumeSlider.Value = Player.Volume;
         }
         finally
@@ -299,7 +312,7 @@ internal sealed partial class PlayerView : UserControl
 
     private void ChangeVolume(int delta)
     {
-        Player.Volume = Math.Clamp(Player.Volume + delta, 0, 100);
+        Player.Volume = Math.Clamp(Player.Volume + delta, 0, _settings.MaxVolume);
         if (Player.IsMuted && delta > 0)
         {
             Player.IsMuted = false;
@@ -308,6 +321,19 @@ internal sealed partial class PlayerView : UserControl
 
         _settings.Volume = Player.Volume;
         UpdateVolume();
+        ShowVolumeBadge();
+    }
+
+    /// <summary>Shows the volume as a number next to the slider for a moment (and the control bar with it).</summary>
+    private void ShowVolumeBadge()
+    {
+        VolumeBadgeText.Text = Player.IsMuted
+            ? Loc.Get("Video.Player.Muted")
+            : Loc.Format("Video.Player.VolumeValue", Player.Volume);
+        VolumeBadgeText.Visibility = Visibility.Visible;
+        ShowBars();
+        _volumeBadgeTimer.Stop();
+        _volumeBadgeTimer.Start();
     }
 
     private void ToggleMute()
@@ -315,6 +341,7 @@ internal sealed partial class PlayerView : UserControl
         Player.IsMuted = !Player.IsMuted;
         _settings.Muted = Player.IsMuted;
         UpdateVolume();
+        ShowVolumeBadge();
     }
 
     private void SetRate(double rate)

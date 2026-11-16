@@ -26,6 +26,21 @@
             BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1"
             CornerRadius="{DynamicResource ControlCornerRadius}" Padding="16,12" Margin="0,0,0,8">
       <StackPanel>
+        <TextBlock Text="{sdk:Loc Video.Settings.MaxVolume}" Style="{DynamicResource BodyStrongTextBlockStyle}" />
+        <TextBlock Text="{sdk:Loc Video.Settings.MaxVolumeHint}" Style="{DynamicResource CaptionTextBlockStyle}"
+                   TextWrapping="Wrap" Margin="0,2,0,8" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        <StackPanel Orientation="Horizontal">
+          <Slider Width="240" Minimum="100" Maximum="200" TickFrequency="10" IsSnapToTickEnabled="True"
+                  SmallChange="10" LargeChange="50" VerticalAlignment="Center"
+                  Value="{Binding MaxVolume}" AutomationProperties.Name="{sdk:Loc Video.Settings.MaxVolume}" />
+          <TextBlock Text="{Binding MaxVolumeText}" VerticalAlignment="Center" Margin="12,0,0,0" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+            CornerRadius="{DynamicResource ControlCornerRadius}" Padding="16,12" Margin="0,0,0,8">
+      <StackPanel>
         <CheckBox Content="{sdk:Loc Video.Settings.RememberPosition}" IsChecked="{Binding RememberPosition}" />
         <TextBlock Text="{sdk:Loc Video.Settings.RememberPositionHint}" Style="{DynamicResource CaptionTextBlockStyle}"
                    TextWrapping="Wrap" Margin="28,2,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />

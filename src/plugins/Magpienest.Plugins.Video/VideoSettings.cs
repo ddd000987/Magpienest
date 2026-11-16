@@ -13,6 +13,13 @@ internal sealed class VideoSettings(IPluginConfig config)
     internal const string MutedKey = "muted";
     internal const string RateKey = "rate";
     internal const string RememberKey = "rememberPosition";
+    internal const string MaxVolumeKey = "maxVolume";
+
+    /// <summary>Lowest choice for the volume limit (the file's own level).</summary>
+    public const int MinMaxVolume = 100;
+
+    /// <summary>Highest volume the player supports (twice the file's level).</summary>
+    public const int MaxMaxVolume = 200;
 
     /// <summary>Default scanned extensions (phase 3 spec).</summary>
     internal static readonly string[] DefaultExtensions =
@@ -52,10 +59,18 @@ internal sealed class VideoSettings(IPluginConfig config)
         set => config.Set(RememberKey, value);
     }
 
+    /// <summary>The highest volume the player's slider, wheel and keys reach (100..200, default 200).</summary>
+    public int MaxVolume
+    {
+        get => Math.Clamp(config.Get(MaxVolumeKey, MaxMaxVolume), MinMaxVolume, MaxMaxVolume);
+        set => config.Set(MaxVolumeKey, Math.Clamp(value, MinMaxVolume, MaxMaxVolume));
+    }
+
+    /// <summary>The last volume, never above <see cref="MaxVolume"/>.</summary>
     public int Volume
     {
-        get => Math.Clamp(config.Get(VolumeKey, 100), 0, 100);
-        set => config.Set(VolumeKey, Math.Clamp(value, 0, 100));
+        get => Math.Clamp(config.Get(VolumeKey, 100), 0, MaxVolume);
+        set => config.Set(VolumeKey, Math.Clamp(value, 0, MaxVolume));
     }
 
     public bool Muted
@@ -102,7 +117,17 @@ internal sealed partial class VideoSettingsViewModel : ObservableObject
         _extensions = string.Join(" ", settings.ExtensionList);
         _continueWithNext = settings.ContinueWithNext;
         _rememberPosition = settings.RememberPosition;
+        _maxVolume = settings.MaxVolume;
     }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(MaxVolumeText))]
+    private int _maxVolume;
+
+    /// <summary>The limit as shown next to its slider.</summary>
+    public string MaxVolumeText => Magpienest.Sdk.Localization.Loc.Format("Video.Player.VolumeValue", MaxVolume);
+
+    partial void OnMaxVolumeChanged(int value) => _settings.MaxVolume = value;
 
     [ObservableProperty]
     private bool _rememberPosition;

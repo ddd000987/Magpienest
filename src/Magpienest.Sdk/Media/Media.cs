@@ -74,7 +74,7 @@ public interface IMediaPlayer : IDisposable
     /// <summary>Media length; zero when unknown.</summary>
     TimeSpan Duration { get; }
 
-    /// <summary>Volume, 0..100.</summary>
+    /// <summary>Volume, 0..200: 100 is the file's own level, above it the sound is amplified.</summary>
     int Volume { get; set; }
 
     /// <summary>Whether the sound is muted.</summary>

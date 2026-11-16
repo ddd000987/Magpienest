@@ -34,5 +34,9 @@
   "Video.Settings.ResetExtensions": "還原預設清單",
   "Video.Settings.ContinueNext": "一部影片播完後自動播放下一部",
   "Video.Settings.RememberPosition": "記住看到哪裡，下次從那裡繼續播放",
-  "Video.Settings.RememberPositionHint": "關閉後，每部影片一律從頭播放，也不會記錄觀看進度。"
+  "Video.Settings.RememberPositionHint": "關閉後，每部影片一律從頭播放，也不會記錄觀看進度。",
+  "Video.Player.VolumeValue": "{0}%",
+  "Video.Player.Muted": "靜音",
+  "Video.Settings.MaxVolume": "最高音量",
+  "Video.Settings.MaxVolumeHint": "播放器的音量最高能調到多少。超過 100% 可以讓小聲的影片變大聲，但聲音可能會失真。"
 }

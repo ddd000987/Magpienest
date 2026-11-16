@@ -34,5 +34,9 @@
   "Video.Settings.ResetExtensions": "Restore the default list",
   "Video.Settings.ContinueNext": "Play the next video when one ends",
   "Video.Settings.RememberPosition": "Remember where I stopped and continue from there",
-  "Video.Settings.RememberPositionHint": "When off, every video starts from the beginning and no viewing progress is recorded."
+  "Video.Settings.RememberPositionHint": "When off, every video starts from the beginning and no viewing progress is recorded.",
+  "Video.Player.VolumeValue": "{0}%",
+  "Video.Player.Muted": "Muted",
+  "Video.Settings.MaxVolume": "Maximum volume",
+  "Video.Settings.MaxVolumeHint": "How high the player's volume goes. Above 100% makes quiet videos louder but can distort the sound."
 }
