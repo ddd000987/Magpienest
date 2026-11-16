@@ -24,6 +24,8 @@
     <ProjectReference Include="..\plugins\Magpienest.Plugins.ImageViewer\Magpienest.Plugins.ImageViewer.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\plugins\Magpienest.Plugins.ImageWindow\Magpienest.Plugins.ImageWindow.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\plugins\Magpienest.Plugins.Illustration\Magpienest.Plugins.Illustration.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\plugins\Magpienest.Plugins.MediaEngine.LibVlc\Magpienest.Plugins.MediaEngine.LibVlc.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\plugins\Magpienest.Plugins.Video\Magpienest.Plugins.Video.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\plugins\Magpienest.Plugins.Library\Magpienest.Plugins.Library.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\plugins\Magpienest.Plugins.Localization\Magpienest.Plugins.Localization.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\plugins\Magpienest.Plugins.Shell\Magpienest.Plugins.Shell.csproj" ReferenceOutputAssembly="false" />

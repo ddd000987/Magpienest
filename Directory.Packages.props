@@ -4,8 +4,10 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageVersion Include="LibVLCSharp.WPF" Version="3.9.4" />
     <PackageVersion Include="Microsoft.Data.Sqlite" Version="11.0.0" />
     <PackageVersion Include="SharpCompress" Version="0.50.9" />
+    <PackageVersion Include="VideoLAN.LibVLC.Windows" Version="3.0.21" />
     <PackageVersion Include="VirtualizingWrapPanel" Version="2.5.4" />
     <PackageVersion Include="xunit.v3" Version="4.0.3" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />

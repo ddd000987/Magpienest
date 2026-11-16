@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.mediaengine.libvlc",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.MediaEngine.LibVlc.dll",
+  "name": { "en": "LibVLC media engine", "zh-TW": "LibVLC 影音引擎" },
+  "description": {
+    "en": "Plays almost every video format with LibVLC and makes thumbnails from video frames.",
+    "zh-TW": "以 LibVLC 播放幾乎所有影片格式，並從影片畫面產生縮圖。"
+  },
+  "author": "Magpienest contributors",
+  "essential": false,
+  "enabledByDefault": true
+}

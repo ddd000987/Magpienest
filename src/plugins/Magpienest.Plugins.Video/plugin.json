@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.video",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.Video.dll",
+  "name": { "en": "Videos", "zh-TW": "影片" },
+  "description": {
+    "en": "Collect video files from your folders, browse them with thumbnails and durations, and play them with resume.",
+    "zh-TW": "收集資料夾中的影片，用縮圖和片長瀏覽，播放時從上次停下的地方繼續。"
+  },
+  "author": "Magpienest contributors",
+  "essential": false,
+  "enabledByDefault": true
+}

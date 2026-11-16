@@ -8,6 +8,8 @@
     <Project Path="src/plugins/Magpienest.Plugins.ImageViewer/Magpienest.Plugins.ImageViewer.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.ImageWindow/Magpienest.Plugins.ImageWindow.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.Imaging/Magpienest.Plugins.Imaging.csproj" />
+    <Project Path="src/plugins/Magpienest.Plugins.MediaEngine.LibVlc/Magpienest.Plugins.MediaEngine.LibVlc.csproj" />
+    <Project Path="src/plugins/Magpienest.Plugins.Video/Magpienest.Plugins.Video.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.Library/Magpienest.Plugins.Library.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.Localization/Magpienest.Plugins.Localization.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.Settings/Magpienest.Plugins.Settings.csproj" />
@@ -28,6 +30,8 @@
     <Project Path="tests/Magpienest.Plugins.ImageViewer.Tests/Magpienest.Plugins.ImageViewer.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.ImageWindow.Tests/Magpienest.Plugins.ImageWindow.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.Imaging.Tests/Magpienest.Plugins.Imaging.Tests.csproj" />
+    <Project Path="tests/Magpienest.Plugins.MediaEngine.LibVlc.Tests/Magpienest.Plugins.MediaEngine.LibVlc.Tests.csproj" />
+    <Project Path="tests/Magpienest.Plugins.Video.Tests/Magpienest.Plugins.Video.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.Library.Tests/Magpienest.Plugins.Library.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.Localization.Tests/Magpienest.Plugins.Localization.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.Thumbnails.Tests/Magpienest.Plugins.Thumbnails.Tests.csproj" />

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PluginId>magpienest.mediaengine.libvlc</PluginId>
+    <!-- Ship the x64 native libraries only (the package copies both by default, ~195 MB together). -->
+    <VlcWindowsX86Enabled>false</VlcWindowsX86Enabled>
+  </PropertyGroup>
+  <Import Project="$(RepoRoot)build\Plugin.props" />
+  <ItemGroup>
+    <PackageReference Include="LibVLCSharp.WPF" />
+    <PackageReference Include="VideoLAN.LibVLC.Windows" />
+    <InternalsVisibleTo Include="Magpienest.Plugins.MediaEngine.LibVlc.Tests" />
+  </ItemGroup>
+</Project>
