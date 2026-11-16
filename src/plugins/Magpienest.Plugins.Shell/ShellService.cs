@@ -20,6 +20,7 @@ internal sealed class ShellService : IShellService
     private readonly Dictionary<PageDescriptor, NavItem> _navItems = [];
     private readonly Dictionary<PageDescriptor, FrameworkElement> _views = [];
     private readonly Stack<IInputElement?> _focusBeforeOverlay = new();
+    private readonly BadgeSet _badges = new();
     private PageDescriptor? _current;
     private bool _started;
     private bool _closing;
@@ -42,6 +43,13 @@ internal sealed class ShellService : IShellService
         _theme = ctx.Config.Get("theme", AppTheme.System);
         ApplyTheme(_theme);
         LocSource.Instance.PropertyChanged += OnLanguageChanged;
+        _badges.Changed += id =>
+        {
+            foreach (var item in _navItems.Values.Where(i => i.Page.Id == id))
+            {
+                item.HasBadge = _badges.Has(id);
+            }
+        };
     }
 
     public Window MainWindow => _window;
@@ -159,7 +167,7 @@ internal sealed class ShellService : IShellService
         }
 
         _pages.Add(page);
-        _navItems[page] = new NavItem(page);
+        _navItems[page] = new NavItem(page) { HasBadge = _badges.Has(page.Id) };
         RefreshNav();
         owner.Track(() => RemovePage(page));
 
@@ -167,6 +175,13 @@ internal sealed class ShellService : IShellService
         {
             Navigate(page.Id);
         }
+    }
+
+    public void SetBadge(IPluginContext owner, string pageId, bool visible)
+    {
+        ArgumentNullException.ThrowIfNull(owner);
+        ArgumentException.ThrowIfNullOrEmpty(pageId);
+        _badges.Set(owner, pageId, visible);
     }
 
     public bool Navigate(string pageId, object? parameter = null)

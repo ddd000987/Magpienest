@@ -12,8 +12,9 @@ using Magpienest.Sdk.Thumbnails;
 namespace Magpienest.Plugins.DevTools;
 
 /// <summary>
-/// <c>--screenshot &lt;dir&gt; [--pages a,b] [--lang code] [--theme light|dark|system]</c> (architecture §14).
-/// Does nothing when the argument is absent.
+/// <c>--screenshot &lt;dir&gt; [--pages a,b] [--lang code] [--theme light|dark|system]</c> (architecture §14), and
+/// <c>--install-plugin &lt;zip&gt;</c> (phase 8 T8.3, see <see cref="InstallPluginRun"/>; it takes precedence).
+/// Does nothing when neither argument is present.
 /// </summary>
 [Requires(typeof(IShellService))]
 [Optional(typeof(ILocalizationService), typeof(ILibraryService), typeof(IThumbnailService))]
@@ -24,8 +25,9 @@ public sealed class DevToolsPlugin : Plugin
     /// <inheritdoc />
     public override void Activate(IPluginContext ctx)
     {
-        var options = ScreenshotOptions.Parse(ctx.Environment.CommandLineArgs);
-        if (options is null)
+        var packages = InstallPluginRun.Packages(ctx.Environment.CommandLineArgs);
+        var options = packages.Count > 0 ? null : ScreenshotOptions.Parse(ctx.Environment.CommandLineArgs);
+        if (packages.Count == 0 && options is null)
         {
             return;
         }
@@ -36,7 +38,7 @@ public sealed class DevToolsPlugin : Plugin
             if (!started)
             {
                 started = true;
-                _ = RunAsync(ctx, options);
+                _ = options is null ? InstallPluginRun.RunAsync(ctx, packages) : RunAsync(ctx, options);
             }
         }
 

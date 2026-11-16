@@ -9,6 +9,7 @@
     "zh-TW": "收藏資料庫：資料夾、項目、標籤與掃描。"
   },
   "author": "Magpienest contributors",
-  "essential": false,
-  "enabledByDefault": true
+  "essential": true,
+  "enabledByDefault": true,
+  "bundle": "magpienest.core"
 }

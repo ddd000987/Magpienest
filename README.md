@@ -9,11 +9,11 @@ Magpienest is a Windows desktop collection library for your **local** illustrati
 ## Features
 
 - **Library**: add folders and Magpienest finds everything inside them. Thumbnail walls with a folder tree, search, sorting, filters, tags, ratings, favourites, status and notes. Missing files are marked instead of silently dropped.
-- **Illustrations**: JPEG, PNG, GIF, BMP, TIFF, WebP, HEIC, AVIF, JPEG XL and more. A fast full-window viewer with zoom, rotation, preloading of the next pages and a bottom bar. Right-click a picture to open it in a borderless image window of its own.
+- **Illustrations**: JPEG, PNG, GIF, BMP, TIFF, WebP, HEIC, AVIF, JPEG XL and more. A fast full-window viewer with zoom, rotation, preloading of the next pages and a bottom bar. Right-click a picture to open it in a borderless image window of its own (from the plugin store).
 - **Comics**: a folder of pages or a zip / cbz / rar / cbr / 7z / cb7 archive is one book. Two-page spreads, right-to-left or left-to-right reading, a cover page shown alone, a continuous strip mode, and Magpienest remembers where you stopped.
-- **Videos**: plays most formats (mp4, mkv, webm, avi, mov, wmv and many more) with LibVLC. Thumbnails and durations on the wall, resume where you stopped, audio and subtitle track selection, playback speed, one frameless player window per video.
-- **Games**: add a game by its exe or let Magpienest scan a folder of game folders and pick the main program of each. Launch with one click; play time and the number of launches are tracked.
-- **Plugins**: the main window, Settings, languages and every media page are plugins. Turn them on or off, or install more from a zip or a folder.
+- **Videos** (from the plugin store): plays most formats (mp4, mkv, webm, avi, mov, wmv and many more) with LibVLC. Thumbnails and durations on the wall, resume where you stopped, audio and subtitle track selection, playback speed, one frameless player window per video.
+- **Games** (from the plugin store): add a game by its exe or let Magpienest scan a folder of game folders and pick the main program of each. Launch with one click; play time and the number of launches are tracked.
+- **Plugins and the plugin store**: every feature is a plugin. Pictures and comics come with the download; videos, games, the image window and the web interface are one click away in the plugin store. Turn features on or off, or install more from a zip or a folder.
 - **Languages and themes**: English and Traditional Chinese (switch live, follows Windows by default), light and dark themes.
 - **Portable**: unzip and run. All data lives next to the program. Windows 10/11 x64.
 
@@ -35,11 +35,13 @@ Everything Magpienest stores (library, thumbnail cache, settings, logs, plugins 
 
 ## Plugins
 
-Open **Settings, Plugins** to see every plugin with its version and state.
+Open **Settings, Plugin store** to add features: Videos, Games, Image window and Web interface. Each card shows the size; "Install" downloads the feature from the store's GitHub releases, checks it and turns it on, and "Update" appears when a newer version exists. With "Check for plugin updates at startup" on, a red dot on Settings tells you an update is waiting.
 
-- **Turn a plugin on or off** with its switch. It takes effect immediately and is remembered. Essential plugins (such as the main window and Settings) cannot be switched off.
-- **Install a plugin** with "Install plugin..." (a `.zip` package) or "Install from folder...". Magpienest shows the name, version and author and asks you to confirm. Plugins run with the same access to your computer as Magpienest itself, so install only plugins you trust.
-- **Remove a plugin** with "Remove". Its settings are kept in case you install it again.
+Open **Settings, Plugins** to see the features you have.
+
+- **Turn a feature on or off** with its switch. It takes effect immediately and is remembered. The built-in "Magpienest" cannot be switched off.
+- **Remove a feature** you installed with "Remove". Its settings are kept in case you install it again.
+- **Show details** lists the plugins of each feature and adds "Install plugin..." (a `.zip` package) and "Install from folder..." for plugins you got elsewhere. Magpienest shows the name, version and author and asks you to confirm. Plugins run with the same access to your computer as Magpienest itself, so install only plugins you trust.
 - Installing, updating or removing a plugin that is already loaded takes effect after a **restart**; Magpienest shows a bar with a "Restart now" button.
 
 ### Safe mode
@@ -65,10 +67,10 @@ artifacts\bin\Debug\Magpienest.exe
 To make the release zip:
 
 ```
-build\publish.ps1 -Version 0.1.0
+build\publish.ps1 -Version 0.1.0 -StoreRepository <owner>/Magpienest-Store
 ```
 
-It builds and tests in Release, publishes a self-contained win-x64 build, runs a smoke test of the published program and writes `artifacts\Magpienest-0.1.0-win-x64.zip`.
+It builds and tests in Release, publishes a self-contained win-x64 build and writes `artifacts\Magpienest-0.1.0-win-x64.zip`. The plugin store goes to `artifacts\store` (one zip per store plugin, `catalog.json` and the store repository's READMEs). The published program is smoke-tested twice: on its own, and with every store package installed.
 
 Useful options of the program: `--data-dir <folder>` keeps all data in that folder; `--smoke-test` starts, checks every plugin and exits; `--screenshot <folder>` saves a PNG of every page and exits; `--safe-mode` loads only the built-in plugins.
 

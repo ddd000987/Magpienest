@@ -9,6 +9,7 @@
     "zh-TW": "顯示版本、授權與資料夾位置。"
   },
   "author": "Magpienest contributors",
-  "essential": false,
-  "enabledByDefault": true
+  "essential": true,
+  "enabledByDefault": true,
+  "bundle": "magpienest.core"
 }

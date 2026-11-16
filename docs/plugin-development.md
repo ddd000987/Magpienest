@@ -140,8 +140,9 @@ Next to your dll, always:
 | `entryType` | Optional full type name of the `Plugin` subclass. Leave it out if the assembly has exactly one public, non-abstract `Plugin` subclass (zero or several is an error). |
 | `name`, `description` | Maps from language code to text. Provide at least `en` and `zh-TW`. Lookup: current language, then `en`, then the first entry. |
 | `author` | Shown in the install confirmation and in Settings. |
-| `essential` | Leave `false`. Only the kernel's own Localization, Shell and Settings plugins are essential (cannot be turned off). |
+| `essential` | Leave `false`. Only the plugins of Magpienest's core bundle are essential (cannot be turned off). |
 | `enabledByDefault` | Whether a fresh install starts enabled. The user's choice is remembered afterwards. |
+| `bundle` | Optional. Plugins with the same bundle id are shown, switched and removed together as one card in Settings. Leave it out and your plugin gets a card of its own. |
 
 The file is read with `System.Text.Json`: property names are case-insensitive;
 comments and trailing commas are allowed.

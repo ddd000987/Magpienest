@@ -379,6 +379,8 @@ public sealed class VideoTests
         public Window MainWindow => throw new NotSupportedException();
         public IReadOnlyList<PageDescriptor> Pages => [];
         public string? CurrentPageId => null;
+
+        public void SetBadge(IPluginContext owner, string pageId, bool visible) { }
         public bool IsFullScreen { get; set; }
         public AppTheme Theme { get; set; }
         public List<string> Notes { get; } = [];

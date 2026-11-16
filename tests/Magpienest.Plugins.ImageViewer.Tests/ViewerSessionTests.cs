@@ -488,6 +488,8 @@ public sealed class ViewerSessionTests
 
         public string? CurrentPageId => null;
 
+        public void SetBadge(IPluginContext owner, string pageId, bool visible) { }
+
         public bool IsFullScreen { get; set; }
 
         public AppTheme Theme { get; set; }

@@ -18,7 +18,7 @@ public sealed class SettingsPlugin : Plugin
         var localization = ctx.Get<ILocalizationService>();
 
         var page = new SettingsPageViewModel(ctx.Log);
-        var service = new SettingsService(shell, page);
+        var service = new SettingsService(ctx, shell, page);
         ctx.Provide<ISettingsService>(service);
 
         shell.AddPage(ctx, new PageDescriptor
@@ -63,21 +63,45 @@ public sealed class SettingsPlugin : Plugin
 }
 
 /// <summary><see cref="ISettingsService"/> implementation.</summary>
-internal sealed class SettingsService(IShellService shell, SettingsPageViewModel page) : ISettingsService
+internal sealed class SettingsService : ISettingsService
 {
+    private readonly IShellService _shell;
+    private readonly SettingsPageViewModel _page;
+
+    /// <param name="ctx">The Settings plugin's context; owns the dot on the Settings navigation entry.</param>
+    /// <param name="shell">The shell.</param>
+    /// <param name="page">The Settings page.</param>
+    public SettingsService(IPluginContext ctx, IShellService shell, SettingsPageViewModel page)
+    {
+        _shell = shell;
+        _page = page;
+        page.Badges.Changed += id =>
+        {
+            page.RefreshBadge(id);
+            shell.SetBadge(ctx, SettingsPlugin.PageId, page.Badges.Any);
+        };
+    }
+
+    public void SetBadge(IPluginContext owner, string sectionId, bool visible)
+    {
+        ArgumentNullException.ThrowIfNull(owner);
+        ArgumentException.ThrowIfNullOrEmpty(sectionId);
+        _page.Badges.Set(owner, sectionId, visible);
+    }
+
     public void AddSection(IPluginContext owner, SettingsSection section)
     {
-        page.Add(section);
-        owner.Track(() => page.Remove(section));
+        _page.Add(section);
+        owner.Track(() => _page.Remove(section));
     }
 
     public void Open(string? sectionId = null)
     {
         if (sectionId is not null)
         {
-            page.Select(sectionId);
+            _page.Select(sectionId);
         }
 
-        shell.Navigate(SettingsPlugin.PageId, sectionId);
+        _shell.Navigate(SettingsPlugin.PageId, sectionId);
     }
 }

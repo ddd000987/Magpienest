@@ -108,9 +108,13 @@ internal sealed partial class ShellViewModel : ObservableObject
 }
 
 /// <summary>One entry in the navigation rail.</summary>
-internal sealed class NavItem(PageDescriptor page) : ObservableObject
+internal sealed partial class NavItem(PageDescriptor page) : ObservableObject
 {
     public PageDescriptor Page { get; } = page;
+
+    /// <summary>A small dot: something new on this page (<see cref="IShellService.SetBadge"/>).</summary>
+    [ObservableProperty]
+    public partial bool HasBadge { get; set; }
 
     public string Glyph => Page.Glyph;
 

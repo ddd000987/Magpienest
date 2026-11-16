@@ -32,6 +32,12 @@ public sealed record PluginManifest
 
     /// <summary>Whether the plugin is enabled when the user has made no choice.</summary>
     public bool EnabledByDefault { get; init; } = true;
+
+    /// <summary>
+    /// Id of the bundle the plugin belongs to (same rules as a plugin id); null = not in a bundle.
+    /// Settings shows, switches and removes the plugins of one bundle together.
+    /// </summary>
+    public string? Bundle { get; init; }
 }
 
 /// <summary>Lifecycle state of a plugin.</summary>

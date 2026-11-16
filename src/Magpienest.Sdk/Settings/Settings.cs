@@ -10,6 +10,16 @@ public interface ISettingsService
     /// <param name="section">The section.</param>
     void AddSection(IPluginContext owner, SettingsSection section);
 
+    /// <summary>
+    /// Shows or hides a small dot on a section in the Settings list; the Settings navigation entry shows a dot
+    /// while any section has one. Works for a section that is added later; cleared when <paramref name="owner"/>
+    /// deactivates.
+    /// </summary>
+    /// <param name="owner">Plugin that sets the dot.</param>
+    /// <param name="sectionId">Section id.</param>
+    /// <param name="visible">True to show it.</param>
+    void SetBadge(IPluginContext owner, string sectionId, bool visible);
+
     /// <summary>Navigates to the settings page and selects the section.</summary>
     /// <param name="sectionId">Section id, or null for the current one.</param>
     void Open(string? sectionId = null);

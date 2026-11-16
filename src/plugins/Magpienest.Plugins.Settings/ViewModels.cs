@@ -15,6 +15,9 @@ internal sealed partial class SettingsPageViewModel(ILog log) : ObservableObject
 
     public ObservableCollection<SectionItem> Sections { get; } = [];
 
+    /// <summary>Dots on sections (<see cref="ISettingsService.SetBadge"/>).</summary>
+    public BadgeSet Badges { get; } = new();
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SelectedView))]
     public partial SectionItem? SelectedSection { get; set; }
@@ -23,7 +26,7 @@ internal sealed partial class SettingsPageViewModel(ILog log) : ObservableObject
 
     public void Add(SettingsSection section)
     {
-        var item = new SectionItem(section);
+        var item = new SectionItem(section) { HasBadge = Badges.Has(section.Id) };
         var index = 0;
         while (index < Sections.Count && Compare(Sections[index].Section, section) <= 0)
         {
@@ -47,6 +50,15 @@ internal sealed partial class SettingsPageViewModel(ILog log) : ObservableObject
         if (SelectedSection == item)
         {
             SelectedSection = Sections.FirstOrDefault();
+        }
+    }
+
+    /// <summary>Updates the dot of a section after <see cref="Badges"/> changed.</summary>
+    public void RefreshBadge(string sectionId)
+    {
+        foreach (var item in Sections.Where(s => s.Section.Id == sectionId))
+        {
+            item.HasBadge = Badges.Has(sectionId);
         }
     }
 
@@ -107,9 +119,12 @@ internal sealed partial class SettingsPageViewModel(ILog log) : ObservableObject
 }
 
 /// <summary>A section entry in the list.</summary>
-internal sealed class SectionItem(SettingsSection section) : ObservableObject
+internal sealed partial class SectionItem(SettingsSection section) : ObservableObject
 {
     public SettingsSection Section { get; } = section;
+
+    [ObservableProperty]
+    public partial bool HasBadge { get; set; }
 
     public string Glyph => Section.Glyph;
 

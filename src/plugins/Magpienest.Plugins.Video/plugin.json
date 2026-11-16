@@ -10,5 +10,6 @@
   },
   "author": "Magpienest contributors",
   "essential": false,
-  "enabledByDefault": true
+  "enabledByDefault": true,
+  "bundle": "magpienest.video"
 }

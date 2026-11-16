@@ -1,0 +1,15 @@
+{
+  "id": "magpienest.catalogue",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.Catalogue.dll",
+  "name": { "en": "Plugin store", "zh-TW": "插件商店" },
+  "description": {
+    "en": "Downloads and updates official features from the Magpienest store.",
+    "zh-TW": "從鵲藏商店下載與更新官方功能。"
+  },
+  "author": "Magpienest contributors",
+  "essential": true,
+  "enabledByDefault": true,
+  "bundle": "magpienest.core"
+}

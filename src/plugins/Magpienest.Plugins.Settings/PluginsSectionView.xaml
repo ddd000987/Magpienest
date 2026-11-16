@@ -9,11 +9,6 @@
   <StackPanel>
     <TextBlock Text="{sdk:Loc Settings.Plugins.Hint}" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                TextWrapping="Wrap" Margin="0,0,0,12" />
-    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-      <Button Command="{Binding InstallZipCommand}" Content="{sdk:Loc Settings.Plugins.InstallZip}"
-              Style="{DynamicResource AccentButtonStyle}" Margin="0,0,8,0" />
-      <Button Command="{Binding InstallFolderCommand}" Content="{sdk:Loc Settings.Plugins.InstallFolder}" />
-    </StackPanel>
     <Border Visibility="{Binding ShowRestartBar, Converter={StaticResource BoolToVisibility}}"
             Margin="0,0,0,12" Padding="16,10" BorderThickness="1"
             Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
@@ -35,41 +30,66 @@
                   Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
                   BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                   CornerRadius="{DynamicResource ControlCornerRadius}">
-            <Grid>
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-              </Grid.ColumnDefinitions>
-              <StackPanel Margin="0,0,16,0">
-                <WrapPanel>
-                  <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Margin="0,0,8,0" />
-                  <TextBlock Text="{Binding VersionText}" Style="{DynamicResource CaptionTextBlockStyle}"
-                             Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
-                  <TextBlock x:Name="StateBadge" Text="{Binding StateText}" Style="{DynamicResource CaptionTextBlockStyle}"
-                             Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
-                </WrapPanel>
-                <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Margin="0,4,0,0"
-                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                <TextBlock x:Name="Author" Text="{Binding AuthorText}" Style="{DynamicResource CaptionTextBlockStyle}"
-                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
-              </StackPanel>
-              <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                <TextBlock Text="{sdk:Loc Settings.Plugins.BuiltIn}" Style="{DynamicResource CaptionTextBlockStyle}"
-                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,16,0"
-                           Visibility="{Binding IsBuiltIn, Converter={StaticResource BoolToVisibility}}" />
-                <Button Command="{Binding RemoveCommand}" Content="{sdk:Loc Settings.Plugins.Remove}" Margin="0,0,16,0"
-                        Visibility="{Binding CanRemove, Converter={StaticResource BoolToVisibility}}" />
-                <Button Command="{Binding UndoCommand}" Content="{sdk:Loc Settings.Plugins.Undo}" Margin="0,0,16,0"
-                        Visibility="{Binding CanUndo, Converter={StaticResource BoolToVisibility}}" />
-                <CheckBox VerticalAlignment="Center"
-                          IsChecked="{Binding IsEnabled}" IsEnabled="{Binding CanToggle}"
-                          Content="{sdk:Loc Settings.Plugins.Enabled}"
-                          ToolTip="{Binding ToggleToolTip}" ToolTipService.ShowOnDisabled="True" />
-              </StackPanel>
-            </Grid>
+            <StackPanel>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,16,0">
+                  <WrapPanel>
+                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" Margin="0,0,8,0" />
+                    <TextBlock Text="{Binding VersionText}" Style="{DynamicResource CaptionTextBlockStyle}"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBlock x:Name="StateBadge" Text="{Binding StateText}" Style="{DynamicResource CaptionTextBlockStyle}"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                  </WrapPanel>
+                  <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Margin="0,4,0,0"
+                             Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                  <TextBlock x:Name="Author" Text="{Binding AuthorText}" Style="{DynamicResource CaptionTextBlockStyle}"
+                             Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                  <TextBlock Text="{sdk:Loc Settings.Plugins.BuiltIn}" Style="{DynamicResource CaptionTextBlockStyle}"
+                             Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,16,0"
+                             Visibility="{Binding IsBuiltIn, Converter={StaticResource BoolToVisibility}}" />
+                  <Button Command="{Binding RemoveCommand}" Content="{sdk:Loc Settings.Plugins.Remove}" Margin="0,0,16,0"
+                          Visibility="{Binding CanRemove, Converter={StaticResource BoolToVisibility}}" />
+                  <Button Command="{Binding UndoCommand}" Content="{sdk:Loc Settings.Plugins.Undo}" Margin="0,0,16,0"
+                          Visibility="{Binding CanUndo, Converter={StaticResource BoolToVisibility}}" />
+                  <CheckBox VerticalAlignment="Center"
+                            IsChecked="{Binding IsEnabled}" IsEnabled="{Binding CanToggle}"
+                            Content="{sdk:Loc Settings.Plugins.Enabled}"
+                            ToolTip="{sdk:Loc Settings.Plugins.Toggle}" ToolTipService.ShowOnDisabled="True"
+                            Visibility="{Binding ShowToggle, Converter={StaticResource BoolToVisibility}}" />
+                </StackPanel>
+              </Grid>
+              <ItemsControl ItemsSource="{Binding Members}" Focusable="False" Margin="0,8,0,0"
+                            Visibility="{Binding DataContext.ShowDetails, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVisibility}}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <WrapPanel Margin="12,2,0,2">
+                      <TextBlock Text="{Binding Name}" Style="{DynamicResource CaptionTextBlockStyle}" Margin="0,0,8,0" />
+                      <TextBlock Text="{Binding VersionText}" Style="{DynamicResource CaptionTextBlockStyle}"
+                                 Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,8,0" />
+                      <TextBlock x:Name="MemberState" Text="{Binding StateText}" Style="{DynamicResource CaptionTextBlockStyle}"
+                                 Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    </WrapPanel>
+                    <DataTemplate.Triggers>
+                      <DataTrigger Binding="{Binding State}" Value="Waiting">
+                        <Setter TargetName="MemberState" Property="Foreground" Value="{DynamicResource SystemFillColorCautionBrush}" />
+                      </DataTrigger>
+                      <DataTrigger Binding="{Binding State}" Value="Failed">
+                        <Setter TargetName="MemberState" Property="Foreground" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+                      </DataTrigger>
+                    </DataTemplate.Triggers>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
           </Border>
           <DataTemplate.Triggers>
-            <DataTrigger Binding="{Binding State}" Value="Active">
+            <DataTrigger Binding="{Binding State}" Value="On">
               <Setter TargetName="StateBadge" Property="Foreground" Value="{DynamicResource SystemFillColorSuccessBrush}" />
             </DataTrigger>
             <DataTrigger Binding="{Binding State}" Value="Waiting">
@@ -85,5 +105,14 @@
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>
+    <CheckBox IsChecked="{Binding ShowDetails}" Content="{sdk:Loc Settings.Plugins.ShowDetails}" Margin="0,8,0,0" />
+    <StackPanel Visibility="{Binding ShowDetails, Converter={StaticResource BoolToVisibility}}" Margin="0,12,0,0">
+      <TextBlock Text="{sdk:Loc Settings.Plugins.InstallHint}" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                 TextWrapping="Wrap" Margin="0,0,0,8" />
+      <StackPanel Orientation="Horizontal">
+        <Button Command="{Binding InstallZipCommand}" Content="{sdk:Loc Settings.Plugins.InstallZip}" Margin="0,0,8,0" />
+        <Button Command="{Binding InstallFolderCommand}" Content="{sdk:Loc Settings.Plugins.InstallFolder}" />
+      </StackPanel>
+    </StackPanel>
   </StackPanel>
 </UserControl>

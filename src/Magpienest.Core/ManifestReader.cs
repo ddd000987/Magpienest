@@ -40,6 +40,11 @@ internal static partial class ManifestReader
             throw new InvalidDataException($"Plugin '{manifest.Id}' has an invalid assembly file name.");
         }
 
+        if (manifest.Bundle is not null && !IsValidId(manifest.Bundle))
+        {
+            throw new InvalidDataException($"Plugin '{manifest.Id}' has an invalid bundle id '{manifest.Bundle}'.");
+        }
+
         return manifest with
         {
             Name = new Dictionary<string, string>(manifest.Name ?? new Dictionary<string, string>(), StringComparer.OrdinalIgnoreCase),

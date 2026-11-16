@@ -9,6 +9,7 @@
     "zh-TW": "在背景執行緒解碼圖片、套用 EXIF 方向並輸出 JPEG。"
   },
   "author": "Magpienest contributors",
-  "essential": false,
-  "enabledByDefault": true
+  "essential": true,
+  "enabledByDefault": true,
+  "bundle": "magpienest.core"
 }

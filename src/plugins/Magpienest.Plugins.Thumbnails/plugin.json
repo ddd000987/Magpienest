@@ -9,6 +9,7 @@
     "zh-TW": "為收藏庫建立並快取縮圖，並取得 Windows 殼層圖示。"
   },
   "author": "Magpienest contributors",
-  "essential": false,
-  "enabledByDefault": true
+  "essential": true,
+  "enabledByDefault": true,
+  "bundle": "magpienest.core"
 }

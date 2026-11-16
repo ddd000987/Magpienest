@@ -10,5 +10,6 @@
   },
   "author": "Magpienest contributors",
   "essential": true,
-  "enabledByDefault": true
+  "enabledByDefault": true,
+  "bundle": "magpienest.core"
 }

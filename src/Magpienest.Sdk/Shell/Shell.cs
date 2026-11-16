@@ -13,6 +13,16 @@ public interface IShellService
     /// <param name="page">The page.</param>
     void AddPage(IPluginContext owner, PageDescriptor page);
 
+    /// <summary>
+    /// Shows or hides a small dot on a page's navigation entry ("something new here"). The dot is shown while at
+    /// least one plugin has it on, also for a page that is added later, and is cleared when <paramref name="owner"/>
+    /// deactivates.
+    /// </summary>
+    /// <param name="owner">Plugin that sets the dot.</param>
+    /// <param name="pageId">Page id.</param>
+    /// <param name="visible">True to show it.</param>
+    void SetBadge(IPluginContext owner, string pageId, bool visible);
+
     /// <summary>Registered pages.</summary>
     IReadOnlyList<PageDescriptor> Pages { get; }
 

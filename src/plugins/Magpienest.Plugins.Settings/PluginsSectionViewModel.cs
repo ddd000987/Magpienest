@@ -44,15 +44,17 @@ internal sealed class WindowsPackagePicker(IShellService shell) : IPackagePicker
     }
 }
 
-/// <summary>Plugins: install buttons, a restart bar and one card per plugin.</summary>
+/// <summary>Plugins: one card per bundle (T8.0), a restart bar, and the details switch with the install buttons.</summary>
 internal sealed partial class PluginsSectionViewModel : ObservableObject
 {
+    internal const string ShowDetailsKey = "showPluginDetails";
+
     private readonly IPluginContext _ctx;
     private readonly IShellService _shell;
     private readonly ILocalizationService _localization;
     private readonly IPluginManager _manager;
     private readonly IPackagePicker _picker;
-    private readonly Dictionary<string, PluginCardViewModel> _cards = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, BundleCardViewModel> _cards = new(StringComparer.Ordinal);
     private bool _refreshQueued;
     private bool _installNeedsRestart;
 
@@ -63,16 +65,23 @@ internal sealed partial class PluginsSectionViewModel : ObservableObject
         _localization = localization;
         _manager = ctx.Get<IPluginManager>();
         _picker = new WindowsPackagePicker(shell);
+        ShowDetails = ctx.Config.Get(ShowDetailsKey, false);
         Refresh();
     }
 
-    public ObservableCollection<PluginCardViewModel> Cards { get; } = [];
+    public ObservableCollection<BundleCardViewModel> Cards { get; } = [];
 
     [ObservableProperty]
     public partial bool ShowRestartBar { get; set; }
 
     [ObservableProperty]
     public partial string RestartBarText { get; set; } = string.Empty;
+
+    /// <summary>Shows each card's plugins and the install-from-file buttons; remembered in the config.</summary>
+    [ObservableProperty]
+    public partial bool ShowDetails { get; set; }
+
+    partial void OnShowDetailsChanged(bool value) => _ctx.Config.Set(ShowDetailsKey, value);
 
     /// <summary>Coalesces refreshes and runs them after the current kernel operation.</summary>
     public void ScheduleRefresh()
@@ -97,23 +106,24 @@ internal sealed partial class PluginsSectionViewModel : ObservableObject
     {
         var infos = _manager.Plugins;
         var language = _localization.CurrentLanguage;
-        foreach (var info in infos)
+        var bundles = PluginBundles.Group(infos, b => BundleCardViewModel.NameOf(b, language));
+        foreach (var bundle in bundles)
         {
-            if (!_cards.TryGetValue(info.Manifest.Id, out var card))
+            if (!_cards.TryGetValue(bundle.Key, out var card))
             {
-                card = new PluginCardViewModel(info.Manifest.Id, Toggle, RemoveAsync, UndoAsync);
-                _cards[info.Manifest.Id] = card;
+                card = new BundleCardViewModel(bundle.Key, Toggle, RemoveAsync, UndoAsync);
+                _cards[bundle.Key] = card;
             }
 
-            card.Update(info, language);
+            card.Update(bundle, language);
         }
 
-        foreach (var id in _cards.Keys.Except(infos.Select(i => i.Manifest.Id)).ToList())
+        foreach (var key in _cards.Keys.Except(bundles.Select(b => b.Key)).ToList())
         {
-            _cards.Remove(id);
+            _cards.Remove(key);
         }
 
-        var sorted = _cards.Values.OrderBy(c => c.Name, StringComparer.CurrentCultureIgnoreCase).ThenBy(c => c.Id, StringComparer.Ordinal).ToList();
+        var sorted = bundles.Select(b => _cards[b.Key]).ToList();
         for (var i = Cards.Count - 1; i >= 0; i--)
         {
             if (!sorted.Contains(Cards[i]))
@@ -147,16 +157,20 @@ internal sealed partial class PluginsSectionViewModel : ObservableObject
         RestartBarText = key is null ? string.Empty : Loc.Get(key);
     }
 
-    private void Toggle(string id, bool enabled)
+    private void Toggle(BundleCardViewModel card, bool enabled)
     {
-        try
+        foreach (var id in card.ToggleIds)
         {
-            _manager.SetEnabled(id, enabled);
-        }
-        catch (Exception ex)
-        {
-            _ctx.Log.Warn($"SetEnabled('{id}', {enabled}) failed.", ex);
-            _shell.Notify(Loc.Format("Settings.Plugins.ToggleFailed", ex.Message), NotifySeverity.Error);
+            try
+            {
+                _manager.SetEnabled(id, enabled);
+            }
+            catch (Exception ex)
+            {
+                _ctx.Log.Warn($"SetEnabled('{id}', {enabled}) failed.", ex);
+                _shell.Notify(Loc.Format("Settings.Plugins.ToggleFailed", card.Name), NotifySeverity.Error);
+                break;
+            }
         }
 
         ScheduleRefresh();
@@ -187,7 +201,7 @@ internal sealed partial class PluginsSectionViewModel : ObservableObject
 
             var manifest = package.Manifest;
             var language = _localization.CurrentLanguage;
-            var name = PluginCardViewModel.Pick(manifest.Name, language) ?? manifest.Id;
+            var name = BundleCardViewModel.Pick(manifest.Name, language) ?? manifest.Id;
             var confirmed = await _shell.ConfirmAsync(
                 Loc.Get("Settings.Plugins.Install.ConfirmTitle"),
                 BuildConfirmMessage(name, manifest, package.InstalledVersion),
@@ -238,35 +252,38 @@ internal sealed partial class PluginsSectionViewModel : ObservableObject
     private Task ShowInstallErrorAsync(PluginInstallError code) =>
         _shell.ShowMessageAsync(Loc.Get("Settings.Plugins.Install.FailedTitle"), Loc.Get(PluginInstallMessages.KeyFor(code)));
 
-    private async Task RemoveAsync(string id)
+    private async Task RemoveAsync(BundleCardViewModel card)
     {
-        var name = _cards.TryGetValue(id, out var card) ? card.Name : id;
         var confirmed = await _shell.ConfirmAsync(
             Loc.Get("Settings.Plugins.Remove.ConfirmTitle"),
-            Loc.Format("Settings.Plugins.Remove.ConfirmMessage", name),
+            Loc.Format("Settings.Plugins.Remove.ConfirmMessage", card.Name),
             Loc.Get("Settings.Plugins.Remove"));
         if (confirmed)
         {
-            Change(() => _manager.Uninstall(id), $"Uninstall('{id}')");
+            Change(card, card.RemovableIds, _manager.Uninstall, "Uninstall");
         }
     }
 
-    private Task UndoAsync(string id)
+    private Task UndoAsync(BundleCardViewModel card)
     {
-        Change(() => _manager.UndoUninstall(id), $"UndoUninstall('{id}')");
+        Change(card, card.PendingIds, _manager.UndoUninstall, "UndoUninstall");
         return Task.CompletedTask;
     }
 
-    private void Change(Action action, string description)
+    private void Change(BundleCardViewModel card, IReadOnlyList<string> ids, Action<string> action, string description)
     {
-        try
+        foreach (var id in ids)
         {
-            action();
-        }
-        catch (Exception ex)
-        {
-            _ctx.Log.Warn($"{description} failed.", ex);
-            _shell.Notify(Loc.Format("Settings.Plugins.ToggleFailed", ex.Message), NotifySeverity.Error);
+            try
+            {
+                action(id);
+            }
+            catch (Exception ex)
+            {
+                _ctx.Log.Warn($"{description}('{id}') failed.", ex);
+                _shell.Notify(Loc.Format("Settings.Plugins.ToggleFailed", card.Name), NotifySeverity.Error);
+                break;
+            }
         }
 
         Refresh();
@@ -291,103 +308,5 @@ internal sealed partial class PluginsSectionViewModel : ObservableObject
         }
 
         _ctx.Environment.RequestShutdown();
-    }
-}
-
-/// <summary>One plugin card.</summary>
-internal sealed class PluginCardViewModel : ObservableObject
-{
-    private readonly Action<string, bool> _toggle;
-    private bool _isEnabled;
-
-    public PluginCardViewModel(string id, Action<string, bool> toggle, Func<string, Task>? remove = null, Func<string, Task>? undo = null)
-    {
-        Id = id;
-        Name = id;
-        _toggle = toggle;
-        RemoveCommand = new AsyncRelayCommand(() => remove?.Invoke(Id) ?? Task.CompletedTask);
-        UndoCommand = new AsyncRelayCommand(() => undo?.Invoke(Id) ?? Task.CompletedTask);
-    }
-
-    public string Id { get; }
-
-    public string Name { get; private set; }
-
-    public string Description { get; private set; } = string.Empty;
-
-    public string VersionText { get; private set; } = string.Empty;
-
-    public string AuthorText { get; private set; } = string.Empty;
-
-    public bool HasAuthor => AuthorText.Length > 0;
-
-    public string StateText { get; private set; } = string.Empty;
-
-    public PluginState State { get; private set; }
-
-    public bool CanToggle { get; private set; }
-
-    public string ToggleToolTip { get; private set; } = string.Empty;
-
-    /// <summary>Shipped with the app: shows the "Built-in" label.</summary>
-    public bool IsBuiltIn { get; private set; }
-
-    /// <summary>User-installed and not yet queued for removal: shows "Remove".</summary>
-    public bool CanRemove { get; private set; }
-
-    /// <summary>Queued for removal: shows "Undo".</summary>
-    public bool CanUndo { get; private set; }
-
-    public ICommand RemoveCommand { get; }
-
-    public ICommand UndoCommand { get; }
-
-    public bool IsEnabled
-    {
-        get => _isEnabled;
-        set
-        {
-            if (value != _isEnabled)
-            {
-                _isEnabled = value;
-                OnPropertyChanged();
-                _toggle(Id, value);
-            }
-        }
-    }
-
-    public void Update(PluginInfo info, string language)
-    {
-        var manifest = info.Manifest;
-        Name = Pick(manifest.Name, language) ?? manifest.Id;
-        Description = Pick(manifest.Description, language) ?? string.Empty;
-        VersionText = Loc.Format("Settings.Plugins.Version", manifest.Version);
-        AuthorText = string.IsNullOrWhiteSpace(manifest.Author) ? string.Empty : Loc.Format("Settings.Plugins.Author", manifest.Author);
-        State = info.State;
-        StateText = info.State switch
-        {
-            PluginState.Active => Loc.Get("Settings.Plugins.State.Active"),
-            PluginState.Disabled => Loc.Get("Settings.Plugins.State.Disabled"),
-            PluginState.Waiting => Loc.Format("Settings.Plugins.State.Waiting", string.Join(", ", info.MissingServices)),
-            PluginState.Failed => Loc.Format("Settings.Plugins.State.Failed", info.Error),
-            _ => Loc.Get("Settings.Plugins.State.PendingRemoval"),
-        };
-        IsBuiltIn = info.IsBuiltIn;
-        CanRemove = !info.IsBuiltIn && info.State != PluginState.PendingRemoval;
-        CanUndo = info.State == PluginState.PendingRemoval;
-        CanToggle = !manifest.Essential && info.State != PluginState.PendingRemoval;
-        ToggleToolTip = manifest.Essential ? Loc.Get("Settings.Plugins.Essential") : Loc.Get("Settings.Plugins.Toggle");
-        _isEnabled = manifest.Essential || info.IsEnabled;
-        OnPropertyChanged(string.Empty);
-    }
-
-    internal static string? Pick(IReadOnlyDictionary<string, string> texts, string language)
-    {
-        if (texts.TryGetValue(language, out var text) || texts.TryGetValue("en", out text))
-        {
-            return text;
-        }
-
-        return texts.Values.FirstOrDefault();
     }
 }

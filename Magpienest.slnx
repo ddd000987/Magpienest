@@ -2,6 +2,7 @@
   <Folder Name="/plugins/">
     <Project Path="src/plugins/Magpienest.Plugins.About/Magpienest.Plugins.About.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.Archives/Magpienest.Plugins.Archives.csproj" />
+    <Project Path="src/plugins/Magpienest.Plugins.Catalogue/Magpienest.Plugins.Catalogue.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.Comic/Magpienest.Plugins.Comic.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.DevTools/Magpienest.Plugins.DevTools.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.Game/Magpienest.Plugins.Game.csproj" />
@@ -30,6 +31,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/Magpienest.Core.Tests/Magpienest.Core.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.Archives.Tests/Magpienest.Plugins.Archives.Tests.csproj" />
+    <Project Path="tests/Magpienest.Plugins.Catalogue.Tests/Magpienest.Plugins.Catalogue.Tests.csproj" />
     <Project Path="tests/Magpienest.Localization.Tests/Magpienest.Localization.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.Comic.Tests/Magpienest.Plugins.Comic.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.Game.Tests/Magpienest.Plugins.Game.Tests.csproj" />
