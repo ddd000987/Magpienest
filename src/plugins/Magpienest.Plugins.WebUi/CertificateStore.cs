@@ -19,8 +19,8 @@ internal enum HttpsMode
 }
 
 /// <summary>
-/// Certificates for HTTPS (phase 7 "HTTPS"). The automatic one is <c>cert.pfx</c> in the plugin's data folder with a
-/// random password encrypted by DPAPI. Keys are loaded into the user key set: Schannel cannot use ephemeral keys (T7.1).
+/// Certificates for HTTPS. The automatic one is <c>cert.pfx</c> in the plugin's data folder with a
+/// random password encrypted by DPAPI. Keys are loaded into the user key set: Schannel cannot use ephemeral keys.
 /// </summary>
 internal sealed class CertificateStore(string dataDirectory, WebUiSettings settings)
 {

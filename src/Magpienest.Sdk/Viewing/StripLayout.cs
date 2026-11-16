@@ -17,7 +17,7 @@ public readonly record struct StripAnchor(int Index, double Fraction);
 /// <summary>
 /// Pages placed edge to edge along one axis (lives in the SDK so every front end lays strips out the same
 /// way). Lengths and offsets are in units of the cross size and measured from the reading start (page 0 at 0).
-/// Not thread-safe; one instance per open strip. Specified in phase-2b T2.7.
+/// Not thread-safe; one instance per open strip.
 /// </summary>
 public sealed class StripLayout
 {

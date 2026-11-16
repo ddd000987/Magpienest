@@ -13,7 +13,7 @@ namespace Magpienest.Plugins.Catalogue.Tests;
 internal sealed class TestServer : IAsyncDisposable
 {
     private readonly TcpListener _listener = new(IPAddress.Loopback, 0);
-    private readonly ConcurrentDictionary<string, Func<Response>> _routes = new(StringComparer.Ordinal);
+    private readonly ConcurrentDictionary<string, Func<Response?>> _routes = new(StringComparer.Ordinal);
     private readonly CancellationTokenSource _stop = new();
     private readonly Task _loop;
 
@@ -43,6 +43,9 @@ internal sealed class TestServer : IAsyncDisposable
 
     public void Redirect(string path, string location, int status = 302) =>
         _routes[path] = () => new Response(status, [], location, null);
+
+    /// <summary>Accepts the request for <paramref name="path"/> and never answers.</summary>
+    public void Silent(string path) => _routes[path] = () => null;
 
     public async ValueTask DisposeAsync()
     {
@@ -92,6 +95,12 @@ internal sealed class TestServer : IAsyncDisposable
                 Requests.Enqueue(new Request(path, headers));
 
                 var response = _routes.TryGetValue(path, out var route) ? route() : new Response(404, [], null, null);
+                if (response is null)
+                {
+                    await Task.Delay(Timeout.Infinite, _stop.Token).ContinueWith(_ => { }, TaskScheduler.Default);
+                    return;
+                }
+
                 var text = new StringBuilder();
                 text.Append($"HTTP/1.1 {response.Status} X\r\n");
                 if (response.ContentLength != -1)
@@ -156,7 +165,23 @@ internal sealed class FakePluginManager : IPluginManager
 
     public void SetEnabled(string pluginId, bool enabled) => throw new NotSupportedException();
 
-    public Task<PluginPackageInfo> InspectAsync(string zipOrFolderPath) => throw new NotSupportedException();
+    /// <summary>Package path → inspection; by default valid, with id and version read from the file name.</summary>
+    public Func<string, PluginPackageInfo>? Inspection { get; set; }
+
+    public List<string> InspectCalls { get; } = [];
+
+    public Task<PluginPackageInfo> InspectAsync(string zipOrFolderPath)
+    {
+        InspectCalls.Add(zipOrFolderPath);
+        return Task.FromResult(Inspection?.Invoke(zipOrFolderPath)
+                               ?? new PluginPackageInfo(true, new PluginManifest { Id = IdOf(zipOrFolderPath), Version = VersionOf(zipOrFolderPath), Assembly = "T.dll" }, null, null));
+    }
+
+    public static string VersionOf(string path)
+    {
+        var name = Path.GetFileNameWithoutExtension(path);
+        return name[(name.LastIndexOf('-') + 1)..];
+    }
 
     public Task<PluginInstallResult> InstallAsync(string zipOrFolderPath)
     {

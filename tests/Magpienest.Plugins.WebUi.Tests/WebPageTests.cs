@@ -6,7 +6,7 @@ using Magpienest.Sdk.Shell;
 
 namespace Magpienest.Plugins.WebUi.Tests;
 
-/// <summary>T7.6: the "Web" page follows its setting through a removable scope.</summary>
+/// <summary>The "Web" page follows its setting through a removable scope.</summary>
 public sealed class WebPageTests
 {
     [Fact]

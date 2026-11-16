@@ -2,7 +2,7 @@ using Magpienest.Sdk;
 
 namespace Magpienest.Core.Tests;
 
-/// <summary>The 22 lifecycle cases of phase-0 T0.3, one test each.</summary>
+/// <summary>The 22 lifecycle cases, one test each.</summary>
 public sealed class KernelLifecycleTests
 {
     [Fact]

@@ -8,7 +8,7 @@ using Magpienest.Sdk.Shell;
 namespace Magpienest.Plugins.Catalogue;
 
 /// <summary>
-/// The store's state and actions for the store page (T8.2): the fetched catalogue, its last error, and installing
+/// The store's state and actions for the store page: the fetched catalogue, its last error, and installing
 /// a bundle with one confirmation. Runs on the UI thread; network and file work run in the background.
 /// </summary>
 internal sealed class StoreService : IDisposable
@@ -19,10 +19,10 @@ internal sealed class StoreService : IDisposable
     /// <summary>Config key: fetch the catalogue once at every start (default off).</summary>
     public const string CheckAtStartupKey = "checkUpdatesAtStartup";
 
-    /// <summary>Filled in once the user has created the store repository (phase 8 T8.4); empty = not configured.</summary>
-    public const string DefaultRepository = "";
+    /// <summary>The official store repository (owner/name); a config value under <see cref="RepositoryKey"/> overrides it.</summary>
+    public const string DefaultRepository = "ddd000987/Magpienest-Store";
 
-    /// <summary>Id of the store's Settings section (T8.2); it carries the update dot.</summary>
+    /// <summary>Id of the store's Settings section; it carries the update dot.</summary>
     public const string SectionId = "store";
 
     private readonly IPluginContext _ctx;

@@ -3,7 +3,7 @@ using Magpienest.Plugins.Catalogue;
 
 namespace Magpienest.Plugins.Catalogue.Tests;
 
-/// <summary>What the store page shows (phase 8 T8.2).</summary>
+/// <summary>What the store page shows.</summary>
 public sealed class StorePageTests
 {
     private static readonly string LangDirectory = Path.Combine(FindRepoRoot(), "src", "plugins", "Magpienest.Plugins.Catalogue", "lang");

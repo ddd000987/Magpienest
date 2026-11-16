@@ -22,7 +22,7 @@ internal enum StoreCardAction
     Cancel,
 }
 
-/// <summary>What the store page shows (phase 8 T8.2). Pure logic, no UI.</summary>
+/// <summary>What the store page shows. Pure logic, no UI.</summary>
 internal static class StoreCards
 {
     /// <summary>The button of a card.</summary>

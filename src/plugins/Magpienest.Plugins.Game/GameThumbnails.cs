@@ -49,7 +49,7 @@ internal static class GameCard
     /// <summary>Card height.</summary>
     public const int Height = 384;
 
-    // Fixed neutral grey: the card is drawn into a bitmap, outside any theme (accepted deviation from "theme brushes only").
+    // Fixed neutral grey: the card is drawn into a bitmap, outside any theme (an exception to the theme-brushes-only rule).
     private const byte Grey = 0x3A;
 
     /// <summary>Puts the icon, at its natural size, in the middle of the card. Pure pixel work, safe on any thread.</summary>

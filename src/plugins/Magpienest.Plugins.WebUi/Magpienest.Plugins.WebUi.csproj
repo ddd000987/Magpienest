@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PluginId>magpienest.webui</PluginId>
-    <!-- Not built in: packed as Magpienest.WebUi-<version>.zip and installed by the user (phase 7). -->
+    <!-- Not built in: packed as Magpienest.WebUi-<version>.zip and installed by the user. -->
     <ExternalPlugin>true</ExternalPlugin>
   </PropertyGroup>
   <Import Project="$(RepoRoot)build\Plugin.props" />

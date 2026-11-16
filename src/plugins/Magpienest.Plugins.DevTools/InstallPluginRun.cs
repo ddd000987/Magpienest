@@ -4,7 +4,7 @@ using Magpienest.Sdk;
 namespace Magpienest.Plugins.DevTools;
 
 /// <summary>
-/// <c>--install-plugin &lt;zip&gt;</c> (repeatable, phase 8 T8.3): installs each package with
+/// <c>--install-plugin &lt;zip&gt;</c> (repeatable): installs each package with
 /// <see cref="IPluginManager.InstallAsync"/> without a dialog, in the order given, then exits with 0 when every
 /// install succeeded and 1 otherwise. Used by the publish script to test the store packages. It refuses the
 /// user's own data folder, so it only runs with an explicit <c>--data-dir</c> (or <c>MAGPIENEST_DATA_DIR</c>).

@@ -16,7 +16,7 @@ internal enum AddressClass
     Internet,
 }
 
-/// <summary>Classifies the socket's remote address (phase 7 "Who can connect"). Headers are never consulted.</summary>
+/// <summary>Classifies the socket's remote address. Headers are never consulted.</summary>
 internal static class AddressClassifier
 {
     /// <summary>Classifies an address.</summary>

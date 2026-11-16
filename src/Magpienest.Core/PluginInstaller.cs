@@ -9,7 +9,7 @@ namespace Magpienest.Core;
 internal sealed record PreparedInstall(PluginManifest Manifest, string Folder, bool Staged);
 
 /// <summary>
-/// File-system side of installing and removing plugins (phase-5 T5.1). Everything stays inside
+/// File-system side of installing and removing plugins. Everything stays inside
 /// &lt;data&gt;/plugins. None of these methods touch kernel state, so they may run on any thread.
 /// </summary>
 internal static class PluginInstaller

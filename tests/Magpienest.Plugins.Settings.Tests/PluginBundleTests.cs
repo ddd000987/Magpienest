@@ -5,7 +5,7 @@ using Magpienest.Sdk;
 
 namespace Magpienest.Plugins.Settings.Tests;
 
-/// <summary>T8.0: Settings → Plugins shows one card per bundle.</summary>
+/// <summary>Settings → Plugins shows one card per bundle.</summary>
 public sealed class PluginBundleTests
 {
     private static readonly string Root = FindRepoRoot();

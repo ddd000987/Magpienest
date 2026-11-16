@@ -9,7 +9,7 @@ using Magpienest.Plugins.WebUi;
 namespace Magpienest.Plugins.WebUi.Tests;
 
 /// <summary>
-/// T7.3 over a real server: requests come from loopback, and the classifier is replaced to make them count as home
+/// Remote access over a real server: requests come from loopback, and the classifier is replaced to make them count as home
 /// network or internet.
 /// </summary>
 public sealed class RemoteAccessTests : IAsyncDisposable

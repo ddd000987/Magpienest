@@ -77,7 +77,7 @@ internal sealed class GameLibraryIndex
 }
 
 /// <summary>
-/// Finds games in a folder of games (T4.2): each sub-folder is a candidate, its executables are filtered
+/// Finds games in a folder of games: each sub-folder is a candidate, its executables are filtered
 /// and scored, the best one is the default. Pure and synchronous; call it on a background thread.
 /// </summary>
 internal sealed class GameFolderScanner(Func<string, string?>? productName = null)

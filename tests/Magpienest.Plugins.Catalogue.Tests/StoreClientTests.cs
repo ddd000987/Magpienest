@@ -174,6 +174,17 @@ public sealed class StoreClientTests : IAsyncLifetime
         Assert.Empty(Directory.GetFiles(_directory));
     }
 
+    [Fact]
+    public async Task ServerThatNeverAnswersIsOfflineAfterTheTimeout()
+    {
+        _server.Silent("/releases/t/a.zip");
+        using var client = new StoreClient(_server.Policy, new Version(0, 3, 0), readTimeout: TimeSpan.FromMilliseconds(300));
+
+        var ex = await Assert.ThrowsAsync<StoreException>(() => client.DownloadAsync(Package(), "1.0.0", _directory, null, TestContext.Current.CancellationToken));
+        Assert.Equal(StoreError.Offline, ex.Code);
+        Assert.Empty(Directory.GetFiles(_directory));
+    }
+
     private CataloguePackage Package() => new("a.b", Zip.Length, new Uri(_server.BaseUrl + "releases/t/a.zip"), Sample.Sha(Zip));
 
     private async Task AssertFailsAsync(CataloguePackage package, StoreError expected)

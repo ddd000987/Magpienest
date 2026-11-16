@@ -13,7 +13,7 @@ namespace Magpienest.Plugins.WebUi;
 internal sealed record WebSession(string Id, string Device, DateTimeOffset FirstSeen, DateTimeOffset LastSeen, string LastAddress);
 
 /// <summary>
-/// Password sessions (phase 7 "Password and sessions"): random cookie values whose SHA-256 is kept in
+/// Password sessions: random cookie values whose SHA-256 is kept in
 /// <c>sessions.json</c>, sliding expiry of 30 days. Thread-safe.
 /// </summary>
 internal sealed class SessionStore

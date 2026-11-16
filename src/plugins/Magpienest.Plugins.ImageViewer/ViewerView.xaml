@@ -6,7 +6,7 @@
              Focusable="True" FocusVisualStyle="{x:Null}" KeyboardNavigation.TabNavigation="Cycle">
   <UserControl.Resources>
     <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
-    <!-- The viewing surface is black in every theme (phase-1 T1.7). -->
+    <!-- The viewing surface is black in every theme. -->
     <SolidColorBrush x:Key="ViewerSurfaceBrush" Color="Black" />
 
     <Style x:Key="Glyph" TargetType="TextBlock">

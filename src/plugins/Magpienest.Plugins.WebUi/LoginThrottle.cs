@@ -1,7 +1,7 @@
 namespace Magpienest.Plugins.WebUi;
 
 /// <summary>
-/// Brute-force limits for the password (phase 7 "Password and sessions"): 5 failures from one address within
+/// Brute-force limits for the password: 5 failures from one address within
 /// 15 minutes refuse that address for 15 minutes; 20 failures in total pause every sign-in for 15 minutes. Thread-safe.
 /// </summary>
 internal sealed class LoginThrottle(TimeProvider clock)

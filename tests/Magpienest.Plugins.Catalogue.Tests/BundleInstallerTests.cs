@@ -89,6 +89,50 @@ public sealed class BundleInstallerTests : IDisposable
     }
 
     [Fact]
+    public async Task EveryPackageIsCheckedBeforeTheFirstIsInstalled()
+    {
+        _manager.Inspection = path => new PluginPackageInfo(true,
+            new PluginManifest { Id = FakePluginManager.IdOf(path) == "m.video" ? "evil.plugin" : FakePluginManager.IdOf(path), Version = "0.2.0", Assembly = "T.dll" },
+            null, null);
+
+        var outcome = await Installer(new FakeDownloader()).InstallAsync(Video, null, TestContext.Current.CancellationToken);
+
+        Assert.False(outcome.Success);
+        Assert.Equal(StoreError.InstallFailed, outcome.Error);
+        Assert.Equal(PluginInstallError.ManifestInvalid, outcome.InstallError);
+        Assert.Equal("m.video", outcome.PackageId);
+        Assert.Equal(2, _manager.InspectCalls.Count);
+        Assert.Empty(_manager.InstallCalls);
+        Assert.Empty(Directory.GetFiles(_directory));
+    }
+
+    [Fact]
+    public async Task PackageTheKernelWouldRefuseInstallsNothing()
+    {
+        _manager.Inspection = path => FakePluginManager.IdOf(path) == "m.video"
+            ? new PluginPackageInfo(false, null, null, "unsafe", PluginInstallError.UnsafePath)
+            : new PluginPackageInfo(true, new PluginManifest { Id = "m.engine", Version = "0.2.0", Assembly = "T.dll" }, null, null);
+
+        var outcome = await Installer(new FakeDownloader()).InstallAsync(Video, null, TestContext.Current.CancellationToken);
+
+        Assert.False(outcome.Success);
+        Assert.Equal(PluginInstallError.UnsafePath, outcome.InstallError);
+        Assert.Empty(_manager.InstallCalls);
+    }
+
+    [Fact]
+    public async Task PackageWithAnotherVersionInstallsNothing()
+    {
+        _manager.Inspection = path => new PluginPackageInfo(true, new PluginManifest { Id = FakePluginManager.IdOf(path), Version = "0.1.0", Assembly = "T.dll" }, null, null);
+
+        var outcome = await Installer(new FakeDownloader()).InstallAsync(Video, null, TestContext.Current.CancellationToken);
+
+        Assert.False(outcome.Success);
+        Assert.Equal("m.engine", outcome.PackageId);
+        Assert.Empty(_manager.InstallCalls);
+    }
+
+    [Fact]
     public async Task UpdateNeedsARestart()
     {
         _manager.Result = path => new PluginInstallResult(true, FakePluginManager.IdOf(path), RestartRequired: FakePluginManager.IdOf(path) == "m.video", null);

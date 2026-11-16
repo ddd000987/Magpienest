@@ -1,4 +1,4 @@
-// The sign-in page for other devices (phase 7 T7.3). Texts come from /api/strings, the look from /api/appearance.
+// The sign-in page for other devices. Texts come from /api/strings, the look from /api/appearance.
 
 let strings = {};
 

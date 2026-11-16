@@ -17,7 +17,7 @@ internal sealed class PackageException(PluginInstallError code, string message, 
 internal sealed record PackageEntry(string Path, long Size, bool IsDirectory, string Source);
 
 /// <summary>
-/// A validated plugin package (a zip or a folder). <see cref="Open"/> applies every rule of phase-5 T5.1;
+/// A validated plugin package (a zip or a folder). <see cref="Open"/> applies every validation rule;
 /// <see cref="Extract"/> writes the plugin files into an empty folder inside the data folder.
 /// </summary>
 internal sealed class PluginPackage : IDisposable

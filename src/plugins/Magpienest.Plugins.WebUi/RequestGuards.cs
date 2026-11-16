@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Magpienest.Plugins.WebUi;
 
-/// <summary>Pure checks applied to every request (phase 7 "Access and security").</summary>
+/// <summary>Pure checks applied to every request.</summary>
 internal static class RequestGuards
 {
     /// <summary>Creates a new access token: 32 random bytes, base64url without padding.</summary>

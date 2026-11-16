@@ -143,7 +143,7 @@ public readonly record struct PageFrame(int First, int Last);
 
 /// <summary>
 /// Which pages are shown together (lives in the SDK so every front end pairs pages the
-/// same way). Pure functions; algorithm in phase-2 T2.3 "Frame layout".
+/// same way). Pure functions.
 /// </summary>
 public static class FrameLayout
 {

@@ -30,7 +30,7 @@ internal sealed class StopwatchClock : IMonotonicClock
 }
 
 /// <summary>
-/// Follows running games (T4.3). Pure logic: the caller drives it by calling <see cref="PollAsync"/> every
+/// Follows running games. Pure logic: the caller drives it by calling <see cref="PollAsync"/> every
 /// <see cref="PollInterval"/>; processes come from an <see cref="IProcessProbe"/>, time from an
 /// <see cref="IMonotonicClock"/> and the stored play time is written through a callback.
 /// Thread-safe; process inspection and persistence never run while the internal lock is held.

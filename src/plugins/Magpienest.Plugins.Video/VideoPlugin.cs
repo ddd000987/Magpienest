@@ -156,7 +156,7 @@ internal static class VideoFormat
     }
 }
 
-/// <summary>The kind-specific extra JSON (03-data-model §4).</summary>
+/// <summary>The kind-specific extra JSON.</summary>
 internal sealed class VideoExtra
 {
     public int Width { get; set; }

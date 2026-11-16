@@ -15,7 +15,7 @@ using Magpienest.Sdk.Viewing;
 
 namespace Magpienest.Plugins.WebUi.Tests;
 
-/// <summary>The library endpoints (phase 7 T7.4) on a real server, with a fake library and temp files.</summary>
+/// <summary>The library endpoints on a real server, with a fake library and temp files.</summary>
 public sealed class LibraryApiTests : IAsyncLifetime
 {
     private const string Token = "test-token-0123456789";
@@ -443,7 +443,7 @@ public sealed class LibraryApiTests : IAsyncLifetime
             ? string.Join(",", values)
             : "";
 
-    /// <summary>The status rule of 03-data-model §4.</summary>
+    /// <summary>The automatic status changes for progress reported by the web page.</summary>
     [Theory]
     [InlineData("comic", ItemStatus.None, false, ItemStatus.InProgress)]
     [InlineData("comic", ItemStatus.None, true, ItemStatus.Completed)]

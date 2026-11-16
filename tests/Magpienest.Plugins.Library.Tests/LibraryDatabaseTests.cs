@@ -4,7 +4,7 @@ using Microsoft.Data.Sqlite;
 
 namespace Magpienest.Plugins.Library.Tests;
 
-/// <summary>T1.1: schema, items, tags, queries, sources.</summary>
+/// <summary>Schema, items, tags, queries, sources.</summary>
 public sealed class LibraryDatabaseTests : IDisposable
 {
     private const string Kind = "illustration";

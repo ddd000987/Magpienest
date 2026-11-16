@@ -8,7 +8,7 @@ using Magpienest.Sdk;
 
 namespace Magpienest.Plugins.WebUi.Tests;
 
-/// <summary>A real server on a free loopback port (phase 7 T7.2 tests).</summary>
+/// <summary>A real server on a free loopback port.</summary>
 public sealed class ServerTests : IAsyncLifetime
 {
     private const string Token = "test-token-0123456789";

@@ -66,7 +66,7 @@ internal sealed partial class ViewerViewModel : ObservableObject
     private int _pendingStep;  // a step requested before the current frame's page sizes were known
     private bool _closed;
 
-    // Strip mode (phase-2b T2.8).
+    // Strip mode.
     private readonly Dictionary<int, (int Width, int Height)> _sizes = []; // known oriented pixel sizes, per book
     private readonly HashSet<int> _infoInflight = [];
     private readonly SemaphoreSlim _infoSlots = new(2, 2);

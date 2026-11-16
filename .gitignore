@@ -5,3 +5,9 @@ obj/
 *.user
 *.suo
 .claude/worktrees/
+TestResults/
+*.trx
+
+# Development plan and AI instructions: kept locally, not published
+/docs/plan/
+/CLAUDE.md

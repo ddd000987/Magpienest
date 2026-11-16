@@ -3,7 +3,7 @@ using Microsoft.Data.Sqlite;
 namespace Magpienest.Plugins.Library;
 
 /// <summary>
-/// The single entry point to <c>library.db</c> (03-data-model §2): pragmas on every connection,
+/// The single entry point to <c>library.db</c>: pragmas on every connection,
 /// one gate for writers, readers on their own connections, migrations by <c>PRAGMA user_version</c>.
 /// </summary>
 internal sealed class LibraryDb : IDisposable

@@ -1,10 +1,11 @@
 # Third-party notices
 
-Magpienest itself is released under the [MIT licence](LICENSE). The release zip also contains
-the third-party components below. Each licence was checked on the package's NuGet page (or in
+Magpienest itself is released under the [MIT licence](LICENSE). The release zip and the plugin store
+packages contain the third-party components below. Each licence was checked on the package's NuGet page (or in
 its repository) for the exact version that is shipped.
 
 Test-only packages (xUnit, Microsoft.NET.Test.Sdk) are not part of the release and are not listed.
+Every plugin store package carries a copy of this file and of the Magpienest licence.
 
 | Component | Version | Licence | Where it is used |
 |---|---|---|---|
@@ -16,12 +17,19 @@ Test-only packages (xUnit, Microsoft.NET.Test.Sdk) are not part of the release a
 | [SQLite](https://sqlite.org/) (native `e_sqlite3` builds from the NuGet package `SQLite` 3.53.4) | 3.53.4 | Public domain | Library database and thumbnail cache |
 | [SharpCompress](https://github.com/adamhathcock/sharpcompress) | 0.50.9 | MIT | Archives plugin (zip, rar, 7z) |
 | [VirtualizingWrapPanel](https://github.com/sbaeumlisberger/VirtualizingWrapPanel) | 2.5.4 | MIT | Library browser grid |
+
+### Videos (plugin store package `magpienest.mediaengine.libvlc-<version>.zip`)
+
+These ship only inside the media engine package of the Videos feature, not in the main zip.
+
+| Component | Version | Licence | Where it is used |
+|---|---|---|---|
 | [LibVLCSharp](https://code.videolan.org/videolan/LibVLCSharp) and LibVLCSharp.WPF | 3.9.4 | LGPL-2.1-or-later | Media engine plugin (.NET bindings for LibVLC) |
 | [LibVLC](https://www.videolan.org/vlc/libvlc.html), from the NuGet package [VideoLAN.LibVLC.Windows](https://code.videolan.org/videolan/libvlc-nuget) | 3.0.21 | LGPL-2.1-or-later | Media engine plugin (video and audio playback) |
 
-### Web interface plugin (separate package `Magpienest.WebUi-<version>.zip`)
+### Web interface (plugin store package `magpienest.webui-<version>.zip`)
 
-These ship only inside the optional web interface package, not in the main zip.
+These ship only inside the web interface package, not in the main zip.
 
 | Component | Version | Licence | Where it is used |
 |---|---|---|---|
@@ -62,11 +70,12 @@ License, version 2.1 or later: <https://www.gnu.org/licenses/old-licenses/lgpl-2
 
 - LibVLC is **dynamically linked**. It is not compiled into any Magpienest program file. It is a set
   of separate DLL files (`libvlc.dll`, `libvlccore.dll`) and plugin DLLs in
-  `plugins\magpienest.mediaengine.libvlc\libvlc\win-x64\`, loaded at run time through LibVLCSharp.
+  `libvlc\win-x64\` of the installed media engine plugin (in a portable copy:
+  `data\plugins\magpienest.mediaengine.libvlc\libvlc\win-x64\`), loaded at run time through LibVLCSharp.
 - **You may replace the LibVLC files.** Put a compatible LibVLC 3.0.x build (the `libvlc.dll`,
   `libvlccore.dll`, `plugins` folder and the other files of a VLC 3.0 Windows x64 build) in that
-  folder and Magpienest will use it. If you only want to turn video playback off, switch the
-  "LibVLC media engine" plugin off in Settings, Plugins.
+  folder and Magpienest will use it. If you only want to turn video playback off, switch
+  "Videos" off in Settings, Plugins.
 - **Source code.** The source of the shipped LibVLC version (VLC 3.0.21) is available from
   VideoLAN:
   - release archive: <https://download.videolan.org/pub/videolan/vlc/3.0.21/vlc-3.0.21.tar.xz>

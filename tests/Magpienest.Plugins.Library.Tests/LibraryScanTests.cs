@@ -2,7 +2,7 @@ using Magpienest.Sdk.Library;
 
 namespace Magpienest.Plugins.Library.Tests;
 
-/// <summary>T1.2: kinds, scanning (03-data-model §5) and LibraryChanged events.</summary>
+/// <summary>Kinds, scanning and LibraryChanged events.</summary>
 public sealed class LibraryScanTests : IDisposable
 {
     private const string Kind = "illustration";

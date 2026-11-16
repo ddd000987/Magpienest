@@ -19,7 +19,7 @@ internal sealed record BundleInstallOutcome(
     string? Message = null);
 
 /// <summary>
-/// Installs one bundle (phase 8 T8.1): downloads and verifies every package first, then installs them in
+/// Installs one bundle: downloads and verifies every package first, then installs them in
 /// catalogue order with <see cref="IPluginManager.InstallAsync"/>. When one is rejected, the packages this run
 /// newly installed are uninstalled again. Every downloaded zip is deleted afterwards, whatever the result.
 /// Call on the UI thread; downloads run in the background.
@@ -78,6 +78,34 @@ internal sealed class BundleInstaller(IPluginManager manager, IPackageDownloader
 
     private async Task<BundleInstallOutcome> InstallDownloadedAsync(CatalogueBundle bundle, IReadOnlyList<string> files)
     {
+        // Check every package before the first one is installed, so a package that is not what the catalogue
+        // says never gets to run, not even until the rollback.
+        for (var i = 0; i < bundle.Packages.Count; i++)
+        {
+            var package = bundle.Packages[i];
+            var info = await manager.InspectAsync(files[i]);
+            var code = PluginInstallError.ManifestInvalid;
+            string? error = null;
+            if (!info.IsValid)
+            {
+                (code, error) = (info.ErrorCode, info.Error ?? "The package is not valid.");
+            }
+            else if (info.Manifest?.Id != package.Id)
+            {
+                error = $"The package holds '{info.Manifest?.Id}', not '{package.Id}'.";
+            }
+            else if (info.Manifest.Version != bundle.Version)
+            {
+                error = $"The package holds version {info.Manifest.Version}, not {bundle.Version}.";
+            }
+
+            if (error is not null)
+            {
+                log.Warn($"Package '{package.Id}' of bundle '{bundle.Id}' was refused before installing: {error}");
+                return new BundleInstallOutcome(false, false, StoreError.InstallFailed, code, package.Id, error);
+            }
+        }
+
         // Only plugins that did not exist before can be undone; an update of an existing one is staged.
         var before = manager.Plugins.Select(p => p.Manifest.Id).ToHashSet(StringComparer.Ordinal);
         var installedNow = new List<string>();

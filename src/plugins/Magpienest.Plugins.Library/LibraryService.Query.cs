@@ -89,7 +89,7 @@ internal sealed partial class LibraryService
         _ => throw new ArgumentOutOfRangeException(nameof(sort), sort, "Not an SQL sort."),
     };
 
-    /// <summary>Builds the WHERE clause (03-data-model §6) and adds its parameters to <paramref name="command"/>.</summary>
+    /// <summary>Builds the WHERE clause and adds its parameters to <paramref name="command"/>.</summary>
     private static string BuildWhere(SqliteCommand command, ItemQuery query)
     {
         var clauses = new List<string> { "kind = $kind" };

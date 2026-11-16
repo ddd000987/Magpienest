@@ -13,7 +13,7 @@ namespace Magpienest.Plugins.Settings;
 /// <param name="State">The plugin's state, for the badge colour.</param>
 internal sealed record BundleMemberRow(string Name, string VersionText, string StateText, PluginState State);
 
-/// <summary>One bundle card (T8.0): what <see cref="PluginBundle"/> decided, as texts and switches.</summary>
+/// <summary>One bundle card: what <see cref="PluginBundle"/> decided, as texts and switches.</summary>
 internal sealed class BundleCardViewModel : ObservableObject
 {
     private readonly Action<BundleCardViewModel, bool> _toggle;

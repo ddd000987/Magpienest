@@ -4,8 +4,8 @@ using System.Text.RegularExpressions;
 namespace Magpienest.Plugins.Catalogue;
 
 /// <summary>
-/// Where the catalogue is read from and which addresses downloads may use (phase 8, "Store repository" and
-/// "Download rules"). Production policies come from <see cref="ForRepository"/>; tests build one for 127.0.0.1.
+/// Where the catalogue is read from and which addresses downloads may use. Production policies come from
+/// <see cref="ForRepository"/>; tests build one for 127.0.0.1.
 /// </summary>
 /// <param name="CatalogueUrl">Address of catalog.json.</param>
 /// <param name="PackagePrefix">Every package url must start with this (compared case-insensitively).</param>

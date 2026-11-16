@@ -10,7 +10,7 @@ using Magpienest.Sdk.Thumbnails;
 namespace Magpienest.Plugins.WebUi;
 
 /// <summary>
-/// The web interface (phase 7): serves the library to a browser. Installed separately; the desktop interface never
+/// The web interface: serves the library to a browser. Installed separately; the desktop interface never
 /// depends on it.
 /// </summary>
 [Requires(typeof(IShellService), typeof(ISettingsService), typeof(ILibraryService), typeof(IThumbnailService),

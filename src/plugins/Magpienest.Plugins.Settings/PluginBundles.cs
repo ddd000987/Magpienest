@@ -2,7 +2,7 @@ using Magpienest.Sdk;
 
 namespace Magpienest.Plugins.Settings;
 
-/// <summary>What a bundle card shows as its state (T8.0).</summary>
+/// <summary>What a bundle card shows as its state.</summary>
 internal enum BundleState
 {
     /// <summary>Every member that is not being removed is running.</summary>

@@ -6,7 +6,7 @@ using Magpienest.Sdk.Localization;
 
 namespace Magpienest.Plugins.Localization;
 
-/// <summary>Language tables per origin (plugin id, folder or "user"), merged into one view (architecture §10).</summary>
+/// <summary>Language tables per origin (plugin id, folder or "user"), merged into one view.</summary>
 internal sealed class LocalizationService : ILocalizationService
 {
     internal const string UserOrigin = "user";

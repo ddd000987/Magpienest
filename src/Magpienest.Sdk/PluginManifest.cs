@@ -55,7 +55,7 @@ public enum PluginState
     /// <summary>Loading or activation failed; sticky until disabled and re-enabled.</summary>
     Failed,
 
-    /// <summary>Will be removed on the next start (Phase 5).</summary>
+    /// <summary>Will be removed on the next start.</summary>
     PendingRemoval,
 }
 

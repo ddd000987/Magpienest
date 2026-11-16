@@ -7,7 +7,7 @@ using Magpienest.Sdk;
 
 namespace Magpienest.Core.Tests;
 
-/// <summary>Phase-5 T5.1: installing, updating and removing plugins from zips and folders, with real assemblies.</summary>
+/// <summary>Installing, updating and removing plugins from zips and folders, with real assemblies.</summary>
 public sealed class PluginInstallTests
 {
     private const string AssemblyFile = "Test.EmittedPlugin.dll";

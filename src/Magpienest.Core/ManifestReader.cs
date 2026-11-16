@@ -4,7 +4,7 @@ using Magpienest.Sdk;
 
 namespace Magpienest.Core;
 
-/// <summary>Parses and validates plugin.json (architecture §5.3).</summary>
+/// <summary>Parses and validates plugin.json.</summary>
 internal static partial class ManifestReader
 {
     /// <summary>Parses a manifest; throws <see cref="InvalidDataException"/> when invalid.</summary>

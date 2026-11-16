@@ -3,7 +3,7 @@ using Magpienest.Sdk;
 
 namespace Magpienest.Core;
 
-/// <summary>config/kernel.json: explicit enable/disable choices and the install / removal queues (architecture §9).</summary>
+/// <summary>config/kernel.json: explicit enable/disable choices and the install / removal queues.</summary>
 internal sealed class KernelStateStore
 {
     private readonly string _path;

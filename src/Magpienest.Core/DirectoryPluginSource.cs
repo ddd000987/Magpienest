@@ -4,7 +4,7 @@ using Magpienest.Sdk;
 
 namespace Magpienest.Core;
 
-/// <summary>Discovers &lt;root&gt;/*/plugin.json (architecture §5.2).</summary>
+/// <summary>Discovers &lt;root&gt;/*/plugin.json.</summary>
 internal sealed class DirectoryPluginSource : IPluginSource
 {
     private readonly string _root;
@@ -111,7 +111,7 @@ internal sealed class DirectoryPluginSource : IPluginSource
 }
 
 /// <summary>
-/// Non-collectible load context with host-first resolution (architecture §6, verified by spike).
+/// Non-collectible load context with host-first resolution.
 /// </summary>
 internal sealed class PluginLoadContext : AssemblyLoadContext
 {

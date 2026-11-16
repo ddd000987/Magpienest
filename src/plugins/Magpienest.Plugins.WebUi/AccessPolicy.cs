@@ -43,7 +43,7 @@ internal enum AccessDecision
 internal sealed record AccessRequest(AccessMode Mode, AddressClass From, bool HostAllowed, bool HasToken, bool HasSession,
                                      bool PasswordSet, bool RequirePasswordAtHome);
 
-/// <summary>The one decision function of phase 7 "How a request is allowed in".</summary>
+/// <summary>The one decision function for how a request is allowed in.</summary>
 internal static class AccessPolicy
 {
     /// <summary>Decides what happens to a request.</summary>

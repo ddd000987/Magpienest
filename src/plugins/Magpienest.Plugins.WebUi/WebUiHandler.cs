@@ -365,7 +365,7 @@ internal sealed class WebUiHandler : IHandler
     internal static IResponse Error(IRequest request, ResponseStatus status, string message) =>
         Json(request, status, new { error = message });
 
-    /// <summary>Headers every response carries (phase 7 "Other rules" 7).</summary>
+    /// <summary>Headers every response carries.</summary>
     internal static IResponseBuilder Secured(IResponseBuilder builder, string cacheControl = "no-store") => builder
         .Header("Cache-Control", cacheControl)
         .Header("X-Content-Type-Options", "nosniff")

@@ -3,7 +3,7 @@ using Magpienest.Plugins.WebUi;
 
 namespace Magpienest.Plugins.WebUi.Tests;
 
-/// <summary>The pure parts of T7.3: access table, address classes, password hashes, throttle, sessions.</summary>
+/// <summary>The pure parts of remote access: access table, address classes, password hashes, throttle, sessions.</summary>
 public sealed class AccessTests : IDisposable
 {
     private readonly string _dir = Path.Combine(Path.GetTempPath(), "mn-webui-access-" + Guid.NewGuid().ToString("N"));

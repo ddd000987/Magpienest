@@ -239,7 +239,7 @@ internal static class Program
         return (dataDirectory, waitPid, passThrough);
     }
 
-    /// <summary>Architecture §8: --data-dir, MAGPIENEST_DATA_DIR, portable.txt, %APPDATA%\Magpienest.</summary>
+    /// <summary>Resolves the data folder: --data-dir, MAGPIENEST_DATA_DIR, portable.txt, %APPDATA%\Magpienest.</summary>
     private static string ResolveDataDirectory(string? argument, string appDirectory)
     {
         if (!string.IsNullOrWhiteSpace(argument))

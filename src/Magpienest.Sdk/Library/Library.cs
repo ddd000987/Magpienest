@@ -54,7 +54,7 @@ public sealed record LibraryItem
     public bool IsFavorite { get; init; }
     /// <summary>Status.</summary>
     public ItemStatus Status { get; init; }
-    /// <summary>Progress position; meaning per kind (03-data-model §4).</summary>
+    /// <summary>Progress position; meaning per kind.</summary>
     public long ProgressPosition { get; init; }
     /// <summary>Progress total; meaning per kind.</summary>
     public long ProgressTotal { get; init; }
@@ -291,7 +291,7 @@ public interface ILibraryService
     /// <param name="sourceId">Source id.</param>
     Task RemoveSourceAsync(long sourceId);
 
-    /// <summary>Scans a source (03-data-model §5).</summary>
+    /// <summary>Scans a source.</summary>
     /// <param name="sourceId">Source id.</param>
     /// <param name="progress">Progress sink.</param>
     /// <param name="ct">Cancellation.</param>

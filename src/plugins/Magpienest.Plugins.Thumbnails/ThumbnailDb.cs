@@ -5,7 +5,7 @@ using Microsoft.Data.Sqlite;
 namespace Magpienest.Plugins.Thumbnails;
 
 /// <summary>
-/// The thumbnail cache file (03-data-model §8). All methods are synchronous and must be called off the UI thread.
+/// The thumbnail cache file. All methods are synchronous and must be called off the UI thread.
 /// Writes are buffered and flushed in one transaction every <c>flushInterval</c> or when <c>flushBatch</c> thumbnails
 /// are waiting; every write (flush, delete, clear) is serialised by one lock; reads open their own connection.
 /// If the file cannot be opened it is deleted and recreated once; if that fails too the cache is disabled

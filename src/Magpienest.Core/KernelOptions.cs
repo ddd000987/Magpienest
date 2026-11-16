@@ -8,7 +8,7 @@ public sealed class KernelOptions
     /// <summary>Folder of the exe; built-in plugins are under &lt;AppDirectory&gt;/plugins.</summary>
     public required string AppDirectory { get; init; }
 
-    /// <summary>Root of all user data (architecture §8).</summary>
+    /// <summary>Root of all user data.</summary>
     public required string DataDirectory { get; init; }
 
     /// <summary>Command-line arguments passed through to plugins.</summary>

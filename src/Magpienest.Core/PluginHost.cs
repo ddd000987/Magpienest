@@ -3,7 +3,7 @@ using Magpienest.Sdk;
 
 namespace Magpienest.Core;
 
-/// <summary>Plugin lifecycle: the algorithms of architecture §4.2. UI thread only.</summary>
+/// <summary>Plugin lifecycle. UI thread only.</summary>
 internal sealed class PluginHost : IPluginManager
 {
     private const int MaxPasses = 1000;

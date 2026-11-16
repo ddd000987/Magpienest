@@ -6,7 +6,7 @@ using Magpienest.Sdk.Shell;
 namespace Magpienest.Plugins.Catalogue;
 
 /// <summary>
-/// Plugin store (phase 8): reads the official catalogue from the store repository and installs bundles from
+/// Plugin store: reads the official catalogue from the store repository and installs bundles from
 /// its releases, on the "Plugin store" page in Settings.
 /// </summary>
 [Requires(typeof(IShellService), typeof(ISettingsService), typeof(ILocalizationService))]

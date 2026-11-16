@@ -12,8 +12,8 @@ using Magpienest.Sdk.Thumbnails;
 namespace Magpienest.Plugins.DevTools;
 
 /// <summary>
-/// <c>--screenshot &lt;dir&gt; [--pages a,b] [--lang code] [--theme light|dark|system]</c> (architecture §14), and
-/// <c>--install-plugin &lt;zip&gt;</c> (phase 8 T8.3, see <see cref="InstallPluginRun"/>; it takes precedence).
+/// <c>--screenshot &lt;dir&gt; [--pages a,b] [--lang code] [--theme light|dark|system]</c>, and
+/// <c>--install-plugin &lt;zip&gt;</c> (see <see cref="InstallPluginRun"/>; it takes precedence).
 /// Does nothing when neither argument is present.
 /// </summary>
 [Requires(typeof(IShellService))]

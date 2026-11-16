@@ -3,7 +3,7 @@ using Magpienest.Sdk.Library;
 namespace Magpienest.Plugins.WebUi;
 
 /// <summary>
-/// The automatic status changes of 03-data-model §4, for progress reported by the web page: automatic changes only
+/// The automatic status changes for progress reported by the web page: automatic changes only
 /// move <c>None → InProgress → Completed</c> and never touch a status the user set to <c>OnHold</c>, <c>Dropped</c>
 /// or <c>Planned</c>.
 /// </summary>

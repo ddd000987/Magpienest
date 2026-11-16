@@ -56,7 +56,7 @@ internal sealed class StoreException(StoreError code, string message, Exception?
 /// <param name="Sha256">Lower-case hex SHA-256 of the zip.</param>
 internal sealed record CataloguePackage(string Id, long Size, Uri Url, string Sha256);
 
-/// <summary>A bundle offered by the store (phase 8 T8.0): plugins installed together.</summary>
+/// <summary>A bundle offered by the store: plugins installed together.</summary>
 internal sealed record CatalogueBundle(
     string Id,
     IReadOnlyDictionary<string, string> Name,
@@ -100,7 +100,7 @@ internal static class Texts
     }
 }
 
-/// <summary>Reads catalog.json (phase 8 T8.1, "Catalogue file").</summary>
+/// <summary>Reads catalog.json.</summary>
 internal static partial class CatalogueParser
 {
     /// <summary>The only schema this version understands.</summary>

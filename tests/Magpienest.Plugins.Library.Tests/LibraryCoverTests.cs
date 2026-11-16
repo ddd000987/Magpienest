@@ -2,7 +2,7 @@ using Magpienest.Sdk.Library;
 
 namespace Magpienest.Plugins.Library.Tests;
 
-/// <summary>03-data-model §7: covers live in the media folder; those are the only files the library deletes.</summary>
+/// <summary>Covers live in the media folder; those are the only files the library deletes.</summary>
 public sealed class LibraryCoverTests : IDisposable
 {
     private const string Kind = "illustration";

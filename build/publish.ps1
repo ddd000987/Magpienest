@@ -7,7 +7,7 @@
   Directory.Build.props is used.
 
 .PARAMETER StoreRepository
-  The store repository as owner/name (phase 8), used for the package addresses in catalog.json.
+  The store repository as owner/name, used for the package addresses in catalog.json.
   When omitted, OWNER/Magpienest-Store is written and a warning is shown.
 
 .PARAMETER PreviousCatalog
@@ -68,7 +68,7 @@ if ($PreviousCatalog) {
     $previous = Get-Content -LiteralPath $PreviousCatalog -Raw -Encoding UTF8 | ConvertFrom-Json
 }
 
-# Store bundles (phase 8 T8.0) and their plugins in install order: a dependency before the plugin that needs it.
+# Store bundles and their plugins in install order: a dependency before the plugin that needs it.
 # Every plugin.json "bundle" must agree with this list; the check is in step 3.
 $storeBundles = [ordered]@{
     'magpienest.imagewindow' = @('magpienest.imagewindow')
@@ -179,7 +179,7 @@ foreach ($doc in 'LICENSE', 'THIRD-PARTY-NOTICES.md', 'README.md', 'README.zh-TW
     Copy-Item -LiteralPath $source -Destination $publishDir -Force
 }
 
-# 5. Store (phase 8 T8.3): one phase-5 package per store plugin (plugin.json at the root), catalog.json and the
+# 5. Store: one package per store plugin (plugin.json at the root), catalog.json and the
 #    store repository's READMEs, all in artifacts\store.
 Write-Host '== 5/7 Store packages and catalogue =='
 Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -192,7 +192,7 @@ foreach ($dir in $storeDir, $storeStage) {
     New-Item -ItemType Directory -Force -Path $dir | Out-Null
 }
 
-# Bundle names and descriptions come from the Settings plugin (T8.0), so nothing is written twice.
+# Bundle names and descriptions come from the Settings plugin, so nothing is written twice.
 $settingsLang = Join-Path $root 'src\plugins\Magpienest.Plugins.Settings\lang'
 $texts = [ordered]@{}
 foreach ($language in 'en', 'zh-TW') {
@@ -235,6 +235,10 @@ foreach ($bundle in $storeBundles.Keys) {
             if (Test-Path -LiteralPath (Join-Path $stage $forbidden)) {
                 throw "$id must not contain $forbidden."
             }
+        }
+        # Licences travel with the package (LibVLC is LGPL and is now distributed only through the store).
+        foreach ($doc in 'LICENSE', 'THIRD-PARTY-NOTICES.md') {
+            Copy-Item -LiteralPath (Join-Path $root $doc) -Destination $stage -Force
         }
         $packagePath = Join-Path $storeDir "$id-$bundleVersion.zip"
         [System.IO.Compression.ZipFile]::CreateFromDirectory($stage, $packagePath, [System.IO.Compression.CompressionLevel]::Optimal, $false)

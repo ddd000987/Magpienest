@@ -27,7 +27,7 @@ internal enum StoreBundleState
 /// <param name="InstalledVersion">Highest installed member version, or null.</param>
 internal sealed record StoreEntry(CatalogueBundle Bundle, StoreBundleState State, string? InstalledVersion);
 
-/// <summary>Compares the catalogue with the installed plugins (phase 8 T8.1, "Updates").</summary>
+/// <summary>Compares the catalogue with the installed plugins.</summary>
 internal static class StoreStatus
 {
     /// <summary>The state of every bundle in the catalogue.</summary>

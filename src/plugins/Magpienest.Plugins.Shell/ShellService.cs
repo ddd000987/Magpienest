@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Threading;
 using Magpienest.Sdk;
 using Magpienest.Sdk.Localization;
@@ -465,50 +466,48 @@ internal sealed class ShellService : IShellService
         _ctx.Environment.RequestShutdown();
     }
 
+    /// <summary>
+    /// Restores the window's position from "placement" (see <see cref="SavedPlacement"/>). The bounds are applied
+    /// once the window has a handle and before it is shown; maximizing goes through WPF.
+    /// </summary>
     private void RestoreBounds()
     {
-        var saved = _ctx.Config.Get<WindowBounds?>("window", null);
-        if (saved is null || saved.Width < _window.MinWidth || saved.Height < _window.MinHeight)
+        var saved = _ctx.Config.Get<SavedPlacement?>("placement", null);
+        if (saved is not null && !WindowPlacement.IsUsable(saved))
         {
-            return;
+            saved = null;
         }
 
-        var screen = new Rect(SystemParameters.VirtualScreenLeft, SystemParameters.VirtualScreenTop,
-            SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
-        var bounds = new Rect(saved.Left, saved.Top, saved.Width, saved.Height);
-        if (!screen.IntersectsWith(bounds))
-        {
-            return;
-        }
+        // Older versions stored WPF units under "window"; only "maximized" is safe to carry over.
+        var maximized = saved?.Maximized ?? _ctx.Config.Get<WindowBounds?>("window", null) is { Maximized: true };
 
+        // WPF's own centering sizes the window for the main monitor's scale even when it opens on another one,
+        // so the first start is placed here too, once the monitor under the mouse pointer is known.
         _window.WindowStartupLocation = WindowStartupLocation.Manual;
-        _window.Left = saved.Left;
-        _window.Top = saved.Top;
-        _window.Width = saved.Width;
-        _window.Height = saved.Height;
-        if (saved.Maximized)
+        _window.SourceInitialized += (_, _) =>
         {
-            _window.WindowState = WindowState.Maximized;
-        }
+            var placement = saved ?? WindowPlacement.DefaultOnCursorMonitor(_window.Width, _window.Height);
+            WindowPlacement.Apply(new WindowInteropHelper(_window).Handle, placement);
+            if (maximized)
+            {
+                _window.WindowState = WindowState.Maximized;
+            }
+        };
     }
 
     private void SaveBounds()
     {
-        if (!_window.IsLoaded)
+        var handle = new WindowInteropHelper(_window).Handle;
+        if (!_window.IsLoaded || handle == IntPtr.Zero)
         {
             return;
         }
 
-        var maximized = _window.WindowState == WindowState.Maximized || (_fullScreen && _stateBeforeFullScreen == WindowState.Maximized);
-        var rect = _window.WindowState == WindowState.Normal && !_fullScreen
-            ? new Rect(_window.Left, _window.Top, _window.ActualWidth, _window.ActualHeight)
-            : _window.RestoreBounds;
-        if (rect.IsEmpty || double.IsNaN(rect.Width))
+        var maximized = _fullScreen ? _stateBeforeFullScreen == WindowState.Maximized : WindowPlacement.IsMaximized(handle);
+        if (WindowPlacement.Read(handle, maximized) is { } placement)
         {
-            return;
+            _ctx.Config.Set("placement", placement);
         }
-
-        _ctx.Config.Set("window", new WindowBounds { Left = rect.Left, Top = rect.Top, Width = rect.Width, Height = rect.Height, Maximized = maximized });
     }
 
     private void SafeCall(Action action)
@@ -536,7 +535,7 @@ internal sealed class ShellService : IShellService
         };
     }
 
-    /// <summary>Persisted window rectangle.</summary>
+    /// <summary>Window rectangle as versions before 0.1.0's release stored it (read only for "maximized").</summary>
     internal sealed class WindowBounds
     {
         public double Left { get; set; }

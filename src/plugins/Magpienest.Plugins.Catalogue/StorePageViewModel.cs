@@ -8,7 +8,7 @@ using Magpienest.Sdk.Shell;
 
 namespace Magpienest.Plugins.Catalogue;
 
-/// <summary>The "store" Settings section (phase 8 T8.2). Shows <see cref="StoreService"/>; decides nothing itself.</summary>
+/// <summary>The "store" Settings section. Shows <see cref="StoreService"/>; decides nothing itself.</summary>
 internal sealed partial class StorePageViewModel : ObservableObject
 {
     private readonly IPluginContext _ctx;
@@ -48,7 +48,7 @@ internal sealed partial class StorePageViewModel : ObservableObject
         set => _service.CheckAtStartup = value;
     }
 
-    /// <summary>Called when the section is shown: fetches the catalogue (T8.1 "Updates").</summary>
+    /// <summary>Called when the section is shown: fetches the catalogue.</summary>
     public void OnShown() => _ = _service.RefreshAsync();
 
     /// <summary>Rebuilds every text and card from the service.</summary>

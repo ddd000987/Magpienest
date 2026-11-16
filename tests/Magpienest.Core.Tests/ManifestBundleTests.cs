@@ -1,6 +1,6 @@
 namespace Magpienest.Core.Tests;
 
-/// <summary>T8.0: the optional "bundle" field of plugin.json.</summary>
+/// <summary>The optional "bundle" field of plugin.json.</summary>
 public sealed class ManifestBundleTests
 {
     [Fact]

@@ -5,7 +5,7 @@ using Magpienest.Sdk.Localization;
 
 namespace Magpienest.Plugins.Game;
 
-/// <summary>The kind-specific extra JSON of a game (03-data-model §4). <c>item.Path</c> is the executable.</summary>
+/// <summary>The kind-specific extra JSON of a game. <c>item.Path</c> is the executable.</summary>
 internal sealed record GameExtra
 {
     /// <summary>The game's folder; null means the executable's folder.</summary>

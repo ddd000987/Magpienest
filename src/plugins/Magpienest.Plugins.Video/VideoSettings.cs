@@ -21,7 +21,7 @@ internal sealed class VideoSettings(IPluginConfig config)
     /// <summary>Highest volume the player supports (twice the file's level).</summary>
     public const int MaxMaxVolume = 200;
 
-    /// <summary>Default scanned extensions (phase 3 spec).</summary>
+    /// <summary>Default scanned extensions.</summary>
     internal static readonly string[] DefaultExtensions =
     [
         ".mp4", ".m4v", ".mkv", ".webm", ".avi", ".mov", ".wmv", ".asf", ".flv", ".f4v", ".mpg", ".mpeg",

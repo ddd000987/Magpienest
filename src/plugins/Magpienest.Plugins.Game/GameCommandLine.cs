@@ -2,7 +2,7 @@ using Magpienest.Sdk.Library;
 
 namespace Magpienest.Plugins.Game;
 
-/// <summary>The <c>--import-games</c> command line option (T4.4); pure so it can be tested.</summary>
+/// <summary>The <c>--import-games</c> command line option; pure so it can be tested.</summary>
 internal static class GameCommandLine
 {
     /// <summary>The folder after <c>--import-games</c>, or null when the option is absent or has no value.</summary>

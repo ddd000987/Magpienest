@@ -9,7 +9,7 @@ internal sealed class WebUiSettings(IPluginConfig config)
     internal const string PortKey = "port";
     internal const string TokenKey = "token";
 
-    /// <summary>Default port (phase 7 decisions).</summary>
+    /// <summary>Default port.</summary>
     public const int DefaultPort = 47290;
 
     /// <summary>Lowest port the user may choose (below are system ports).</summary>

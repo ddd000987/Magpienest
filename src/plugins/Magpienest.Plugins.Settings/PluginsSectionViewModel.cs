@@ -44,7 +44,7 @@ internal sealed class WindowsPackagePicker(IShellService shell) : IPackagePicker
     }
 }
 
-/// <summary>Plugins: one card per bundle (T8.0), a restart bar, and the details switch with the install buttons.</summary>
+/// <summary>Plugins: one card per bundle, a restart bar, and the details switch with the install buttons.</summary>
 internal sealed partial class PluginsSectionViewModel : ObservableObject
 {
     internal const string ShowDetailsKey = "showPluginDetails";

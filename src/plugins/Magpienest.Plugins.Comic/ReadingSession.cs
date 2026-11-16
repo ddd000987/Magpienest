@@ -3,7 +3,7 @@ using Magpienest.Sdk.Viewing;
 
 namespace Magpienest.Plugins.Comic;
 
-/// <summary>Per-book JSON in <see cref="LibraryItem.Extra"/> (03-data-model §4); null = use the viewer default.</summary>
+/// <summary>Per-book JSON in <see cref="LibraryItem.Extra"/>; null = use the viewer default.</summary>
 internal sealed class ComicExtra
 {
     /// <summary>"rtl" | "ltr" | null.</summary>

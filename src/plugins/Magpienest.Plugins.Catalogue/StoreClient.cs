@@ -17,7 +17,7 @@ internal interface IPackageDownloader
     Task<string> DownloadAsync(CataloguePackage package, string version, string directory, IProgress<long>? progress, CancellationToken cancellationToken);
 }
 
-/// <summary>HTTP access to the store (phase 8 T8.1, "Download rules"). Sends nothing but the request and a User-Agent.</summary>
+/// <summary>HTTP access to the store. Sends nothing but the request and a User-Agent.</summary>
 internal sealed class StoreClient : IPackageDownloader, IDisposable
 {
     /// <summary>No package may be larger than this.</summary>
@@ -26,14 +26,21 @@ internal sealed class StoreClient : IPackageDownloader, IDisposable
     private const int MaxCatalogueBytes = 1024 * 1024;
     private const int MaxRedirects = 5;
     private static readonly TimeSpan CatalogueTimeout = TimeSpan.FromSeconds(30);
-    private static readonly TimeSpan ReadTimeout = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan DefaultReadTimeout = TimeSpan.FromSeconds(60);
 
     private readonly HttpClient _http;
     private readonly StorePolicy _policy;
 
-    public StoreClient(StorePolicy policy, Version appVersion)
+    /// <summary>How long a download may wait for the server to answer or to send more data.</summary>
+    private readonly TimeSpan _readTimeout;
+
+    /// <param name="policy">Where the store lives.</param>
+    /// <param name="appVersion">Sent in the User-Agent.</param>
+    /// <param name="readTimeout">Tests only: replaces the 60 s answer/read timeout.</param>
+    public StoreClient(StorePolicy policy, Version appVersion, TimeSpan? readTimeout = null)
     {
         _policy = policy;
+        _readTimeout = readTimeout ?? DefaultReadTimeout;
         var handler = new SocketsHttpHandler
         {
             AllowAutoRedirect = false,
@@ -133,7 +140,7 @@ internal sealed class StoreClient : IPackageDownloader, IDisposable
                     int read;
                     using (var idle = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
                     {
-                        idle.CancelAfter(ReadTimeout);
+                        idle.CancelAfter(_readTimeout);
                         try
                         {
                             read = await source.ReadAsync(buffer, idle.Token).ConfigureAwait(false);
@@ -195,14 +202,22 @@ internal sealed class StoreClient : IPackageDownloader, IDisposable
         for (var hop = 0; ; hop++)
         {
             HttpResponseMessage response;
-            try
+            using (var answer = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
             {
-                using var request = new HttpRequestMessage(HttpMethod.Get, url);
-                response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
-            }
-            catch (HttpRequestException ex)
-            {
-                throw new StoreException(StoreError.Offline, $"Could not reach {url.Host}: {ex.Message}", ex);
+                answer.CancelAfter(_readTimeout);
+                try
+                {
+                    using var request = new HttpRequestMessage(HttpMethod.Get, url);
+                    response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, answer.Token).ConfigureAwait(false);
+                }
+                catch (HttpRequestException ex)
+                {
+                    throw new StoreException(StoreError.Offline, $"Could not reach {url.Host}: {ex.Message}", ex);
+                }
+                catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+                {
+                    throw new StoreException(StoreError.Offline, $"{url.Host} did not answer.", ex);
+                }
             }
 
             var status = (int)response.StatusCode;

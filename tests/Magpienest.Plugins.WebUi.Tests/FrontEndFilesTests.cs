@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 
 namespace Magpienest.Plugins.WebUi.Tests;
 
-/// <summary>T7.5: the web pages load only files that exist in <c>www/</c> and only types the server sends.</summary>
+/// <summary>The web pages load only files that exist in <c>www/</c> and only types the server sends.</summary>
 public sealed partial class FrontEndFilesTests
 {
     private static readonly string Www = Path.Combine(FindRepoRoot(), "src", "plugins", "Magpienest.Plugins.WebUi", "www");

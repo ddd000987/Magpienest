@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace Magpienest.Localization.Tests;
 
-/// <summary>Source-level checks of the localization rules (architecture §10). No project references.</summary>
+/// <summary>Source-level checks of the localization rules. No project references.</summary>
 public sealed partial class LocalizationHygieneTests
 {
     private static readonly string RepoRoot = FindRepoRoot();

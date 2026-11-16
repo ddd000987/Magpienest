@@ -7,7 +7,7 @@ using Magpienest.Sdk.Viewing;
 namespace Magpienest.Plugins.ImageViewer;
 
 /// <summary>
-/// Strip mode (phase-2b T2.8): every page edge to edge at one height, scrolled continuously.
+/// Strip mode: every page edge to edge at one height, scrolled continuously.
 /// Positions come from the view model's <see cref="StripLayout"/>; the scroll position is kept as a
 /// <see cref="StripAnchor"/> so pages whose size arrives later never move the page being read.
 /// Only the pages near the viewport have elements, each placed relative to the current scroll.

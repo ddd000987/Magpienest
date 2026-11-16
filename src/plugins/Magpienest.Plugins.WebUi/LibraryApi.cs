@@ -13,7 +13,7 @@ using Magpienest.Sdk.Viewing;
 namespace Magpienest.Plugins.WebUi;
 
 /// <summary>
-/// The library endpoints of the web API (phase 7 "API"). Files are found only by item id and page index; nothing here
+/// The library endpoints of the web API. Files are found only by item id and page index; nothing here
 /// accepts a path, and the only writes are library metadata. Runs on the server's threads; the services it calls are
 /// thread-safe by contract.
 /// </summary>
@@ -541,7 +541,7 @@ internal sealed class LibraryApi : IAsyncDisposable
 
     private sealed record CachedQuery(DateTimeOffset At, Task<IReadOnlyList<LibraryItem>> Items);
 
-    /// <summary>Reading settings in a book's <c>extra</c> JSON (03-data-model §4).</summary>
+    /// <summary>Reading settings in a book's <c>extra</c> JSON.</summary>
     private sealed class BookExtra
     {
         public string? Direction { get; set; }

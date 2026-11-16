@@ -7,7 +7,7 @@ namespace Magpienest.Plugins.WebUi;
 /// <summary>PBKDF2-SHA256 password hashes, stored as <c>pbkdf2-sha256$&lt;iterations&gt;$&lt;salt&gt;$&lt;hash&gt;</c>.</summary>
 internal static class PasswordHasher
 {
-    /// <summary>Iterations for new hashes (phase 7 "Password and sessions").</summary>
+    /// <summary>Iterations for new hashes.</summary>
     public const int Iterations = 600_000;
 
     /// <summary>Shortest password accepted.</summary>
