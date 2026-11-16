@@ -43,12 +43,15 @@ internal sealed class DirectoryPluginSource : IPluginSource
                 continue;
             }
 
-            var loader = new EntryTypeLoader(directory, manifest);
-            candidates.Add(new PluginCandidate(manifest, directory, _isBuiltIn, loader.Load));
+            candidates.Add(CreateCandidate(manifest, directory, _isBuiltIn));
         }
 
         return candidates;
     }
+
+    /// <summary>Creates a candidate for a plugin folder whose manifest was already read.</summary>
+    public static PluginCandidate CreateCandidate(PluginManifest manifest, string directory, bool isBuiltIn) =>
+        new(manifest, directory, isBuiltIn, new EntryTypeLoader(directory, manifest).Load);
 
     /// <summary>Loads the plugin assembly at most once and resolves its entry type.</summary>
     private sealed class EntryTypeLoader

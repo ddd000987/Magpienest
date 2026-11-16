@@ -19,8 +19,9 @@ public sealed class Kernel
         var fileLog = new FileLog(Path.Combine(options.DataDirectory, "logs"), verbose);
         Log = new PluginLog(fileLog, "kernel");
         var environment = new AppEnvironment(options);
-        var sources = options.Sources ?? DefaultSources(options);
-        _host = new PluginHost(options.Dispatcher, environment, sources, fileLog, Log);
+        var safeMode = options.Args.Contains("--safe-mode", StringComparer.OrdinalIgnoreCase);
+        var sources = options.Sources ?? DefaultSources(options, safeMode);
+        _host = new PluginHost(options.Dispatcher, environment, sources, fileLog, Log, safeMode);
     }
 
     /// <summary>The plugin manager (also available to plugins as a kernel service).</summary>
@@ -43,9 +44,11 @@ public sealed class Kernel
     /// <param name="evt">The event.</param>
     public void Emit<TEvent>(TEvent evt) => _host.Bus.Emit(evt);
 
-    private static IReadOnlyList<IPluginSource> DefaultSources(KernelOptions options) =>
-    [
-        new DirectoryPluginSource(Path.Combine(options.AppDirectory, "plugins"), isBuiltIn: true),
-        new DirectoryPluginSource(Path.Combine(options.DataDirectory, "plugins"), isBuiltIn: false),
-    ];
+    private static IReadOnlyList<IPluginSource> DefaultSources(KernelOptions options, bool safeMode)
+    {
+        var builtIn = new DirectoryPluginSource(Path.Combine(options.AppDirectory, "plugins"), isBuiltIn: true);
+        return safeMode
+            ? [builtIn]
+            : [builtIn, new DirectoryPluginSource(Path.Combine(options.DataDirectory, "plugins"), isBuiltIn: false)];
+    }
 }

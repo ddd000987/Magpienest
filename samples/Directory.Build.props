@@ -1,0 +1,8 @@
+<Project>
+  <!--
+    Intentionally empty. Samples are stand-alone: they are not part of
+    Magpienest.slnx and must not inherit the repository's build settings
+    (output folders under artifacts\, warnings as errors, central package
+    versions), so that a sample can be copied anywhere and still build.
+  -->
+</Project>

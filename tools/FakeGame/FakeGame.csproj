@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Test tool for the Games plugin: a window that does nothing. Deliberately knows nothing about Magpienest. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <IsPackable>false</IsPackable>
+    <OutDir>$(RepoRoot)artifacts\tools\FakeGame\</OutDir>
+  </PropertyGroup>
+</Project>

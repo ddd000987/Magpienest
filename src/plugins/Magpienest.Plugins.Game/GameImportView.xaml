@@ -1,0 +1,43 @@
+<UserControl x:Class="Magpienest.Plugins.Game.GameImportView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sdk="clr-namespace:Magpienest.Sdk.Localization;assembly=Magpienest.Sdk">
+  <DockPanel>
+    <TextBlock DockPanel.Dock="Top" Text="{Binding Summary}" TextWrapping="Wrap"
+               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,8,0,8">
+      <Button Content="{sdk:Loc Game.Import.SelectAll}" Command="{Binding SelectAllCommand}" />
+      <Button Content="{sdk:Loc Game.Import.SelectNone}" Command="{Binding SelectNoneCommand}" Margin="8,0,0,0" />
+    </StackPanel>
+    <ScrollViewer MaxHeight="420" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <ItemsControl ItemsSource="{Binding Rows}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border Margin="0,0,0,6" Padding="10,8" BorderThickness="1" CornerRadius="{DynamicResource ControlCornerRadius}"
+                    Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+              <Grid IsEnabled="{Binding IsSelectable}">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto" />
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="1.2*" />
+                  <ColumnDefinition Width="130" />
+                </Grid.ColumnDefinitions>
+                <CheckBox IsChecked="{Binding IsChecked}" VerticalAlignment="Center" MinWidth="0" Margin="0,0,8,0"
+                          AutomationProperties.Name="{Binding Candidate.Name}" />
+                <TextBox Grid.Column="1" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"
+                         VerticalAlignment="Center" AutomationProperties.Name="{sdk:Loc Game.Import.TitleColumn}" />
+                <ComboBox Grid.Column="2" ItemsSource="{Binding Executables}" SelectedItem="{Binding SelectedExecutable}"
+                          DisplayMemberPath="RelativePath" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0,0,8,0"
+                          AutomationProperties.Name="{sdk:Loc Game.Import.ExecutableColumn}" />
+                <TextBlock Grid.Column="3" Text="{Binding StatusText}" VerticalAlignment="Center" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+              </Grid>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

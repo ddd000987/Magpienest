@@ -1,0 +1,7 @@
+{
+  "Hello.Page.Title": "Hello",
+  "Hello.Greeting": "Hello from a plugin!",
+  "Hello.Hint": "This page was added by the sample plugin. Switch the language in Settings and the text changes at once.",
+  "Hello.Button": "Say hello",
+  "Hello.Notification": "Hello again!"
+}

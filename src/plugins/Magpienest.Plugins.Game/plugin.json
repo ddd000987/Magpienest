@@ -1,0 +1,14 @@
+{
+  "id": "magpienest.game",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.Game.dll",
+  "name": { "en": "Games", "zh-TW": "遊戲" },
+  "description": {
+    "en": "Keep your PC games in one place: add them by hand or import a whole folder, start them with one click and see how long you have played.",
+    "zh-TW": "把電腦上的遊戲收集在一起：手動加入或匯入整個資料夾，一鍵開始遊玩，並顯示遊玩時數。"
+  },
+  "author": "Magpienest contributors",
+  "essential": false,
+  "enabledByDefault": true
+}

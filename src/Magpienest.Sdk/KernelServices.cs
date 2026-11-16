@@ -13,6 +13,46 @@ public interface IPluginManager
     /// <param name="pluginId">Plugin id.</param>
     /// <param name="enabled">The new choice.</param>
     void SetEnabled(string pluginId, bool enabled);
+
+    /// <summary>
+    /// True when a package was staged by <see cref="InstallAsync"/> as an update of a loaded plugin and
+    /// will be applied at the next start.
+    /// </summary>
+    bool RestartRequired { get; }
+
+    /// <summary>
+    /// Validates a plugin package (a .zip or a folder) exactly like <see cref="InstallAsync"/> does, without
+    /// installing it, and returns its manifest (name, version, author) for a confirmation dialog.
+    /// Never throws for a bad package; check <see cref="PluginPackageInfo.IsValid"/>.
+    /// </summary>
+    /// <param name="zipOrFolderPath">Path of a .zip file or of a folder.</param>
+    Task<PluginPackageInfo> InspectAsync(string zipOrFolderPath);
+
+    /// <summary>
+    /// Validates and installs a plugin package (a .zip or a folder holding plugin.json at its root or
+    /// inside exactly one top-level folder). A new id becomes active immediately; a package whose id is
+    /// already loaded is staged and applied at the next start (<see cref="PluginInstallResult.RestartRequired"/>).
+    /// Extraction runs off the UI thread. Never throws for a bad package; check <see cref="PluginInstallResult.Success"/>.
+    /// </summary>
+    /// <param name="zipOrFolderPath">Path of a .zip file or of a folder.</param>
+    Task<PluginInstallResult> InstallAsync(string zipOrFolderPath);
+
+    /// <summary>
+    /// Removes a user-installed plugin: it is deactivated now, listed as <see cref="PluginState.PendingRemoval"/>,
+    /// and its files are deleted at the next start. Its config and data folder are kept.
+    /// Throws <see cref="InvalidOperationException"/> for an unknown id and for built-in plugins
+    /// (<see cref="PluginInfo.IsBuiltIn"/>). Does nothing when the plugin is already pending removal.
+    /// </summary>
+    /// <param name="pluginId">Plugin id.</param>
+    void Uninstall(string pluginId);
+
+    /// <summary>
+    /// Cancels <see cref="Uninstall"/> for a plugin listed as <see cref="PluginState.PendingRemoval"/>: it leaves
+    /// the removal queue and is enabled again if the user had it enabled. Does nothing when the plugin is
+    /// not pending removal; throws <see cref="InvalidOperationException"/> for an unknown id.
+    /// </summary>
+    /// <param name="pluginId">Plugin id.</param>
+    void UndoUninstall(string pluginId);
 }
 
 /// <summary>Kernel service: application paths, arguments and shutdown.</summary>

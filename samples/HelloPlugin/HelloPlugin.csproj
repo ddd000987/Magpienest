@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>HelloPlugin</RootNamespace>
+    <AssemblyName>HelloPlugin</AssemblyName>
+    <Version>1.0.0</Version>
+    <!-- Plain bin\<Configuration>\ output so pack.ps1 knows where to look. -->
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- Lets the host load the plugin into its own AssemblyLoadContext. -->
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <!-- Folder that contains Magpienest.Sdk.dll: a built or installed Magpienest. Override with -p:MagpienestDir=... -->
+    <MagpienestDir Condition="'$(MagpienestDir)' == ''">$(MSBuildThisFileDirectory)..\..\artifacts\bin\Debug</MagpienestDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Compile against the SDK, but never ship it: the host provides it at run time. -->
+    <Reference Include="Magpienest.Sdk">
+      <HintPath>$(MagpienestDir)\Magpienest.Sdk.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="plugin.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="lang\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

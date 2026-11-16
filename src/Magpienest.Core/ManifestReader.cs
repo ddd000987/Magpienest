@@ -25,9 +25,9 @@ internal static partial class ManifestReader
             throw new InvalidDataException("Invalid plugin.json: empty.");
         }
 
-        if (string.IsNullOrWhiteSpace(manifest.Id) || !IdPattern().IsMatch(manifest.Id))
+        if (!IsValidId(manifest.Id))
         {
-            throw new InvalidDataException($"Invalid plugin id '{manifest.Id}': use lower-case letters, digits and dots.");
+            throw IdError($"Invalid plugin id '{manifest.Id}': use lower-case letters, digits and dots.");
         }
 
         if (string.IsNullOrWhiteSpace(manifest.Version))
@@ -50,6 +50,22 @@ internal static partial class ManifestReader
     /// <summary>Reads and parses a plugin.json file.</summary>
     public static PluginManifest Read(string path) => Parse(File.ReadAllText(path));
 
+    /// <summary>True when the exception came from an invalid plugin id (as opposed to another manifest problem).</summary>
+    public static bool IsIdError(InvalidDataException ex) => ex.Data.Contains(IdErrorKey);
+
+    /// <summary>True when <paramref name="id"/> is a valid plugin id.</summary>
+    public static bool IsValidId(string? id) => !string.IsNullOrWhiteSpace(id) && IdPattern().IsMatch(id);
+
+    private const string IdErrorKey = "pluginIdError";
+
+    private static InvalidDataException IdError(string message)
+    {
+        var ex = new InvalidDataException(message);
+        ex.Data[IdErrorKey] = true;
+        return ex;
+    }
+
     [GeneratedRegex("^[a-z0-9]+(\\.[a-z0-9]+)*$")]
     private static partial Regex IdPattern();
 }
+

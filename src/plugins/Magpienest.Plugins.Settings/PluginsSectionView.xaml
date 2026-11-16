@@ -3,9 +3,31 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:sdk="clr-namespace:Magpienest.Sdk.Localization;assembly=Magpienest.Sdk">
+  <UserControl.Resources>
+    <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+  </UserControl.Resources>
   <StackPanel>
     <TextBlock Text="{sdk:Loc Settings.Plugins.Hint}" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                TextWrapping="Wrap" Margin="0,0,0,12" />
+    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+      <Button Command="{Binding InstallZipCommand}" Content="{sdk:Loc Settings.Plugins.InstallZip}"
+              Style="{DynamicResource AccentButtonStyle}" Margin="0,0,8,0" />
+      <Button Command="{Binding InstallFolderCommand}" Content="{sdk:Loc Settings.Plugins.InstallFolder}" />
+    </StackPanel>
+    <Border Visibility="{Binding ShowRestartBar, Converter={StaticResource BoolToVisibility}}"
+            Margin="0,0,0,12" Padding="16,10" BorderThickness="1"
+            Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{DynamicResource SystemFillColorAttentionBrush}"
+            CornerRadius="{DynamicResource ControlCornerRadius}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="{Binding RestartBarText}" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,16,0" />
+        <Button Grid.Column="1" Command="{Binding RestartNowCommand}" Content="{sdk:Loc Settings.Plugins.RestartNow}" />
+      </Grid>
+    </Border>
     <ItemsControl ItemsSource="{Binding Cards}" Focusable="False">
       <ItemsControl.ItemTemplate>
         <DataTemplate>
@@ -31,10 +53,19 @@
                 <TextBlock x:Name="Author" Text="{Binding AuthorText}" Style="{DynamicResource CaptionTextBlockStyle}"
                            Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
               </StackPanel>
-              <CheckBox Grid.Column="1" VerticalAlignment="Center"
-                        IsChecked="{Binding IsEnabled}" IsEnabled="{Binding CanToggle}"
-                        Content="{sdk:Loc Settings.Plugins.Enabled}"
-                        ToolTip="{Binding ToggleToolTip}" ToolTipService.ShowOnDisabled="True" />
+              <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{sdk:Loc Settings.Plugins.BuiltIn}" Style="{DynamicResource CaptionTextBlockStyle}"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,16,0"
+                           Visibility="{Binding IsBuiltIn, Converter={StaticResource BoolToVisibility}}" />
+                <Button Command="{Binding RemoveCommand}" Content="{sdk:Loc Settings.Plugins.Remove}" Margin="0,0,16,0"
+                        Visibility="{Binding CanRemove, Converter={StaticResource BoolToVisibility}}" />
+                <Button Command="{Binding UndoCommand}" Content="{sdk:Loc Settings.Plugins.Undo}" Margin="0,0,16,0"
+                        Visibility="{Binding CanUndo, Converter={StaticResource BoolToVisibility}}" />
+                <CheckBox VerticalAlignment="Center"
+                          IsChecked="{Binding IsEnabled}" IsEnabled="{Binding CanToggle}"
+                          Content="{sdk:Loc Settings.Plugins.Enabled}"
+                          ToolTip="{Binding ToggleToolTip}" ToolTipService.ShowOnDisabled="True" />
+              </StackPanel>
             </Grid>
           </Border>
           <DataTemplate.Triggers>

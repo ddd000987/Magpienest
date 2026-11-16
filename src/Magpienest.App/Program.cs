@@ -16,13 +16,19 @@ namespace Magpienest.App;
 internal static class Program
 {
     private const string NoWindowMessage =
-        "Magpienest could not open its main window. See the log:\n{0}\n\nMagpienest 無法開啟主視窗，請查看記錄檔。";
+        "Magpienest could not open its main window. See the log:\n{0}\n\nIf a plugin you installed causes this, start Magpienest with --safe-mode.\n\n"
+        + "Magpienest 無法開啟主視窗，請查看記錄檔。\n如果是您安裝的外掛造成的，請加上 --safe-mode 參數啟動 Magpienest。";
 
     [STAThread]
     private static int Main(string[] args)
     {
         var appDirectory = Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory);
-        var (dataDirectoryArg, passThrough) = ParseArgs(args);
+        var (dataDirectoryArg, waitPid, passThrough) = ParseArgs(args);
+        if (waitPid is not null)
+        {
+            WaitForExit(waitPid.Value);
+        }
+
         var dataDirectory = ResolveDataDirectory(dataDirectoryArg, appDirectory);
         Directory.CreateDirectory(dataDirectory);
 
@@ -165,9 +171,31 @@ internal static class Program
         return ok ? 0 : 1;
     }
 
-    private static (string? DataDirectory, List<string> PassThrough) ParseArgs(string[] args)
+    /// <summary>
+    /// Waits (up to 30 s) for the process that is restarting Magpienest to exit, so it has released the
+    /// single-instance lock before this instance tries to take it.
+    /// </summary>
+    private static void WaitForExit(int processId)
+    {
+        try
+        {
+            using var process = Process.GetProcessById(processId);
+            process.WaitForExit(30000);
+        }
+        catch (ArgumentException)
+        {
+            // Already gone.
+        }
+        catch (InvalidOperationException)
+        {
+            // Already gone.
+        }
+    }
+
+    private static (string? DataDirectory, int? WaitPid, List<string> PassThrough) ParseArgs(string[] args)
     {
         string? dataDirectory = null;
+        int? waitPid = null;
         var passThrough = new List<string>();
         for (var i = 0; i < args.Length; i++)
         {
@@ -175,13 +203,20 @@ internal static class Program
             {
                 dataDirectory = args[++i];
             }
+            else if (string.Equals(args[i], "--wait-for-pid", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+            {
+                if (int.TryParse(args[++i], System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var pid))
+                {
+                    waitPid = pid;
+                }
+            }
             else
             {
                 passThrough.Add(args[i]);
             }
         }
 
-        return (dataDirectory, passThrough);
+        return (dataDirectory, waitPid, passThrough);
     }
 
     /// <summary>Architecture §8: --data-dir, MAGPIENEST_DATA_DIR, portable.txt, %APPDATA%\Magpienest.</summary>

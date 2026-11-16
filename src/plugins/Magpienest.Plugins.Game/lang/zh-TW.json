@@ -1,0 +1,73 @@
+{
+  "Game.Kind": "遊戲",
+  "Game.Page.Title": "遊戲",
+
+  "Game.Command.Play": "開始遊玩",
+  "Game.Command.Edit": "編輯…",
+  "Game.Command.OpenFolder": "開啟安裝資料夾",
+  "Game.Command.SetCover": "從檔案設定封面…",
+  "Game.Command.ResetCover": "還原封面",
+
+  "Game.Add.Game": "加入遊戲…",
+  "Game.Add.Scan": "掃描資料夾…",
+
+  "Game.PlayTime.Never": "尚未玩過",
+  "Game.PlayTime.LessThanMinute": "不到 1 分鐘",
+  "Game.PlayTime.Minutes": "{0} 分鐘",
+  "Game.PlayTime.HoursMinutes": "{0} 小時 {1} 分鐘",
+
+  "Game.Running": "執行中",
+  "Game.Running.Already": "「{0}」已經在執行中。",
+
+  "Game.Details.Play": "開始遊玩",
+  "Game.Details.StopTracking": "執行中 — 停止追蹤",
+  "Game.Details.Session": "本次遊玩",
+  "Game.Details.PlayTime": "遊玩時間",
+  "Game.Details.LastPlayed": "上次遊玩",
+  "Game.Details.Never": "從未",
+  "Game.Details.Launches": "啟動次數",
+  "Game.Details.Executable": "執行檔",
+  "Game.Details.InstallFolder": "安裝資料夾",
+  "Game.Details.WorkingFolder": "工作資料夾",
+  "Game.Details.Edit": "編輯…",
+
+  "Game.Editor.AddTitle": "加入遊戲",
+  "Game.Editor.EditTitle": "編輯遊戲",
+  "Game.Editor.Add": "加入",
+  "Game.Editor.Save": "儲存",
+  "Game.Editor.Title": "名稱",
+  "Game.Editor.Executable": "啟動遊戲的程式",
+  "Game.Editor.Browse": "瀏覽…",
+  "Game.Editor.Arguments": "啟動參數（選填）",
+  "Game.Editor.WorkingFolder": "工作資料夾（選填）",
+  "Game.Editor.InstallFolder": "安裝資料夾（選填）",
+  "Game.Editor.FolderHint": "留空就會使用程式所在的資料夾。",
+  "Game.Editor.ShortcutInvalid": "這個捷徑沒有指向可以啟動的程式。",
+  "Game.Editor.ChooseExecutable": "選擇啟動遊戲的程式",
+  "Game.Editor.ExecutableFilter": "程式與捷徑",
+
+  "Game.Cover.Title": "選擇封面圖片",
+  "Game.Cover.Filter": "圖片",
+
+  "Game.Scan.ChooseFolder": "選擇存放遊戲的資料夾",
+  "Game.Scan.Progress": "正在尋找遊戲…",
+  "Game.Scan.Nothing": "在「{0}」裡找不到遊戲。",
+
+  "Game.Import.Title": "匯入遊戲",
+  "Game.Import.Import": "匯入",
+  "Game.Import.Summary": "在「{1}」裡找到 {0} 個資料夾。請勾選要加入的遊戲，並確認每個遊戲的名稱和程式。",
+  "Game.Import.SelectAll": "全選",
+  "Game.Import.SelectNone": "全部取消",
+  "Game.Import.TitleColumn": "名稱",
+  "Game.Import.ExecutableColumn": "程式",
+  "Game.Import.Done": "已加入 {0} 款遊戲。",
+  "Game.Import.Status.Ready": "可以匯入",
+  "Game.Import.Status.NoExecutable": "找不到程式",
+  "Game.Import.Status.AlreadyInLibrary": "已在收藏庫中",
+
+  "Game.Error.Missing": "無法啟動「{0}」，找不到它的程式。請編輯這款遊戲，重新選擇程式。",
+  "Game.Error.Launch": "無法啟動「{0}」。",
+  "Game.Error.FolderMissing": "無法開啟資料夾「{0}」。",
+  "Game.Error.AlreadyAdded": "收藏庫裡已經有使用這個程式的遊戲。",
+  "Game.Error.Failed": "無法儲存變更。"
+}

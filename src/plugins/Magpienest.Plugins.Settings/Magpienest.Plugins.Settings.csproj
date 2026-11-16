@@ -3,4 +3,7 @@
     <PluginId>magpienest.settings</PluginId>
   </PropertyGroup>
   <Import Project="$(RepoRoot)build\Plugin.props" />
+  <ItemGroup>
+    <InternalsVisibleTo Include="Magpienest.Plugins.Settings.Tests" />
+  </ItemGroup>
 </Project>

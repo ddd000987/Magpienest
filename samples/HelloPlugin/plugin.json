@@ -1,0 +1,14 @@
+{
+  "id": "sample.hello",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "assembly": "HelloPlugin.dll",
+  "name": { "en": "Hello", "zh-TW": "哈囉" },
+  "description": {
+    "en": "A sample plugin that adds one page with a greeting.",
+    "zh-TW": "範例外掛，新增一個顯示問候語的頁面。"
+  },
+  "author": "Magpienest contributors",
+  "essential": false,
+  "enabledByDefault": true
+}

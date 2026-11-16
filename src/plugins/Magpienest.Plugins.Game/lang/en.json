@@ -1,0 +1,73 @@
+{
+  "Game.Kind": "Game",
+  "Game.Page.Title": "Games",
+
+  "Game.Command.Play": "Play",
+  "Game.Command.Edit": "Edit…",
+  "Game.Command.OpenFolder": "Open install folder",
+  "Game.Command.SetCover": "Set cover from file…",
+  "Game.Command.ResetCover": "Reset cover",
+
+  "Game.Add.Game": "Add game…",
+  "Game.Add.Scan": "Scan folder…",
+
+  "Game.PlayTime.Never": "Never played",
+  "Game.PlayTime.LessThanMinute": "<1 min",
+  "Game.PlayTime.Minutes": "{0} min",
+  "Game.PlayTime.HoursMinutes": "{0} h {1} min",
+
+  "Game.Running": "Running",
+  "Game.Running.Already": "\"{0}\" is already running.",
+
+  "Game.Details.Play": "Play",
+  "Game.Details.StopTracking": "Running — stop tracking",
+  "Game.Details.Session": "This session",
+  "Game.Details.PlayTime": "Play time",
+  "Game.Details.LastPlayed": "Last played",
+  "Game.Details.Never": "Never",
+  "Game.Details.Launches": "Times started",
+  "Game.Details.Executable": "Program",
+  "Game.Details.InstallFolder": "Install folder",
+  "Game.Details.WorkingFolder": "Working folder",
+  "Game.Details.Edit": "Edit…",
+
+  "Game.Editor.AddTitle": "Add a game",
+  "Game.Editor.EditTitle": "Edit game",
+  "Game.Editor.Add": "Add",
+  "Game.Editor.Save": "Save",
+  "Game.Editor.Title": "Title",
+  "Game.Editor.Executable": "Program to start",
+  "Game.Editor.Browse": "Browse…",
+  "Game.Editor.Arguments": "Start options (optional)",
+  "Game.Editor.WorkingFolder": "Working folder (optional)",
+  "Game.Editor.InstallFolder": "Install folder (optional)",
+  "Game.Editor.FolderHint": "Leave empty to use the folder of the program.",
+  "Game.Editor.ShortcutInvalid": "This shortcut does not point to a program that can be started.",
+  "Game.Editor.ChooseExecutable": "Choose the program that starts the game",
+  "Game.Editor.ExecutableFilter": "Programs and shortcuts",
+
+  "Game.Cover.Title": "Choose a cover image",
+  "Game.Cover.Filter": "Images",
+
+  "Game.Scan.ChooseFolder": "Choose the folder that contains your games",
+  "Game.Scan.Progress": "Looking for games…",
+  "Game.Scan.Nothing": "No games were found in \"{0}\".",
+
+  "Game.Import.Title": "Import games",
+  "Game.Import.Import": "Import",
+  "Game.Import.Summary": "Found {0} folder(s) in \"{1}\". Tick the games to add, and check the title and the program of each.",
+  "Game.Import.SelectAll": "Select all",
+  "Game.Import.SelectNone": "Select none",
+  "Game.Import.TitleColumn": "Title",
+  "Game.Import.ExecutableColumn": "Program",
+  "Game.Import.Done": "Added {0} game(s).",
+  "Game.Import.Status.Ready": "Ready to import",
+  "Game.Import.Status.NoExecutable": "No program found",
+  "Game.Import.Status.AlreadyInLibrary": "Already in library",
+
+  "Game.Error.Missing": "\"{0}\" could not be started because its program was not found. Edit the game to choose it again.",
+  "Game.Error.Launch": "\"{0}\" could not be started.",
+  "Game.Error.FolderMissing": "The folder \"{0}\" could not be opened.",
+  "Game.Error.AlreadyAdded": "A game with this program is already in the library.",
+  "Game.Error.Failed": "The change could not be saved."
+}

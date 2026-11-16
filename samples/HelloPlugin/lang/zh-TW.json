@@ -1,0 +1,7 @@
+{
+  "Hello.Page.Title": "哈囉",
+  "Hello.Greeting": "來自外掛的問候！",
+  "Hello.Hint": "這個頁面由範例外掛新增。在設定中切換語言，文字會立即改變。",
+  "Hello.Button": "打個招呼",
+  "Hello.Notification": "再次問候！"
+}

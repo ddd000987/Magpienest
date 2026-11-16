@@ -20,6 +20,7 @@
     <ProjectReference Include="..\plugins\Magpienest.Plugins.About\Magpienest.Plugins.About.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\plugins\Magpienest.Plugins.Archives\Magpienest.Plugins.Archives.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\plugins\Magpienest.Plugins.Comic\Magpienest.Plugins.Comic.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\plugins\Magpienest.Plugins.Game\Magpienest.Plugins.Game.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\plugins\Magpienest.Plugins.Imaging\Magpienest.Plugins.Imaging.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\plugins\Magpienest.Plugins.ImageViewer\Magpienest.Plugins.ImageViewer.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\plugins\Magpienest.Plugins.ImageWindow\Magpienest.Plugins.ImageWindow.csproj" ReferenceOutputAssembly="false" />

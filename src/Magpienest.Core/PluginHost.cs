@@ -17,14 +17,19 @@ internal sealed class PluginHost : IPluginManager
     private readonly PluginConfigStore _configs;
     private readonly List<PluginEntry> _entries = [];
     private readonly HashSet<PluginEntry> _deactivating = [];
+    private readonly bool _safeMode;
+    private readonly string _pluginsRoot;
+    private int _installing;
     private bool _started;
     private bool _shutDown;
     private bool _reconciling;
     private bool _dirty;
     private int _activationCounter;
 
-    public PluginHost(IUiDispatcher ui, AppEnvironment environment, IReadOnlyList<IPluginSource> sources, FileLog fileLog, ILog log)
+    public PluginHost(IUiDispatcher ui, AppEnvironment environment, IReadOnlyList<IPluginSource> sources, FileLog fileLog, ILog log, bool safeMode = false)
     {
+        _safeMode = safeMode;
+        _pluginsRoot = Path.Combine(environment.DataDirectory, "plugins");
         Ui = ui;
         Environment = environment;
         FileLog = fileLog;
@@ -79,15 +84,15 @@ internal sealed class PluginHost : IPluginManager
         Registry.Add(typeof(IUiDispatcher), Ui, null);
 
         _state.Load();
+        if (_safeMode)
+        {
+            _log.Warn("Safe mode: only built-in plugins are loaded.");
+        }
+
+        PluginInstaller.ProcessQueues(_state, _pluginsRoot, _log);
         foreach (var candidate in Discover())
         {
-            var id = candidate.Manifest.Id;
-            var enabled = candidate.Manifest.Essential || (_state.GetEnabled(id) ?? candidate.Manifest.EnabledByDefault);
-            var entry = new PluginEntry(candidate, enabled, new PluginLog(FileLog, id), _configs.Get(id))
-            {
-                State = enabled ? PluginState.Waiting : PluginState.Disabled,
-            };
-            _entries.Add(entry);
+            _entries.Add(CreateEntry(candidate));
         }
 
         _log.Info($"Discovered {_entries.Count} plugin(s).");
@@ -114,6 +119,13 @@ internal sealed class PluginHost : IPluginManager
         entry.Enabled = enabled;
         _state.SetEnabled(pluginId, enabled);
 
+        if (entry.State == PluginState.PendingRemoval)
+        {
+            // The choice is stored and applies if the removal is undone.
+            EmitStateChanged(entry);
+            return;
+        }
+
         if (!enabled)
         {
             if (entry.State == PluginState.Active)
@@ -135,6 +147,180 @@ internal sealed class PluginHost : IPluginManager
 
         Reconcile();
     }
+
+    public bool RestartRequired => _state.PendingInstall.Count > 0;
+
+    public async Task<PluginPackageInfo> InspectAsync(string zipOrFolderPath)
+    {
+        AssertUiThread();
+        var (builtIn, _, versions) = SnapshotForPackages();
+        var root = _pluginsRoot;
+        try
+        {
+            var manifest = await Task.Run(() => PluginInstaller.Inspect(zipOrFolderPath, root, builtIn)).ConfigureAwait(false);
+            return new PluginPackageInfo(true, manifest, versions.GetValueOrDefault(manifest.Id), null);
+        }
+        catch (PackageException ex)
+        {
+            return new PluginPackageInfo(false, null, null, ex.Message, ex.Code);
+        }
+        catch (Exception ex) when (IsPackageIoError(ex))
+        {
+            _log.Warn($"Could not inspect '{zipOrFolderPath}'.", ex);
+            return new PluginPackageInfo(false, null, null, $"The package could not be read: {ex.Message}", PluginInstallError.IoError);
+        }
+    }
+
+    public async Task<PluginInstallResult> InstallAsync(string zipOrFolderPath)
+    {
+        AssertUiThread();
+        if (!_started || _shutDown)
+        {
+            throw new InvalidOperationException("The kernel is not running.");
+        }
+
+        if (Interlocked.CompareExchange(ref _installing, 1, 0) != 0)
+        {
+            return new PluginInstallResult(false, null, false, "Another plugin is being installed.", PluginInstallError.Busy);
+        }
+
+        try
+        {
+            var (builtIn, loaded, _) = SnapshotForPackages();
+            var root = _pluginsRoot;
+            var safeMode = _safeMode;
+            PreparedInstall prepared;
+            try
+            {
+                prepared = await Task.Run(() => PluginInstaller.Prepare(zipOrFolderPath, root, builtIn, loaded, safeMode)).ConfigureAwait(false);
+            }
+            catch (PackageException ex)
+            {
+                _log.Info($"Plugin package '{zipOrFolderPath}' was rejected: {ex.Message}");
+                return new PluginInstallResult(false, ex.PluginId, false, ex.Message, ex.Code);
+            }
+            catch (Exception ex) when (IsPackageIoError(ex))
+            {
+                _log.Error($"Installing '{zipOrFolderPath}' failed.", ex);
+                return new PluginInstallResult(false, null, false, $"The package could not be installed: {ex.Message}", PluginInstallError.IoError);
+            }
+
+            return await Ui.InvokeAsync(() => CompleteInstall(prepared)).ConfigureAwait(false);
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _installing, 0);
+        }
+    }
+
+    public void Uninstall(string pluginId)
+    {
+        AssertUiThread();
+        var entry = _entries.FirstOrDefault(e => e.Id == pluginId)
+            ?? throw new InvalidOperationException($"Unknown plugin '{pluginId}'.");
+        if (entry.IsBuiltIn)
+        {
+            throw new InvalidOperationException($"Plugin '{pluginId}' is built in and cannot be removed.");
+        }
+
+        if (entry.State == PluginState.PendingRemoval)
+        {
+            return;
+        }
+
+        if (entry.State == PluginState.Active)
+        {
+            DeactivateCore(entry, PluginState.PendingRemoval);
+        }
+        else
+        {
+            entry.State = PluginState.PendingRemoval;
+            entry.Error = null;
+            EmitStateChanged(entry);
+        }
+
+        _state.AddPendingRemoval(pluginId);
+        entry.Log.Info($"Plugin '{pluginId}' will be removed at the next start.");
+        Reconcile();
+    }
+
+    public void UndoUninstall(string pluginId)
+    {
+        AssertUiThread();
+        var entry = _entries.FirstOrDefault(e => e.Id == pluginId)
+            ?? throw new InvalidOperationException($"Unknown plugin '{pluginId}'.");
+        UndoRemoval(entry);
+        Reconcile();
+    }
+
+    private PluginEntry CreateEntry(PluginCandidate candidate)
+    {
+        var id = candidate.Manifest.Id;
+        var enabled = candidate.Manifest.Essential || (_state.GetEnabled(id) ?? candidate.Manifest.EnabledByDefault);
+        return new PluginEntry(candidate, enabled, new PluginLog(FileLog, id), _configs.Get(id))
+        {
+            // A removal that failed at start-up (files in use) is retried at the next start.
+            State = !candidate.IsBuiltIn && _state.IsPendingRemoval(id)
+                ? PluginState.PendingRemoval
+                : enabled ? PluginState.Waiting : PluginState.Disabled,
+        };
+    }
+
+    private void UndoRemoval(PluginEntry entry)
+    {
+        if (entry.State != PluginState.PendingRemoval)
+        {
+            return;
+        }
+
+        _state.RemovePendingRemoval(entry.Id);
+        entry.Error = null;
+        entry.State = entry.Enabled ? PluginState.Waiting : PluginState.Disabled;
+        entry.Log.Info($"Removal of plugin '{entry.Id}' was undone.");
+        EmitStateChanged(entry);
+    }
+
+    private PluginInstallResult CompleteInstall(PreparedInstall prepared)
+    {
+        var manifest = prepared.Manifest;
+        var id = manifest.Id;
+        var existing = _entries.FirstOrDefault(e => e.Id == id);
+        if (prepared.Staged)
+        {
+            _state.AddPendingInstall(id);
+            if (existing is not null)
+            {
+                // Installing over a plugin that was just removed cancels the removal; the update replaces its files.
+                UndoRemoval(existing);
+                Reconcile();
+            }
+
+            _log.Info($"Plugin '{id}' {manifest.Version} is staged; it takes effect at the next start.");
+            return new PluginInstallResult(true, id, true, null);
+        }
+
+        if (existing is not null)
+        {
+            return new PluginInstallResult(false, id, false, $"Plugin '{id}' is already installed.", PluginInstallError.IoError);
+        }
+
+        var entry = CreateEntry(DirectoryPluginSource.CreateCandidate(manifest, prepared.Folder, isBuiltIn: false));
+        _entries.Add(entry);
+        _log.Info($"Plugin '{id}' {manifest.Version} installed.");
+        EmitStateChanged(entry);
+        Reconcile();
+        return new PluginInstallResult(true, id, false, null);
+    }
+
+    private (HashSet<string> BuiltIn, HashSet<string> Loaded, Dictionary<string, string> Versions) SnapshotForPackages() =>
+    (
+        [.. _entries.Where(e => e.IsBuiltIn).Select(e => e.Id)],
+        [.. _entries.Select(e => e.Id)],
+        _entries.ToDictionary(e => e.Id, e => e.Manifest.Version, StringComparer.Ordinal)
+    );
+
+    private static bool IsPackageIoError(Exception ex) =>
+        ex is IOException or UnauthorizedAccessException or InvalidDataException or NotSupportedException or ArgumentException;
 
     public void Shutdown()
     {
