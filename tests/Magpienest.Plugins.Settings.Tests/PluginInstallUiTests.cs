@@ -65,8 +65,8 @@ public sealed class PluginInstallUiTests
     public void CreateStartsTheExeDirectlyWithEachArgumentSeparate()
     {
         var args = RestartCommand.AppArguments(77, @"D:\my data", ["--verbose"]);
-        var info = RestartCommand.Create(@"C:\app\Magpienest.App.exe", args);
-        Assert.Equal(@"C:\app\Magpienest.App.exe", info.FileName);
+        var info = RestartCommand.Create(@"C:\app\Magpienest.exe", args);
+        Assert.Equal(@"C:\app\Magpienest.exe", info.FileName);
         Assert.False(info.UseShellExecute);
         Assert.Equal(args, info.ArgumentList);
     }

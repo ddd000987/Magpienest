@@ -1,3 +1,6 @@
+// The exclusion masks below are adapted from Playnite/source/Playnite/Common/Programs.cs
+// (scanFileExclusionMasks). Copyright (c) 2020 Josef Nemec, MIT licence.
+
 using System.Text;
 using System.Text.RegularExpressions;
 using Magpienest.Sdk.Library;

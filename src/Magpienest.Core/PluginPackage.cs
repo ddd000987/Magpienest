@@ -27,7 +27,7 @@ internal sealed class PluginPackage : IDisposable
     private const long MaxManifestBytes = 1024 * 1024;
     private const string ManifestName = "plugin.json";
 
-    private static readonly string[] ForbiddenFiles = ["Magpienest.Sdk.dll", "Magpienest.Core.dll"];
+    private static readonly string[] ForbiddenFiles = ["Magpienest.Sdk.dll", "Magpienest.Core.dll", "Magpienest.exe", "Magpienest.dll"];
 
     private static readonly HashSet<string> ReservedNames = new(StringComparer.OrdinalIgnoreCase)
     {

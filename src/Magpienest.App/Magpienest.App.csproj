@@ -7,8 +7,13 @@
     <RootNamespace>Magpienest.App</RootNamespace>
     <OutDir>$(RepoRoot)artifacts\bin\$(Configuration)\</OutDir>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <AssemblyName>Magpienest.App</AssemblyName>
+    <AssemblyName>Magpienest</AssemblyName>
+    <ApplicationIcon>Assets\Magpienest.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\Magpienest.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Magpienest.Core\Magpienest.Core.csproj" />

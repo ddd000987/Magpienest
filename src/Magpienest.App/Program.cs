@@ -97,6 +97,9 @@ internal static class Program
             e.SetObserved();
         };
 
+        // Plugins create the windows and cannot see App resources, so the host gives every window without an icon the app icon.
+        EventManager.RegisterClassHandler(typeof(Window), FrameworkElement.LoadedEvent, new RoutedEventHandler(ApplyWindowIcon));
+
         app.Startup += (_, _) =>
         {
             kernel = new Kernel(new KernelOptions
@@ -151,6 +154,23 @@ internal static class Program
         }
 
         return exitCode;
+    }
+
+    private static void ApplyWindowIcon(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Window { Icon: null } window || !ReferenceEquals(e.OriginalSource, window))
+        {
+            return;
+        }
+
+        try
+        {
+            window.Icon = System.Windows.Media.Imaging.BitmapFrame.Create(new Uri("pack://application:,,,/Magpienest;component/Assets/Magpienest.ico"));
+        }
+        catch (Exception)
+        {
+            // A missing icon must never stop a window from opening.
+        }
     }
 
     /// <summary>Writes &lt;data&gt;/smoke.json; 0 when nothing failed and every enabled plugin is active.</summary>

@@ -24,7 +24,7 @@ public enum PluginInstallError
     /// <summary>An entry would be written outside the plugin folder (zip-slip) or has an invalid path.</summary>
     UnsafePath,
 
-    /// <summary>The package contains Magpienest.Sdk.dll, Magpienest.Core.dll or Magpienest.App.*.</summary>
+    /// <summary>The package contains Magpienest.Sdk.dll, Magpienest.Core.dll, Magpienest.exe, Magpienest.dll or Magpienest.App.*.</summary>
     ForbiddenFile,
 
     /// <summary>No plugin.json at the root or inside exactly one top-level folder.</summary>

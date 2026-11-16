@@ -12,7 +12,8 @@
     </ProjectReference>
     <!-- Compile-time only (source generators); the host supplies the runtime copy through the SDK. -->
     <PackageReference Include="CommunityToolkit.Mvvm" ExcludeAssets="runtime" />
-    <Content Include="plugin.json" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="lang\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- CopyToPublishDirectory=Never: the publish script copies plugins itself; the host publish must not pull them in. -->
+    <Content Include="plugin.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
+    <Content Include="lang\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="Never" />
   </ItemGroup>
 </Project>

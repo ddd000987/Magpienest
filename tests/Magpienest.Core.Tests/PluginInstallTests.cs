@@ -117,6 +117,8 @@ public sealed class PluginInstallTests
     [InlineData("magpienest.core.DLL")]
     [InlineData("Magpienest.App.exe")]
     [InlineData("Magpienest.App.dll")]
+    [InlineData("Magpienest.exe")]
+    [InlineData("Magpienest.dll")]
     [InlineData("lib/Magpienest.Sdk.dll")]
     public void Validation_HostAssembliesAreRejected(string forbidden)
     {

@@ -182,8 +182,8 @@ Things to know:
   `Magpienest.Sdk.dll`. The host loads your plugin into its own
   `AssemblyLoadContext` and always supplies its own copy of the SDK (and of
   WPF); that keeps SDK types identical for every plugin. The installer rejects
-  packages that contain `Magpienest.Sdk.dll`, `Magpienest.Core.dll` or
-  `Magpienest.App.*`.
+  packages that contain `Magpienest.Sdk.dll`, `Magpienest.Core.dll`,
+  `Magpienest.exe`, `Magpienest.dll` or `Magpienest.App.*`.
 - **Your own NuGet packages are fine.** Their dlls are loaded from your plugin
   folder (keep the generated `*.deps.json` next to your dll). If the host
   already ships an assembly of that name, the host's copy wins, so avoid
@@ -649,7 +649,7 @@ The installer rejects a package when:
 - `plugin.json` is missing, unreadable, or its `id` is not `[a-z0-9.]+`;
 - `apiVersion` is not supported or the `assembly` file is not in the package;
 - the `id` belongs to a built-in plugin;
-- it contains `Magpienest.Sdk.dll`, `Magpienest.Core.dll` or `Magpienest.App.*`;
+- it contains `Magpienest.Sdk.dll`, `Magpienest.Core.dll`, `Magpienest.exe`, `Magpienest.dll` or `Magpienest.App.*`;
 - an entry would extract outside the plugin folder;
 - it is larger than 500 MB uncompressed or has more than 5000 entries.
 
@@ -691,7 +691,7 @@ shows the current one.
 Run a separate copy of the data so that you never disturb your real library:
 
 ```
-Magpienest.App.exe --data-dir C:\dev\magpienest-data --verbose
+Magpienest.exe --data-dir C:\dev\magpienest-data --verbose
 ```
 
 Install your zip into it, or copy your build output folder to
@@ -716,7 +716,7 @@ unloaded, restart Magpienest after each rebuild.
     names are listed. Turn on the plugin that provides it.
   - A key shown in the UI instead of text (for example `Hello.Greeting`) means
     the key is missing from `lang\*.json`, or the files were not copied.
-- **Does it start at all?** `Magpienest.App.exe --smoke-test --data-dir <dir>`
+- **Does it start at all?** `Magpienest.exe --smoke-test --data-dir <dir>`
   starts the app, waits for startup, writes `<dir>\smoke.json` with every
   plugin's state, error and missing services, and exits with code 0 only if no
   plugin failed and every enabled plugin is active.

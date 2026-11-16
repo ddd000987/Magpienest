@@ -37,4 +37,4 @@ Then in Magpienest open **Settings, Plugins, Install plugin...** and choose
 remove it like any other plugin.
 
 To try it without touching your real data, start Magpienest with a throw-away
-data folder: `Magpienest.App.exe --data-dir C:\dev\magpienest-data`.
+data folder: `Magpienest.exe --data-dir C:\dev\magpienest-data`.

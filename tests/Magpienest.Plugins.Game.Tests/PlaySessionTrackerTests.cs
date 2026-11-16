@@ -5,7 +5,7 @@ namespace Magpienest.Plugins.Game.Tests;
 public sealed class PlaySessionTrackerTests
 {
     private const long Id = 7;
-    private const string Own = @"C:\Apps\Magpienest\Magpienest.App.exe";
+    private const string Own = @"C:\Apps\Magpienest\Magpienest.exe";
 
     // ----- simple cases -----------------------------------------------------------------------------------------
 
