@@ -1,20 +1,28 @@
-// The comic reader: pages paired into frames by the server (the same FrameLayout as the desktop), keys, click or tap
-// thirds and swipes as in the desktop viewer (direction-aware), a page slider, and toggles for spread, direction and
-// cover-alone that are saved with the book. Progress is sent at most once a second and when the reader closes.
+// The comic reader: pages paired into frames by the server (the same FrameLayout as the desktop), or one continuous
+// strip (strip.js); keys, click or tap thirds and swipes as in the desktop viewer (direction-aware), a page slider,
+// and toggles for pages shown (one, two or strip), direction and cover-alone that are saved with the book. Every wheel
+// notch turns a page at once: the next frames and their pages are fetched ahead. Progress is sent at most once a second
+// and when the reader closes.
 
 import { api, urls, beacon } from "./api.js";
 import { t, label, textElement, formatNumber } from "./i18n.js";
 import { icon, iconButton } from "./icons.js";
 import { back } from "./router.js";
+import { createStrip } from "./strip.js";
 
 const IDLE_LIMIT_MS = 5 * 60 * 1000;
 const SAVE_EVERY_MS = 1000;
 const TIME_FLUSH_MS = 30 * 1000;
 const SWIPE = 60;
 const TAP_MOVE = 10;
-const WHEEL_GAP_MS = 250;
+const WHEEL_STEP = 100;    // wheel distance (px) that turns a page; one mouse notch is about this
+const WHEEL_RESET_MS = 250; // a touchpad's leftover distance is forgotten after this pause
+const DECODE_WAIT_MS = 300; // how long a turn waits for its pages before showing them anyway
+const FRAMES_AHEAD = 2;     // page pairs asked for ahead of the reader
 const PORTRAIT = 0.7;
 const CHROME_MS = 2500;
+const STRIP_PAGE = 0.9;   // share of the window a page key or a tap scrolls in a strip
+const STRIP_ARROW = 0.5;  // share an arrow key scrolls
 
 /** Opens book `id` in `root`. `context.toast(text)` shows a short message. Returns `{ close() }`. */
 export function openReader(root, id, context) {
@@ -23,6 +31,9 @@ export function openReader(root, id, context) {
   let spread = "double";
   let direction = "rtl";
   let coverAlone = true;
+  let flow = "paged";
+  let strip = null;
+  let stripCurrent = 0;
   let closed = false;
   let chain = Promise.resolve();
   let pending = 0;
@@ -35,7 +46,9 @@ export function openReader(root, id, context) {
   let unsent = null;
   let lastSave = 0;
   let saveTimer = 0;
-  let lastWheel = 0;
+  let wheelSum = 0;
+  let wheelTimer = 0;
+  const frames = new Map();   // "dir:at" -> Promise of a frame, so turning a page needs no wait for the server
   let drag = null;
   let chromeTimer = 0;
 
@@ -119,6 +132,7 @@ export function openReader(root, id, context) {
       spread = info.spread;
       direction = info.direction;
       coverAlone = info.coverAlone;
+      flow = info.flow === "strip" ? "strip" : "paged";
       title.textContent = item.title;
       if (info.count === 0) {
         showMessage("WebUi.Web.Reader.NoPages");
@@ -127,7 +141,11 @@ export function openReader(root, id, context) {
 
       slider.max = String(info.count - 1);
       showSettings();
-      await navigate(() => load(info.position, "forward"));
+      if (flow === "strip") {
+        enterStrip(info.position);
+      } else {
+        await navigate(() => load(info.position, "forward"));
+      }
     } catch {
       if (!closed) {
         showMessage("WebUi.Web.Reader.CannotOpen");
@@ -143,8 +161,44 @@ export function openReader(root, id, context) {
 
   // ---------- Frames ----------
 
+  /** The frame at `at` going `dir`, from the cache or the server. */
   function load(at, dir) {
-    return api.frame(id, { at, dir, spread, coverAlone });
+    const key = `${dir}:${at}`;
+    let found = frames.get(key);
+    if (!found) {
+      if (frames.size > 64) {
+        frames.clear();
+      }
+
+      found = api.frame(id, { at, dir, spread, coverAlone });
+      frames.set(key, found);
+      found.catch(() => frames.delete(key));
+    }
+
+    return found;
+  }
+
+  /** Asks for the next frames on both sides ahead, so the following turns are immediate. */
+  async function prefetch(from) {
+    try {
+      let next = from;
+      for (let i = 0; i < FRAMES_AHEAD && next.last + 1 < book.count; i++) {
+        next = await load(next.last + 1, "forward");
+        preload(next);
+      }
+
+      if (from.first > 0) {
+        preload(await load(from.first - 1, "backward"));
+      }
+    } catch {
+      // Asked for again when the reader gets there.
+    }
+  }
+
+  function preload(target) {
+    for (let i = target.first; i <= target.last; i++) {
+      new Image().src = urls.page(id, i);
+    }
   }
 
   /** Runs navigations one after another so quick key presses page in order; more than three waiting are dropped. */
@@ -157,8 +211,8 @@ export function openReader(root, id, context) {
     chain = chain.then(async () => {
       try {
         const target = await next();
-        if (target && !closed) {
-          showFrame(target);
+        if (target && !closed && !strip) {
+          await showFrame(target);
         }
       } catch {
         if (!closed) {
@@ -174,6 +228,11 @@ export function openReader(root, id, context) {
   function forward() {
     touch();
     hideChrome();
+    if (strip) {
+      strip.scrollBy(STRIP_PAGE);
+      return;
+    }
+
     navigate(() => {
       if (frame.last + 1 >= book.count) {
         context.toast(t("WebUi.Web.Reader.LastPage"));
@@ -187,6 +246,11 @@ export function openReader(root, id, context) {
   function backward() {
     touch();
     hideChrome();
+    if (strip) {
+      strip.scrollBy(-STRIP_PAGE);
+      return;
+    }
+
     navigate(() => {
       if (frame.first <= 0) {
         context.toast(t("WebUi.Web.Reader.FirstPage"));
@@ -199,17 +263,22 @@ export function openReader(root, id, context) {
 
   function goTo(page) {
     touch();
+    if (strip) {
+      strip.goTo(page);
+      return;
+    }
+
     navigate(() => load(Math.min(book.count - 1, Math.max(0, page)), "forward"));
   }
 
-  function showFrame(next) {
-    frame = next;
+  /** Shows a frame once its pages are decoded (or after a short wait), so the old pages stay until then. */
+  async function showFrame(next) {
     const indices = [];
     for (let i = next.first; i <= next.last; i++) {
       indices.push(i);
     }
 
-    pages.replaceChildren(...indices.map((index) => {
+    const images = indices.map((index) => {
       const image = document.createElement("img");
       image.alt = "";
       image.draggable = false;
@@ -222,7 +291,17 @@ export function openReader(root, id, context) {
       });
       image.src = urls.page(id, index);
       return image;
-    }));
+    });
+    const decoded = Promise.all(images.map((image) => image.decode().then(() => {
+      ratios.set(Number(image.dataset.index), image.naturalWidth / image.naturalHeight);
+    }, () => {})));
+    await Promise.race([decoded, new Promise((resolve) => setTimeout(resolve, DECODE_WAIT_MS))]);
+    if (closed || strip) {
+      return;
+    }
+
+    frame = next;
+    pages.replaceChildren(...images);
     layout();
 
     slider.value = String(next.first);
@@ -232,13 +311,7 @@ export function openReader(root, id, context) {
       label(pageText, "WebUi.Web.Reader.PagesOf", formatNumber(next.first + 1), formatNumber(next.last + 1), formatNumber(book.count));
     }
 
-    // Load the pages around this frame ahead.
-    for (const index of [next.last + 1, next.last + 2, next.first - 1, next.first - 2]) {
-      if (index >= 0 && index < book.count) {
-        new Image().src = urls.page(id, index);
-      }
-    }
-
+    prefetch(next);
     record({ progressPosition: next.first, progressTotal: book.count, reachedEnd: next.last >= book.count - 1 });
   }
 
@@ -258,13 +331,45 @@ export function openReader(root, id, context) {
     });
   }
 
+  // ---------- Strip ----------
+
+  function enterStrip(page) {
+    frame = null;
+    pages.replaceChildren();
+    stripCurrent = page;
+    strip = createStrip(stage, {
+      count: book.count,
+      rtl: direction === "rtl",
+      start: page,
+      src: (index) => urls.page(id, index),
+      onMove: onStripMove,
+    });
+  }
+
+  function leaveStrip() {
+    strip?.destroy();
+    strip = null;
+  }
+
+  function onStripMove({ current, atEnd }) {
+    stripCurrent = current;
+    slider.value = String(current);
+    label(pageText, "WebUi.Web.Reader.PageOf", formatNumber(current + 1), formatNumber(book.count));
+    record({ progressPosition: current, progressTotal: book.count, reachedEnd: atEnd });
+  }
+
+  /** The first page on screen. */
+  function currentPage() {
+    return strip ? stripCurrent : frame ? frame.first : 0;
+  }
+
   // ---------- Settings ----------
 
   function showSettings() {
     pages.classList.toggle("rtl", direction === "rtl");
     slider.dir = direction === "rtl" ? "rtl" : "ltr";
-    spreadButton.replaceChildren(icon(spread === "double" ? "spread" : "single"));
-    spreadButton.setAttribute("aria-pressed", String(spread === "double"));
+    spreadButton.replaceChildren(icon(flow === "strip" ? "strip" : spread === "double" ? "spread" : "single"));
+    coverButton.hidden = flow === "strip";
     directionButton.replaceChildren(icon(direction === "rtl" ? "rtl" : "ltr"));
     directionButton.setAttribute("aria-pressed", String(direction === "rtl"));
     coverButton.setAttribute("aria-pressed", String(coverAlone));
@@ -275,9 +380,19 @@ export function openReader(root, id, context) {
     let toast;
     let change;
     if (which === "spread") {
-      spread = spread === "double" ? "single" : "double";
-      change = { spread };
-      toast = spread === "double" ? "WebUi.Web.Reader.DoublePage" : "WebUi.Web.Reader.SinglePage";
+      // One page, two pages, strip, as the desktop viewer's "pages shown" button.
+      if (flow === "strip") {
+        flow = "paged";
+        spread = "single";
+      } else if (spread === "single") {
+        spread = "double";
+      } else {
+        flow = "strip";
+      }
+
+      change = { spread, flow };
+      toast = flow === "strip" ? "WebUi.Web.Reader.Strip"
+        : spread === "double" ? "WebUi.Web.Reader.DoublePage" : "WebUi.Web.Reader.SinglePage";
     } else if (which === "direction") {
       direction = direction === "rtl" ? "ltr" : "rtl";
       change = { direction };
@@ -291,8 +406,20 @@ export function openReader(root, id, context) {
     showSettings();
     context.toast(t(toast));
     api.patch(id, { extra: change }).catch(() => context.toast(t("WebUi.Web.Error.Save")));
-    if (frame) {
-      const keep = frame.first;
+    frames.clear();
+    if (!frame && !strip) {
+      return;
+    }
+
+    const keep = currentPage();
+    if (flow === "strip") {
+      if (!strip) {
+        enterStrip(keep);
+      } else if (which === "direction") {
+        strip.setDirection(direction === "rtl");
+      }
+    } else {
+      leaveStrip();
       navigate(() => load(keep, "forward"));
     }
   }
@@ -317,7 +444,7 @@ export function openReader(root, id, context) {
   }
 
   function onKey(event) {
-    if (event.altKey || event.ctrlKey || event.metaKey || !frame) {
+    if (event.altKey || event.ctrlKey || event.metaKey || (!frame && !strip)) {
       if (event.key === "Escape") {
         leave();
       }
@@ -327,10 +454,20 @@ export function openReader(root, id, context) {
 
     switch (event.key) {
       case "ArrowLeft":
-        left();
+        if (strip) {
+          touch();
+          strip.scrollBy(direction === "rtl" ? STRIP_ARROW : -STRIP_ARROW);
+        } else {
+          left();
+        }
         break;
       case "ArrowRight":
-        right();
+        if (strip) {
+          touch();
+          strip.scrollBy(direction === "rtl" ? -STRIP_ARROW : STRIP_ARROW);
+        } else {
+          right();
+        }
         break;
       case " ":
       case "PageDown":
@@ -369,17 +506,32 @@ export function openReader(root, id, context) {
   }
 
   function onWheel(event) {
+    if (strip) {
+      touch();
+      return; // the strip scrolls itself
+    }
+
+    // Every notch turns a page at once, as in the desktop viewer; a touchpad turns one per WHEEL_STEP of travel.
     event.preventDefault();
-    const now = Date.now();
-    if (!frame || now - lastWheel < WHEEL_GAP_MS || event.deltaY === 0) {
+    const delta = event.deltaY * (event.deltaMode === 1 ? 33 : event.deltaMode === 2 ? stage.clientHeight : 1);
+    if (!frame || delta === 0) {
       return;
     }
 
-    lastWheel = now;
-    if (event.deltaY > 0) {
-      forward();
-    } else {
-      backward();
+    if (Math.sign(delta) !== Math.sign(wheelSum)) {
+      wheelSum = 0;
+    }
+
+    wheelSum += delta;
+    clearTimeout(wheelTimer);
+    wheelTimer = setTimeout(() => (wheelSum = 0), WHEEL_RESET_MS);
+    if (Math.abs(delta) >= WHEEL_STEP / 2 || Math.abs(wheelSum) >= WHEEL_STEP) {
+      wheelSum = 0;
+      if (delta > 0) {
+        forward();
+      } else {
+        backward();
+      }
     }
   }
 
@@ -389,7 +541,7 @@ export function openReader(root, id, context) {
   }
 
   function onPointerUp(event) {
-    if (!drag || !frame) {
+    if (!drag || (!frame && !strip)) {
       drag = null;
       return;
     }
@@ -398,6 +550,10 @@ export function openReader(root, id, context) {
     const dy = event.clientY - drag.y;
     drag = null;
     if (Math.hypot(dx, dy) > TAP_MOVE) {
+      if (strip) {
+        return; // the strip was scrolled
+      }
+
       // A swipe to the right works like the Left key (it pulls the page on the left into view).
       if (Math.abs(dx) > SWIPE && Math.abs(dx) > Math.abs(dy)) {
         if (dx > 0) {
@@ -447,7 +603,7 @@ export function openReader(root, id, context) {
   }
 
   function tick() {
-    if (document.visibilityState === "visible" && Date.now() - lastInput < IDLE_LIMIT_MS && frame) {
+    if (document.visibilityState === "visible" && Date.now() - lastInput < IDLE_LIMIT_MS && (frame || strip)) {
       seconds++;
       if (seconds * 1000 >= TIME_FLUSH_MS) {
         record({});
@@ -521,9 +677,11 @@ export function openReader(root, id, context) {
   return {
     close() {
       closed = true;
+      leaveStrip();
       flushOnLeave();
       clearInterval(ticker);
       clearTimeout(chromeTimer);
+      clearTimeout(wheelTimer);
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("resize", layout);
       window.removeEventListener("pagehide", flushOnLeave);

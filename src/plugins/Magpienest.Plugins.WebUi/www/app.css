@@ -1023,3 +1023,37 @@ body.details-open .browse {
   margin: 4px 0 0;
   color: var(--danger);
 }
+
+/* Strip mode: pages edge to edge at the window's height, scrolled sideways (touch pans natively). */
+.strip {
+  position: absolute;
+  inset: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior: contain;
+  touch-action: pan-x;
+  scrollbar-width: none;
+  cursor: grab;
+}
+
+.strip::-webkit-scrollbar {
+  display: none;
+}
+
+.strip.dragging {
+  cursor: grabbing;
+}
+
+.strip-row {
+  display: flex;
+  width: max-content;
+  height: 100%;
+}
+
+.strip-row img {
+  display: block;
+  flex: none;
+  height: 100%;
+  -webkit-user-drag: none;
+  background: #111111;
+}

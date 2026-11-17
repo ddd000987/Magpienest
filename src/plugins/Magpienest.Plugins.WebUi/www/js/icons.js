@@ -14,6 +14,7 @@ const PATHS = {
   right: "M9 6l6 6-6 6",
   spread: "M3 5h8v14H3zM13 5h8v14h-8z",
   single: "M7 4h10v16H7z",
+  strip: "M2 6h6v12H2zM9 6h6v12H9zM16 6h6v12h-6z",
   rtl: "M20 12H4M9 7l-5 5 5 5",
   ltr: "M4 12h16M15 7l5 5-5 5",
   cover: "M6 3h12v18H6zM9 8h6M9 11h4",
