@@ -37,12 +37,14 @@ internal sealed class ShellService : IShellService
         {
             IsRailCollapsed = ctx.Config.Get("railCollapsed", false),
         };
+
+        // The theme goes first: the window's styles are based on the theme's styles when the window is built.
+        _theme = ctx.Config.Get("theme", AppTheme.System);
+        ApplyTheme(_theme);
         _window = new MainWindow { DataContext = _vm };
         _window.Closing += OnWindowClosing;
         RestoreBounds();
 
-        _theme = ctx.Config.Get("theme", AppTheme.System);
-        ApplyTheme(_theme);
         LocSource.Instance.PropertyChanged += OnLanguageChanged;
         _badges.Changed += id =>
         {

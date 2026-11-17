@@ -19,10 +19,21 @@
       <Setter Property="HorizontalAlignment" Value="Center" />
     </Style>
 
+    <!-- The collapsed rail is too narrow for the item's default side padding: drop it and centre the icon. -->
+    <Style x:Key="NavItemContainer" TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+      <Style.Triggers>
+        <DataTrigger Binding="{Binding DataContext.IsRailCollapsed, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+          <Setter Property="Padding" Value="0,12" />
+          <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </DataTrigger>
+      </Style.Triggers>
+    </Style>
+
     <Style x:Key="NavList" TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
       <Setter Property="Background" Value="Transparent" />
       <Setter Property="BorderThickness" Value="0" />
       <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+      <Setter Property="ItemContainerStyle" Value="{StaticResource NavItemContainer}" />
     </Style>
 
     <DataTemplate x:Key="NavItemTemplate" DataType="{x:Type local:NavItem}">
