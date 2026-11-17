@@ -1,6 +1,6 @@
 {
   "id": "magpienest.about",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "apiVersion": 1,
   "assembly": "Magpienest.Plugins.About.dll",
   "name": { "en": "About", "zh-TW": "關於" },

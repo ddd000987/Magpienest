@@ -1,6 +1,6 @@
 {
   "id": "magpienest.hoverpreview",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "apiVersion": 1,
   "assembly": "Magpienest.Plugins.HoverPreview.dll",
   "name": { "en": "Hover Preview", "zh-TW": "懸浮檢視" },

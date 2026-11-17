@@ -1,6 +1,6 @@
 {
   "id": "magpienest.shell",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "apiVersion": 1,
   "assembly": "Magpienest.Plugins.Shell.dll",
   "name": { "en": "Main window", "zh-TW": "主視窗" },

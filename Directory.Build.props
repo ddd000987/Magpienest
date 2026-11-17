@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>Magpienest contributors</Authors>
     <Copyright>Copyright (c) 2026 Magpienest contributors</Copyright>
     <LangVersion>latest</LangVersion>
