@@ -12,6 +12,7 @@ internal sealed class LibraryDb : IDisposable
     internal static readonly IReadOnlyList<(int Version, string Sql)> Migrations =
     [
         (1, SchemaV1),
+        (2, SchemaV2),
     ];
 
     private const string SchemaV1 = """
@@ -63,6 +64,24 @@ internal sealed class LibraryDb : IDisposable
           PRIMARY KEY (item_id, tag_id)
         ) WITHOUT ROWID;
         CREATE INDEX ix_item_tag_tag ON item_tag (tag_id);
+        """;
+
+    /// <summary>Tags and a rating on folders; they apply to every item below the folder.</summary>
+    private const string SchemaV2 = """
+        CREATE TABLE folder (
+          id      INTEGER PRIMARY KEY,
+          kind    TEXT    NOT NULL,
+          path    TEXT    NOT NULL COLLATE NOCASE,
+          rating  INTEGER NOT NULL DEFAULT 0,
+          UNIQUE (kind, path)
+        );
+
+        CREATE TABLE folder_tag (
+          folder_id  INTEGER NOT NULL REFERENCES folder(id) ON DELETE CASCADE,
+          tag_id     INTEGER NOT NULL REFERENCES tag(id)    ON DELETE CASCADE,
+          PRIMARY KEY (folder_id, tag_id)
+        ) WITHOUT ROWID;
+        CREATE INDEX ix_folder_tag_tag ON folder_tag (tag_id);
         """;
 
     private const string ConnectionPragmas =

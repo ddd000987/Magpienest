@@ -137,5 +137,13 @@
   "Library.Settings.RemoveMissing": "Remove missing items…",
   "Library.Settings.RemoveMissingTitle": "Remove missing items",
   "Library.Settings.RemoveMissingMessage": "Remove {0} missing item(s) from {1}? Their tags, ratings and notes are lost. No files are deleted.",
-  "Library.Settings.NoMissing": "{0} has no missing items."
+  "Library.Settings.NoMissing": "{0} has no missing items.",
+  "Library.Folder.EditLabels": "Folder tags and rating…",
+  "Library.Folder.Title": "Tags and rating of {0}",
+  "Library.Folder.Hint": "They apply to everything in this folder and its subfolders. An item's own rating comes first.",
+  "Library.Folder.ToolTipRating": "Rating: {0}",
+  "Library.Folder.ToolTipTags": "Tags: {0}",
+  "Library.Folder.TagSeparator": ", ",
+  "Library.Details.FolderRating": "Folder rating: {0}",
+  "Library.Details.FolderTags": "From folders: {0}"
 }

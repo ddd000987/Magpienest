@@ -19,9 +19,13 @@ internal sealed partial class LibraryService
     {
         var naturalSort = query.Sort is ItemSort.Title or ItemSort.Path;
         using var command = connection.CreateCommand();
-        var where = BuildWhere(command, query);
+        var folders = new FolderFilter(connection, command, query.Kind, LoadFolderLabels(connection, query.Kind));
+        // With rated folders an item's rating may come from its folder: that order is also made here, not in SQLite.
+        var ratingSort = query.Sort == ItemSort.Rating && folders.HasRatings;
+        var sortHere = naturalSort || ratingSort;
+        var where = BuildWhere(command, query, folders);
         var sql = $"SELECT {ItemColumns} FROM item WHERE {where}";
-        if (!naturalSort)
+        if (!sortHere)
         {
             sql += " ORDER BY " + SortExpression(query.Sort) + (query.Descending ? " DESC" : " ASC") + ", id ASC";
             if (query.Limit is { } limit)
@@ -46,10 +50,12 @@ internal sealed partial class LibraryService
             }
         }
 
-        if (naturalSort)
+        if (sortHere)
         {
             // Natural order is not expressible in SQLite: sort here, then apply the limit.
-            items = SortNaturally(items, query.Sort == ItemSort.Title, query.Descending);
+            items = ratingSort
+                ? SortByRating(ApplyFolderLabels(items, folders.Folders), query.Descending)
+                : SortNaturally(items, query.Sort == ItemSort.Title, query.Descending);
             if (query.Limit is { } limit && limit < items.Count)
             {
                 items = items.GetRange(0, Math.Max(0, limit));
@@ -57,7 +63,7 @@ internal sealed partial class LibraryService
         }
 
         ct.ThrowIfCancellationRequested();
-        return items.Count == 0 ? items : AttachTags(connection, items);
+        return items.Count == 0 ? items : ApplyFolderLabels(AttachTags(connection, items), folders.Folders);
     }
 
     /// <summary>Natural comparison is the expensive part of a big query, so large lists are sorted on all cores.</summary>
@@ -77,6 +83,15 @@ internal sealed partial class LibraryService
             : items.OrderBy(key, LibraryRules.Natural).ThenBy(i => i.Id)).ToList();
     }
 
+    /// <summary>By the rating an item counts with (its own, else its folder's), then by id as the SQL sorts do.</summary>
+    private static List<LibraryItem> SortByRating(List<LibraryItem> items, bool descending)
+    {
+        static int Effective(LibraryItem item) => item.Rating > 0 ? item.Rating : item.FolderRating;
+        return (descending
+            ? items.OrderByDescending(Effective).ThenBy(i => i.Id)
+            : items.OrderBy(Effective).ThenBy(i => i.Id)).ToList();
+    }
+
     private static string SortExpression(ItemSort sort) => sort switch
     {
         ItemSort.AddedAt => "added_at",
@@ -90,7 +105,7 @@ internal sealed partial class LibraryService
     };
 
     /// <summary>Builds the WHERE clause and adds its parameters to <paramref name="command"/>.</summary>
-    private static string BuildWhere(SqliteCommand command, ItemQuery query)
+    private static string BuildWhere(SqliteCommand command, ItemQuery query, FolderFilter folders)
     {
         var clauses = new List<string> { "kind = $kind" };
         command.Parameters.AddWithValue("$kind", query.Kind);
@@ -102,10 +117,14 @@ internal sealed partial class LibraryService
 
         if (!string.IsNullOrEmpty(query.Text))
         {
+            var text = query.Text;
+            var inFolder = folders.UnderAny(folders.Folders
+                .Where(f => f.Tags.Any(t => t.Contains(text, StringComparison.OrdinalIgnoreCase)))
+                .Select(f => f.Path));
             clauses.Add(
                 "(title LIKE $text ESCAPE '\\' OR EXISTS (SELECT 1 FROM item_tag it JOIN tag t ON t.id = it.tag_id " +
-                "WHERE it.item_id = item.id AND t.name LIKE $text ESCAPE '\\'))");
-            command.Parameters.AddWithValue("$text", "%" + LibraryRules.EscapeLike(query.Text) + "%");
+                "WHERE it.item_id = item.id AND t.name LIKE $text ESCAPE '\\')" + (inFolder is null ? "" : " OR " + inFolder) + ")");
+            command.Parameters.AddWithValue("$text", "%" + LibraryRules.EscapeLike(text) + "%");
         }
 
         if (!string.IsNullOrEmpty(query.Directory))
@@ -137,9 +156,12 @@ internal sealed partial class LibraryService
         foreach (var tag in LibraryRules.NormalizeTags(query.Tags))
         {
             var name = "$tag" + tagIndex++;
+            var inFolder = folders.UnderAny(folders.Folders
+                .Where(f => f.Tags.Contains(tag, StringComparer.OrdinalIgnoreCase))
+                .Select(f => f.Path));
             clauses.Add(
-                "EXISTS (SELECT 1 FROM item_tag it JOIN tag t ON t.id = it.tag_id " +
-                $"WHERE it.item_id = item.id AND t.name = {name})");
+                "(EXISTS (SELECT 1 FROM item_tag it JOIN tag t ON t.id = it.tag_id " +
+                $"WHERE it.item_id = item.id AND t.name = {name})" + (inFolder is null ? "" : " OR " + inFolder) + ")");
             command.Parameters.AddWithValue(name, tag);
         }
 
@@ -150,7 +172,7 @@ internal sealed partial class LibraryService
 
         if (query.MinRating > 0)
         {
-            clauses.Add("rating >= $minRating");
+            clauses.Add(folders.MinRating(query.MinRating));
             command.Parameters.AddWithValue("$minRating", query.MinRating);
         }
 

@@ -136,6 +136,30 @@ public sealed class BrowserViewModelTests
     }
 
     [Fact]
+    public async Task FolderLabelsShowOnTheTreeAndInTheTagFilters()
+    {
+        using var lib = new TestLibrary();
+        var folder = lib.NewFolder("pics");
+        var scanner = new FakeScanner();
+        scanner.Entries.Add(FakeScanner.Entry(Path.Combine(folder, "a.png")));
+        scanner.Entries.Add(FakeScanner.Entry(Path.Combine(folder, "sub", "b.png")));
+        lib.RegisterScanner(Kind, scanner);
+        var source = await lib.Service.AddSourceAsync(Kind, folder);
+        await lib.Service.ScanAsync(source.Id, ct: TestContext.Current.CancellationToken);
+        await lib.Service.SetFolderLabelsAsync(Kind, Path.Combine(source.Path, "sub"), 4, ["night"]);
+
+        using var vm = new BrowserViewModel(BrowserHarness.Services(lib.Service), lib.Context, BrowserHarness.Options());
+        await vm.Initialization;
+
+        var sourceNode = vm.FolderRoots[0].Children.Single();
+        var subNode = sourceNode.Children.Single();
+        Assert.False(sourceNode.HasRating || sourceNode.HasTags);
+        Assert.Equal(4, subNode.Rating);
+        Assert.Equal(["night"], subNode.Tags);
+        Assert.Equal(1, vm.TagFilters.Single(t => t.Name == "night").Count);
+    }
+
+    [Fact]
     public async Task StatusFilterAppliesOnlyWhenTheKindShowsStatus()
     {
         using var lib = new TestLibrary();

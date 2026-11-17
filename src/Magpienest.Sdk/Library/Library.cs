@@ -70,6 +70,10 @@ public sealed record LibraryItem
     public string Extra { get; init; } = "{}";
     /// <summary>Tag names.</summary>
     public IReadOnlyList<string> Tags { get; init; } = [];
+    /// <summary>Tags of the labelled folders above the item (see <see cref="FolderLabels"/>); filters and search count them as the item's own.</summary>
+    public IReadOnlyList<string> FolderTags { get; init; } = [];
+    /// <summary>Rating of the nearest labelled folder above the item that has one, 0 = none; filters and the rating sort use it while <see cref="Rating"/> is 0.</summary>
+    public int FolderRating { get; init; }
 }
 
 /// <summary>Helpers for <see cref="LibraryItem.Extra"/>.</summary>
@@ -178,7 +182,7 @@ public sealed record ItemQuery
 {
     /// <summary>Kind id.</summary>
     public required string Kind { get; init; }
-    /// <summary>Case-insensitive substring of the title or of any tag.</summary>
+    /// <summary>Case-insensitive substring of the title or of any tag, folder tags included.</summary>
     public string? Text { get; init; }
     /// <summary>Directory filter.</summary>
     public string? Directory { get; init; }
@@ -186,11 +190,11 @@ public sealed record ItemQuery
     public bool IncludeSubdirectories { get; init; } = true;
     /// <summary>Source filter.</summary>
     public long? SourceId { get; init; }
-    /// <summary>The item must have all of these tags.</summary>
+    /// <summary>The item must have all of these tags, on itself or on a folder above it.</summary>
     public IReadOnlyList<string> Tags { get; init; } = [];
     /// <summary>Favourites only.</summary>
     public bool FavoritesOnly { get; init; }
-    /// <summary>Minimum rating.</summary>
+    /// <summary>Minimum rating: the item's own, or while it has none, its <see cref="LibraryItem.FolderRating"/>.</summary>
     public int MinRating { get; init; }
     /// <summary>Status filter.</summary>
     public ItemStatus? Status { get; init; }
@@ -226,6 +230,15 @@ public sealed record ScanProgress(int Found, string? CurrentDirectory);
 /// <param name="Relinked">Moved/renamed rows relinked.</param>
 /// <param name="Total">Entries the scanner returned.</param>
 public sealed record ScanResult(int Added, int Updated, int MarkedMissing, int Relinked, int Total);
+
+/// <summary>
+/// Tags and a rating given to a folder. They apply to every item in the folder and in its subfolders: tags add up
+/// down the tree, and the nearest rated folder gives the rating of an item that has none of its own.
+/// </summary>
+/// <param name="Path">Absolute folder path.</param>
+/// <param name="Rating">0 = unrated, 1..5.</param>
+/// <param name="Tags">Tag names.</param>
+public sealed record FolderLabels(string Path, int Rating, IReadOnlyList<string> Tags);
 
 /// <summary>A tag and the number of items carrying it.</summary>
 /// <param name="Name">Tag name.</param>
@@ -324,13 +337,24 @@ public interface ILibraryService
     /// <param name="tags">New tags.</param>
     Task SetTagsAsync(long id, IReadOnlyCollection<string> tags);
 
-    /// <summary>Tags used by a kind, with counts.</summary>
+    /// <summary>Tags used by a kind, with counts (items that have a tag through a folder count too).</summary>
     /// <param name="kind">Kind id.</param>
     Task<IReadOnlyList<TagCount>> GetTagsAsync(string kind);
 
     /// <summary>Distinct directory values of non-missing items.</summary>
     /// <param name="kind">Kind id.</param>
     Task<IReadOnlyList<string>> GetDirectoriesAsync(string kind);
+
+    /// <summary>Every folder of a kind that has tags or a rating.</summary>
+    /// <param name="kind">Kind id.</param>
+    Task<IReadOnlyList<FolderLabels>> GetFolderLabelsAsync(string kind);
+
+    /// <summary>Replaces a folder's tags and rating; no tags and rating 0 removes its labels. Never touches files.</summary>
+    /// <param name="kind">Kind id.</param>
+    /// <param name="path">Folder path.</param>
+    /// <param name="rating">0 = unrated, 1..5.</param>
+    /// <param name="tags">New tags.</param>
+    Task SetFolderLabelsAsync(string kind, string path, int rating, IReadOnlyCollection<string> tags);
 }
 
 /// <summary>Kind of library change.</summary>

@@ -196,7 +196,7 @@ internal sealed partial class LibraryService : ILibraryService, IDisposable
         return await _db.ReadAsync<LibraryItem?>(connection =>
         {
             var item = SelectItem(connection, id);
-            return item is null ? null : AttachTags(connection, [item])[0];
+            return item is null ? null : ApplyFolderLabels(AttachTags(connection, [item]), LoadFolderLabels(connection, item.Kind))[0];
         }).ConfigureAwait(false);
     }
 
@@ -322,13 +322,21 @@ internal sealed partial class LibraryService : ILibraryService, IDisposable
         return await _db.ReadAsync<IReadOnlyList<TagCount>>(connection =>
         {
             var result = new List<TagCount>();
-            using var command = connection.Command(
-                "SELECT t.name, COUNT(*) FROM tag t JOIN item_tag it ON it.tag_id = t.id JOIN item i ON i.id = it.item_id " +
-                "WHERE i.kind = $kind GROUP BY t.id ORDER BY t.name").With("$kind", kind);
-            using var reader = command.ExecuteReader();
-            while (reader.Read())
+            using (var command = connection.Command(
+                       "SELECT t.name, COUNT(*) FROM tag t JOIN item_tag it ON it.tag_id = t.id JOIN item i ON i.id = it.item_id " +
+                       "WHERE i.kind = $kind GROUP BY t.id ORDER BY t.name").With("$kind", kind))
+            using (var reader = command.ExecuteReader())
             {
-                result.Add(new TagCount(reader.GetString(0), reader.GetInt32(1)));
+                while (reader.Read())
+                {
+                    result.Add(new TagCount(reader.GetString(0), reader.GetInt32(1)));
+                }
+            }
+
+            var folders = LoadFolderLabels(connection, kind);
+            if (folders.Any(f => f.Tags.Count > 0))
+            {
+                MergeFolderTagCounts(connection, kind, folders, result);
             }
 
             return result;
@@ -460,8 +468,12 @@ internal sealed partial class LibraryService : ILibraryService, IDisposable
         return "(" + string.Join(',', names) + ")";
     }
 
+    /// <summary>A tag no item and no folder carries.</summary>
+    private const string OrphanTag =
+        "NOT EXISTS (SELECT 1 FROM item_tag WHERE item_tag.tag_id = tag.id) AND NOT EXISTS (SELECT 1 FROM folder_tag WHERE folder_tag.tag_id = tag.id)";
+
     private static void DeleteOrphanTags(SqliteConnection connection, SqliteTransaction transaction) =>
-        connection.Command("DELETE FROM tag WHERE NOT EXISTS (SELECT 1 FROM item_tag WHERE item_tag.tag_id = tag.id)", transaction).Execute();
+        connection.Command("DELETE FROM tag WHERE " + OrphanTag, transaction).Execute();
 
     private static string? SetTagsCore(SqliteConnection connection, long id, List<string> tags)
     {
@@ -494,8 +506,7 @@ internal sealed partial class LibraryService : ILibraryService, IDisposable
         foreach (var chunk in oldTagIds.Chunk(ChunkSize))
         {
             var cleanup = connection.Command("DELETE FROM tag", transaction);
-            cleanup.CommandText += " WHERE id IN " + AddInParameters(cleanup, chunk, "$t") +
-                                   " AND NOT EXISTS (SELECT 1 FROM item_tag WHERE item_tag.tag_id = tag.id)";
+            cleanup.CommandText += " WHERE id IN " + AddInParameters(cleanup, chunk, "$t") + " AND " + OrphanTag;
             cleanup.Execute();
         }
 

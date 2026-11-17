@@ -191,6 +191,27 @@ internal sealed partial class BrowserView : UserControl
         }
     }
 
+    /// <summary>Right-click on a folder (not "All"): edit its tags and rating without selecting it.</summary>
+    private void Folders_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+    {
+        var container = e.OriginalSource as DependencyObject;
+        while (container is not null and not TreeViewItem)
+        {
+            container = container is Visual or System.Windows.Media.Media3D.Visual3D
+                ? VisualTreeHelper.GetParent(container)
+                : LogicalTreeHelper.GetParent(container);
+        }
+
+        if (container is not TreeViewItem { DataContext: FolderNode { IsRoot: false } node })
+        {
+            e.Handled = true;
+            return;
+        }
+
+        FolderMenu.Items.Clear();
+        FolderMenu.Items.Add(Item("Library.Folder.EditLabels", "", () => _vm.EditFolderLabelsCommand.Execute(node)));
+    }
+
     private void Tiles_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {
         if (_vm.SelectedTiles.Count == 0)

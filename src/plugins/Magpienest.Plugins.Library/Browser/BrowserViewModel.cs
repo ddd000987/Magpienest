@@ -53,6 +53,7 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
     private IReadOnlyList<LibrarySource> _sources = [];
     private IReadOnlyList<string> _directories = [];
     private IReadOnlyList<string> _tagNames = [];
+    private IReadOnlyList<FolderLabels> _folderLabels = [];
     private CancellationTokenSource? _query;
     private int _refreshVersion;
     private bool _restoring;
@@ -378,6 +379,7 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
         var sources = await _services.Library.GetSourcesAsync(Kind);
         var directories = ShowFolderTreeOption ? await _services.Library.GetDirectoriesAsync(Kind) : [];
         var tags = await _services.Library.GetTagsAsync(Kind);
+        var folderLabels = ShowFolderTreeOption ? await _services.Library.GetFolderLabelsAsync(Kind) : [];
         if (_disposed)
         {
             return;
@@ -385,6 +387,7 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
 
         _sources = sources;
         _directories = directories;
+        _folderLabels = folderLabels;
         _tagNames = [.. tags.Select(t => t.Name)];
         RebuildTree();
 
@@ -421,6 +424,18 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
 
         var root = FolderTreeBuilder.Build(Loc.Get("Library.Browser.AllFolders"), _sources, _directories, expanded);
         var nodes = root.SelfAndDescendants().ToList();
+        if (_folderLabels.Count > 0)
+        {
+            var labels = _folderLabels.ToDictionary(f => f.Path, StringComparer.OrdinalIgnoreCase);
+            foreach (var node in nodes)
+            {
+                if (node.Path is { } path && labels.TryGetValue(path, out var label))
+                {
+                    node.SetLabels(label.Rating, label.Tags);
+                }
+            }
+        }
+
         var selected = nodes.FirstOrDefault(n => string.Equals(n.Key, selectedKey, StringComparison.OrdinalIgnoreCase)) ?? root;
 
         _restoring = true;

@@ -678,13 +678,15 @@ function renderDetails() {
   }
 
   parts.push(factList(item));
-  if (item.tags?.length) {
+  // Tags given to a folder above the item count as its own in filters, so they show with them.
+  const tags = [...new Set([...(item.tags ?? []), ...(item.folderTags ?? [])])];
+  if (tags.length) {
     const section = document.createElement("section");
     const heading = textElement("h3", "WebUi.Web.Details.Tags");
     heading.className = "section-title";
     const chips = document.createElement("div");
     chips.className = "chips";
-    chips.append(...item.tags.map((tag) => {
+    chips.append(...tags.map((tag) => {
       const chip = tagChip(tag);
       chip.addEventListener("click", () => {
         filters.set(item.kind, { ...(filters.get(item.kind) ?? values()), tags: [tag] });

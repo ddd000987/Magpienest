@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Magpienest.Sdk.Library;
+using Magpienest.Sdk.Localization;
 
 namespace Magpienest.Plugins.Library.Browser;
 
@@ -27,7 +28,42 @@ internal sealed partial class FolderNode : ObservableObject
     /// <summary>Key for expansion and selection state: the path, or "" for the root.</summary>
     public string Key => Path ?? "";
 
-    public string ToolTip => Path ?? Name;
+    /// <summary>The folder's own rating, 0 = none.</summary>
+    public int Rating { get; private set; }
+
+    /// <summary>The folder's own tags.</summary>
+    public IReadOnlyList<string> Tags { get; private set; } = [];
+
+    public bool HasRating => Rating > 0;
+
+    public bool HasTags => Tags.Count > 0;
+
+    /// <summary>The path, then the folder's rating and tags when it has them.</summary>
+    public string ToolTip
+    {
+        get
+        {
+            var lines = new List<string> { Path ?? Name };
+            if (HasRating)
+            {
+                lines.Add(Loc.Format("Library.Folder.ToolTipRating", Rating));
+            }
+
+            if (HasTags)
+            {
+                lines.Add(Loc.Format("Library.Folder.ToolTipTags", string.Join(Loc.Get("Library.Folder.TagSeparator"), Tags)));
+            }
+
+            return string.Join(Environment.NewLine, lines);
+        }
+    }
+
+    /// <summary>Shows a folder's labels (set while the tree is built).</summary>
+    public void SetLabels(int rating, IReadOnlyList<string> tags)
+    {
+        Rating = rating;
+        Tags = tags;
+    }
 
     public List<FolderNode> Children { get; } = [];
 

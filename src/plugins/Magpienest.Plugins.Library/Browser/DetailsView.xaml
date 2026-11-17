@@ -110,6 +110,9 @@
             <TextBlock Style="{StaticResource StarText}" Text="{Binding Rating, Converter={StaticResource StarGlyph}, ConverterParameter=5}" />
           </Button>
         </StackPanel>
+        <TextBlock Text="{Binding FolderRatingText}" Style="{DynamicResource CaptionTextBlockStyle}" Margin="4,2,0,0"
+                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                   Visibility="{Binding HasFolderRating, Converter={StaticResource BoolToVisibility}}" />
 
         <CheckBox Content="{sdk:Loc Library.Details.Favorite}" IsChecked="{Binding IsFavorite}" Margin="0,12,0,0" />
 
@@ -121,6 +124,9 @@
 
         <TextBlock Text="{sdk:Loc Library.Details.Tags}" Style="{StaticResource Label}" />
         <local:TagEditorView DataContext="{Binding Tags}" />
+        <TextBlock Text="{Binding FolderTagsText}" Style="{DynamicResource CaptionTextBlockStyle}" Margin="0,4,0,0" TextWrapping="Wrap"
+                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                   Visibility="{Binding HasFolderTags, Converter={StaticResource BoolToVisibility}}" />
 
         <TextBlock Text="{sdk:Loc Library.Details.Notes}" Style="{StaticResource Label}" />
         <TextBox Text="{Binding Notes, UpdateSourceTrigger=LostFocus}" AcceptsReturn="True" TextWrapping="Wrap"

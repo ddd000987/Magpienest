@@ -137,5 +137,13 @@
   "Library.Settings.RemoveMissing": "移除遺失的項目…",
   "Library.Settings.RemoveMissingTitle": "移除遺失的項目",
   "Library.Settings.RemoveMissingMessage": "要從{1}移除 {0} 個遺失的項目嗎？它們的標籤、評分和筆記會一併刪除。不會刪除任何檔案。",
-  "Library.Settings.NoMissing": "{0}沒有遺失的項目。"
+  "Library.Settings.NoMissing": "{0}沒有遺失的項目。",
+  "Library.Folder.EditLabels": "資料夾標籤與評分…",
+  "Library.Folder.Title": "「{0}」的標籤與評分",
+  "Library.Folder.Hint": "會套用到這個資料夾和子資料夾裡的所有項目。項目自己有評分時，以項目自己的為準。",
+  "Library.Folder.ToolTipRating": "評分：{0}",
+  "Library.Folder.ToolTipTags": "標籤：{0}",
+  "Library.Folder.TagSeparator": "、",
+  "Library.Details.FolderRating": "資料夾評分：{0}",
+  "Library.Details.FolderTags": "來自資料夾：{0}"
 }

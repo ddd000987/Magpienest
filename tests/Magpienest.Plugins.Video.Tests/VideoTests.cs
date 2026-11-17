@@ -372,6 +372,10 @@ public sealed class VideoTests
         public Task SetTagsAsync(long id, IReadOnlyCollection<string> tags) => throw new NotSupportedException();
         public Task<IReadOnlyList<TagCount>> GetTagsAsync(string kind) => throw new NotSupportedException();
         public Task<IReadOnlyList<string>> GetDirectoriesAsync(string kind) => throw new NotSupportedException();
+
+        public Task<IReadOnlyList<FolderLabels>> GetFolderLabelsAsync(string kind) => throw new NotSupportedException();
+
+        public Task SetFolderLabelsAsync(string kind, string path, int rating, IReadOnlyCollection<string> tags) => throw new NotSupportedException();
     }
 
     private sealed class FakeShell : IShellService

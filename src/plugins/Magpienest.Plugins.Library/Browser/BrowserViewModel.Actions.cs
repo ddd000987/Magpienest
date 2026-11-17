@@ -194,6 +194,31 @@ internal sealed partial class BrowserViewModel
         }
     }
 
+    /// <summary>Edits the tags and rating of a folder in the tree; they apply to everything below it.</summary>
+    [RelayCommand]
+    private async Task EditFolderLabels(FolderNode? node)
+    {
+        if (node?.Path is not { } path)
+        {
+            return;
+        }
+
+        var editor = new FolderLabelsViewModel(node.Rating, node.Tags, _tagNames);
+        var accepted = await _services.Shell.ShowDialogAsync(new DialogDescriptor
+        {
+            Title = Loc.Format("Library.Folder.Title", node.Name),
+            Content = new FolderLabelsView { DataContext = editor, Width = 400 },
+            PrimaryText = Loc.Get("Library.EditTags.Save"),
+        });
+        if (!accepted)
+        {
+            return;
+        }
+
+        editor.Tags.AddCommand.Execute(null); // a tag typed but not yet added with Enter
+        await TryAsync(() => _services.Library.SetFolderLabelsAsync(Kind, path, editor.Rating, [.. editor.Tags.Tags]));
+    }
+
     [RelayCommand]
     private async Task RemoveSelected()
     {

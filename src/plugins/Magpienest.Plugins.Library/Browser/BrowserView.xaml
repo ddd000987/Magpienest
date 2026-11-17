@@ -299,7 +299,11 @@
       <!-- Folder tree -->
       <Border Width="240" BorderThickness="0,0,1,0" BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}"
               Visibility="{Binding ShowFolderPane, Converter={StaticResource BoolToVisibility}}">
-        <TreeView ItemsSource="{Binding FolderRoots}" Background="Transparent" BorderThickness="0" Padding="4,8">
+        <TreeView ItemsSource="{Binding FolderRoots}" Background="Transparent" BorderThickness="0" Padding="4,8"
+                  ContextMenuOpening="Folders_ContextMenuOpening">
+          <TreeView.ContextMenu>
+            <ContextMenu x:Name="FolderMenu" />
+          </TreeView.ContextMenu>
           <TreeView.ItemContainerStyle>
             <Style TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}">
               <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
@@ -312,6 +316,17 @@
               <StackPanel Orientation="Horizontal">
                 <TextBlock x:Name="NodeGlyph" Text="&#xE8B7;" Style="{StaticResource Glyph}" FontSize="14" Margin="0,0,8,0" />
                 <TextBlock Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <!-- The folder's own labels: a star with its rating, a tag mark. -->
+                <StackPanel Orientation="Horizontal" Margin="6,0,0,0" VerticalAlignment="Center"
+                            Visibility="{Binding HasRating, Converter={StaticResource BoolToVisibility}}">
+                  <TextBlock Text="&#xE735;" Style="{StaticResource Glyph}" FontSize="10" Margin="0,0,2,0"
+                             Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                  <TextBlock Text="{Binding Rating}" FontSize="11" VerticalAlignment="Center"
+                             Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+                <TextBlock Text="&#xE8EC;" Style="{StaticResource Glyph}" FontSize="11" Margin="6,0,0,0"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                           Visibility="{Binding HasTags, Converter={StaticResource BoolToVisibility}}" />
               </StackPanel>
               <HierarchicalDataTemplate.Triggers>
                 <DataTrigger Binding="{Binding IsRoot}" Value="True">

@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -182,9 +183,26 @@ internal sealed class LibraryApi : IAsyncDisposable
 
         var json = JsonSerializer.SerializeToNode(ToDto(item), WebJson.Options)!.AsObject();
         json["tags"] = new JsonArray([.. item.Tags.Select(t => (JsonNode)JsonValue.Create(t))]);
+        try
+        {
+            AddFolderLabels(json, item);
+        }
+        catch (MissingMemberException)
+        {
+            // Magpienest 0.1.0 has no folder labels: this plugin can be installed from the store before the app is updated.
+        }
+
         json["notes"] = item.Notes;
         json["extra"] = ParseObject(item.Extra);
         return WebUiHandler.Json(request, ResponseStatus.Ok, json);
+    }
+
+    /// <summary>Kept apart (and never inlined) so that a host without these members fails only this call.</summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void AddFolderLabels(JsonObject json, LibraryItem item)
+    {
+        json["folderTags"] = new JsonArray([.. item.FolderTags.Select(t => (JsonNode)JsonValue.Create(t))]);
+        json["folderRating"] = item.FolderRating;
     }
 
     private async Task<IResponse> PatchAsync(IRequest request, long id, bool progressOnly)

@@ -78,6 +78,17 @@ internal sealed partial class DetailsViewModel : ObservableObject
 
     public bool IsMissing => Item?.IsMissing == true;
 
+    /// <summary>The rating the item gets from its folders, shown while it has none of its own.</summary>
+    public string FolderRatingText => Item is { Rating: 0, FolderRating: > 0 } item ? Loc.Format("Library.Details.FolderRating", item.FolderRating) : "";
+
+    public bool HasFolderRating => FolderRatingText.Length > 0;
+
+    public string FolderTagsText => Item is { FolderTags.Count: > 0 } item
+        ? Loc.Format("Library.Details.FolderTags", string.Join(Loc.Get("Library.Folder.TagSeparator"), item.FolderTags))
+        : "";
+
+    public bool HasFolderTags => FolderTagsText.Length > 0;
+
     /// <summary>Shows the current selection. Values the user is editing survive a refresh of the same item.</summary>
     public void Show(IReadOnlyList<LibraryItem> selection, IReadOnlyList<string> allTags)
     {
@@ -128,6 +139,10 @@ internal sealed partial class DetailsViewModel : ObservableObject
         OnPropertyChanged(nameof(AddedText));
         OnPropertyChanged(nameof(OpenedText));
         OnPropertyChanged(nameof(IsMissing));
+        OnPropertyChanged(nameof(FolderRatingText));
+        OnPropertyChanged(nameof(HasFolderRating));
+        OnPropertyChanged(nameof(FolderTagsText));
+        OnPropertyChanged(nameof(HasFolderTags));
         CustomDetails = CreateCustomDetails(item);
         if (!sameItem || item.FileSize != previous!.FileSize || item.FileModified != previous.FileModified
             || item.CoverPath != previous.CoverPath)

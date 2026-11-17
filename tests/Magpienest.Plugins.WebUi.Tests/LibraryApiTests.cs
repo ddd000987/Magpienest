@@ -583,6 +583,10 @@ public sealed class LibraryApiTests : IAsyncLifetime
         public Task<IReadOnlyList<string>> GetDirectoriesAsync(string kind) =>
             Task.FromResult<IReadOnlyList<string>>([.. Items.Where(i => i.Kind == kind).Select(i => i.Directory).Distinct()]);
 
+        public Task<IReadOnlyList<FolderLabels>> GetFolderLabelsAsync(string kind) => Task.FromResult<IReadOnlyList<FolderLabels>>([]);
+
+        public Task SetFolderLabelsAsync(string kind, string path, int rating, IReadOnlyCollection<string> tags) => throw new NotSupportedException();
+
         public void RegisterKind(IPluginContext owner, ItemKindDescriptor kind) => throw new NotSupportedException();
 
         public Task<IReadOnlyList<LibrarySource>> GetSourcesAsync(string kind) => throw new NotSupportedException();
