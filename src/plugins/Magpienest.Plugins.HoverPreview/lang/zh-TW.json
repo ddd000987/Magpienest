@@ -1,0 +1,10 @@
+{
+  "HoverPreview.Settings.Title": "懸浮檢視",
+  "HoverPreview.Settings.Delay": "滑鼠停留多久後顯示",
+  "HoverPreview.Settings.Hint": "在收藏庫裡把滑鼠停在插畫或漫畫上。在漫畫上捲動滾輪可以翻頁；滑鼠移開或按一下就會關閉。",
+  "HoverPreview.Delay.Short": "0.2 秒",
+  "HoverPreview.Delay.Normal": "0.4 秒",
+  "HoverPreview.Delay.Long": "0.7 秒",
+  "HoverPreview.Delay.VeryLong": "1 秒",
+  "HoverPreview.PageOf": "{0} / {1}"
+}

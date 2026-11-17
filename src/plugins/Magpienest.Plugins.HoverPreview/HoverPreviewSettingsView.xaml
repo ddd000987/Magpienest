@@ -1,0 +1,26 @@
+<UserControl x:Class="Magpienest.Plugins.HoverPreview.HoverPreviewSettingsView"
+             x:ClassModifier="internal"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sdk="clr-namespace:Magpienest.Sdk.Localization;assembly=Magpienest.Sdk">
+  <StackPanel>
+    <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+            CornerRadius="{DynamicResource ControlCornerRadius}" Padding="16,12" Margin="0,0,0,8">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+          <TextBlock Text="{sdk:Loc HoverPreview.Settings.Delay}" />
+          <TextBlock Text="{sdk:Loc HoverPreview.Settings.Hint}" Style="{DynamicResource CaptionTextBlockStyle}" TextWrapping="Wrap"
+                     Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+        <ComboBox Grid.Column="1" MinWidth="160" VerticalAlignment="Center"
+                  ItemsSource="{Binding Delays}" SelectedItem="{Binding Delay}" DisplayMemberPath="Label"
+                  ToolTip="{sdk:Loc HoverPreview.Settings.Delay}" />
+      </Grid>
+    </Border>
+  </StackPanel>
+</UserControl>

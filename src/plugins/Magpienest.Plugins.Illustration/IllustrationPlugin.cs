@@ -1,3 +1,4 @@
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Magpienest.Sdk;
@@ -13,7 +14,7 @@ namespace Magpienest.Plugins.Illustration;
 /// <summary>The "Illustrations" page: image files in library folders, browsed and viewed one by one.</summary>
 [Requires(typeof(IShellService), typeof(ILibraryService), typeof(ILibraryBrowserFactory),
           typeof(IImagingService), typeof(IThumbnailService), typeof(IImageViewerService))]
-[Optional(typeof(IImageWindowService))]
+[Optional(typeof(IImageWindowService), typeof(IHoverPreviewService))]
 public sealed class IllustrationPlugin : Plugin
 {
     /// <summary>Kind and page id.</summary>
@@ -31,6 +32,7 @@ public sealed class IllustrationPlugin : Plugin
         var imaging = ctx.Get<IImagingService>();
         var viewer = ctx.Get<IImageViewerService>();
         ctx.TryGet<IImageWindowService>(out var windows);
+        ctx.TryGet<IHoverPreviewService>(out var hover);
 
         library.RegisterKind(ctx, new ItemKindDescriptor
         {
@@ -55,8 +57,22 @@ public sealed class IllustrationPlugin : Plugin
                 Sorts = [ItemSort.Title, ItemSort.AddedAt, ItemSort.FileModified, ItemSort.Rating, ItemSort.FileSize],
                 DefaultSort = ItemSort.Title,
                 Commands = windows is null ? [] : [WindowCommand(windows, shell, ctx.Log)],
+                TileHovered = hover is null ? null : (tile, item) => Preview(hover, tile, item),
             }),
         });
+    }
+
+    /// <summary>Hover preview of one picture.</summary>
+    internal static void Preview(IHoverPreviewService hover, FrameworkElement tile, LibraryItem item)
+    {
+        if (!item.IsMissing)
+        {
+            hover.Hover(tile, new HoverPreviewRequest
+            {
+                Title = item.Title,
+                OpenPages = _ => Task.FromResult<IPageSource>(new FilePageSource([item.Path])),
+            });
+        }
     }
 
     /// <summary>"Open in borderless window": one window per selected picture (only when the Image Window plugin is on).</summary>

@@ -6,6 +6,7 @@
     <Project Path="src/plugins/Magpienest.Plugins.Comic/Magpienest.Plugins.Comic.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.DevTools/Magpienest.Plugins.DevTools.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.Game/Magpienest.Plugins.Game.csproj" />
+    <Project Path="src/plugins/Magpienest.Plugins.HoverPreview/Magpienest.Plugins.HoverPreview.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.Illustration/Magpienest.Plugins.Illustration.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.ImageViewer/Magpienest.Plugins.ImageViewer.csproj" />
     <Project Path="src/plugins/Magpienest.Plugins.ImageWindow/Magpienest.Plugins.ImageWindow.csproj" />
@@ -35,6 +36,7 @@
     <Project Path="tests/Magpienest.Localization.Tests/Magpienest.Localization.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.Comic.Tests/Magpienest.Plugins.Comic.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.Game.Tests/Magpienest.Plugins.Game.Tests.csproj" />
+    <Project Path="tests/Magpienest.Plugins.HoverPreview.Tests/Magpienest.Plugins.HoverPreview.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.ImageViewer.Tests/Magpienest.Plugins.ImageViewer.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.ImageWindow.Tests/Magpienest.Plugins.ImageWindow.Tests.csproj" />
     <Project Path="tests/Magpienest.Plugins.Imaging.Tests/Magpienest.Plugins.Imaging.Tests.csproj" />

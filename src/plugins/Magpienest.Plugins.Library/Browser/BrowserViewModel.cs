@@ -190,6 +190,9 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
 
     public Stretch ThumbnailStretch => Options.ThumbnailStretch;
 
+    /// <summary>Tiles show their title as a tooltip unless something else follows the mouse on them (hover preview).</summary>
+    public bool ShowTileToolTip => Options.TileHovered is null;
+
     public double ThumbnailWidth => TileWidth;
 
     public double ThumbnailHeight => Math.Round(TileWidth / (Options.TileAspectRatio > 0 ? Options.TileAspectRatio : 1.0));

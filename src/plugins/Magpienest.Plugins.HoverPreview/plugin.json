@@ -1,0 +1,15 @@
+{
+  "id": "magpienest.hoverpreview",
+  "version": "0.1.0",
+  "apiVersion": 1,
+  "assembly": "Magpienest.Plugins.HoverPreview.dll",
+  "name": { "en": "Hover Preview", "zh-TW": "懸浮檢視" },
+  "description": {
+    "en": "Rest the mouse on a picture or a comic to see it large beside the cursor; scroll to turn a comic's pages.",
+    "zh-TW": "滑鼠停在圖片或漫畫上，就會在游標旁放大顯示；在漫畫上捲動滾輪可以翻頁。"
+  },
+  "author": "Magpienest contributors",
+  "essential": false,
+  "enabledByDefault": true,
+  "bundle": "magpienest.viewer"
+}

@@ -163,6 +163,14 @@ internal sealed partial class BrowserView : UserControl
         }
     }
 
+    private void Tile_MouseEnter(object sender, MouseEventArgs e)
+    {
+        if (_vm.Options.TileHovered is { } hovered && sender is FrameworkElement { DataContext: TileViewModel tile } element)
+        {
+            hovered(element, tile.Item);
+        }
+    }
+
     private void Tile_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
         (e.OldValue as TileViewModel)?.Detach();

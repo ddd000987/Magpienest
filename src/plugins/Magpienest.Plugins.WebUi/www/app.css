@@ -1057,3 +1057,38 @@ body.details-open .browse {
   -webkit-user-drag: none;
   background: #111111;
 }
+
+/* Hover preview: a large picture beside the cursor while it rests on a tile (mouse only). */
+.hover-preview {
+  position: fixed;
+  z-index: 40;
+  pointer-events: none;
+  background: var(--surface);
+  outline: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.hover-preview[hidden] {
+  display: none;
+}
+
+.hover-preview img {
+  display: block;
+}
+
+.hover-badge {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--fg);
+  opacity: 0.9;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.hover-badge[hidden] {
+  display: none;
+}

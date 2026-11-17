@@ -1,0 +1,10 @@
+{
+  "HoverPreview.Settings.Title": "Hover preview",
+  "HoverPreview.Settings.Delay": "Show the preview after the mouse rests for",
+  "HoverPreview.Settings.Hint": "Rest the mouse on an illustration or a comic in the library. Scroll the wheel to turn a comic's pages; move the mouse away or click to close the preview.",
+  "HoverPreview.Delay.Short": "0.2 seconds",
+  "HoverPreview.Delay.Normal": "0.4 seconds",
+  "HoverPreview.Delay.Long": "0.7 seconds",
+  "HoverPreview.Delay.VeryLong": "1 second",
+  "HoverPreview.PageOf": "{0} / {1}"
+}

@@ -393,6 +393,11 @@ public sealed record BrowserOptions
     public IReadOnlyList<BrowserCommand> Commands { get; init; } = [];
     /// <summary>Kind-specific details block.</summary>
     public Func<LibraryItem, FrameworkElement?>? CreateDetails { get; init; }
+    /// <summary>
+    /// Called when the mouse enters a tile, with the tile element (for example to start a hover preview).
+    /// While it is set, tiles show no title tooltip.
+    /// </summary>
+    public Action<FrameworkElement, LibraryItem>? TileHovered { get; init; }
 }
 
 /// <summary>An open request from the browser.</summary>

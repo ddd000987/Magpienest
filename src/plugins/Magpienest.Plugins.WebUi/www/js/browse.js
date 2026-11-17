@@ -6,6 +6,7 @@ import { t, label, labelAttribute, textElement, onLanguage, formatDate, formatSi
 import { icon, kindIcon, iconButton } from "./icons.js";
 import { isGame, gameTileLine, gameFacts } from "./games.js";
 import { go, back } from "./router.js";
+import { attachHover } from "./hover.js";
 
 const PAGE_SIZE = 120;
 const MAX_PAGE = 500;
@@ -74,6 +75,7 @@ export function cached(id) {
 /** Sets everything up once; `options.toast` shows a short message. */
 export function init(options) {
   notify = options.toast;
+  attachHover($("grid"), cached);
   fillSelect($("sort"), SORTS);
   fillSelect($("filter-rating"), [[0, "WebUi.Web.Filter.Any"], ...[1, 2, 3, 4, 5].map((n) => [n, "WebUi.Web.Filter.RatingAtLeast", n])]);
   fillSelect($("filter-status"), [["", "WebUi.Web.Filter.Any"], ...STATUSES]);

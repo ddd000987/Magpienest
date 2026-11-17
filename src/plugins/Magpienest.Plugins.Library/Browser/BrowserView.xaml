@@ -91,7 +91,9 @@
     <DataTemplate x:Key="TileTemplate" DataType="{x:Type local:TileViewModel}">
       <Grid x:Name="TileRoot" Background="Transparent"
             Loaded="Tile_Loaded" Unloaded="Tile_Unloaded" DataContextChanged="Tile_DataContextChanged"
-            ToolTip="{Binding Title}" ToolTipService.InitialShowDelay="800">
+            MouseEnter="Tile_MouseEnter"
+            ToolTip="{Binding Title}" ToolTipService.InitialShowDelay="800"
+            ToolTipService.IsEnabled="{Binding DataContext.ShowTileToolTip, RelativeSource={RelativeSource AncestorType=ListBox}}">
         <Grid.RowDefinitions>
           <RowDefinition Height="{Binding DataContext.ThumbnailHeight, RelativeSource={RelativeSource AncestorType=ListBox}}" />
           <RowDefinition Height="Auto" />

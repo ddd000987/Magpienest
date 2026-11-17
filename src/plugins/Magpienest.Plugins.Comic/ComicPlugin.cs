@@ -16,7 +16,7 @@ namespace Magpienest.Plugins.Comic;
 [Requires(typeof(IShellService), typeof(ISettingsService), typeof(ILibraryService),
           typeof(ILibraryBrowserFactory), typeof(IImagingService), typeof(IThumbnailService),
           typeof(IImageViewerService))]
-[Optional(typeof(IArchiveService))]
+[Optional(typeof(IArchiveService), typeof(IHoverPreviewService))]
 public sealed class ComicPlugin : Plugin
 {
     /// <summary>Kind and page id.</summary>
@@ -31,6 +31,7 @@ public sealed class ComicPlugin : Plugin
         var imaging = ctx.Get<IImagingService>();
         var viewer = ctx.Get<IImageViewerService>();
         ctx.TryGet<IArchiveService>(out var archives);
+        ctx.TryGet<IHoverPreviewService>(out var hover);
 
         var pages = new BookPages(imaging, archives);
         var books = new ComicBooks(pages, library, shell, viewer, ctx.Log);
@@ -63,6 +64,14 @@ public sealed class ComicPlugin : Plugin
                 ProgressFraction = ComicBooks.ProgressFraction,
                 Commands = books.Commands,
                 CreateDetails = item => ComicDetails.Create(item, library, ctx.Log),
+                TileHovered = hover is null ? null : (tile, item) =>
+                {
+                    // The cover first; the wheel turns the pages.
+                    if (!item.IsMissing)
+                    {
+                        hover.Hover(tile, new HoverPreviewRequest { Title = item.Title, OpenPages = ct => pages.CreateAsync(item.Path, ct) });
+                    }
+                },
             }),
         });
     }
