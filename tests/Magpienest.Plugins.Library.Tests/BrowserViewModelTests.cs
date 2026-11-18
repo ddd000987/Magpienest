@@ -185,6 +185,7 @@ public sealed class BrowserViewModelTests
             vm.TileWidth = 250;
             Assert.False(vm.IsDetailsVisible);
             vm.IsDetailsVisible = true;
+            vm.ResizeFolderPane(9999, save: true);
             await vm.LastRefresh;
         }
 
@@ -194,6 +195,7 @@ public sealed class BrowserViewModelTests
         Assert.True(again.Descending);
         Assert.Equal(250, again.TileWidth);
         Assert.True(again.IsDetailsVisible);
+        Assert.Equal(BrowserViewModel.MaxFolderPaneWidth, again.FolderPaneWidth);
 
         using var other = new BrowserViewModel(services, lib.Context, BrowserHarness.Options(kind: "other"));
         await other.Initialization;

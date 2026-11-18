@@ -39,6 +39,9 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
     public const double MinTileWidth = 120;
     public const double MaxTileWidth = 360;
     public const double DefaultTileWidth = 180;
+    public const double MinFolderPaneWidth = 160;
+    public const double MaxFolderPaneWidth = 640;
+    public const double DefaultFolderPaneWidth = 240;
 
     private static readonly TimeSpan SearchDelay = TimeSpan.FromMilliseconds(250);
     private static readonly TimeSpan ChangeDelay = TimeSpan.FromMilliseconds(300);
@@ -79,6 +82,7 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
 
         _restoring = true;
         TileWidth = Math.Clamp(Config("tileWidth", DefaultTileWidth), MinTileWidth, MaxTileWidth);
+        FolderPaneWidth = Math.Clamp(Config("folderPaneWidth", DefaultFolderPaneWidth), MinFolderPaneWidth, MaxFolderPaneWidth);
         var storedSort = Config("sort", options.DefaultSort.ToString());
         SelectedSort = SortOptions.FirstOrDefault(o => o.Value.ToString() == storedSort)
                        ?? SortOptions.FirstOrDefault(o => o.Value == options.DefaultSort)
@@ -563,6 +567,20 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
     partial void OnStatusFilterChanged(LocalizedOption<ItemStatus?> value) => QueryChanged();
 
     partial void OnShowMissingChanged(bool value) => QueryChanged();
+
+    /// <summary>Width of the folder pane, dragged by its edge.</summary>
+    [ObservableProperty]
+    public partial double FolderPaneWidth { get; private set; }
+
+    /// <summary>Sets the folder pane's width (clamped); <paramref name="save"/> stores it (at the end of a drag).</summary>
+    public void ResizeFolderPane(double width, bool save)
+    {
+        FolderPaneWidth = Math.Round(Math.Clamp(width, MinFolderPaneWidth, MaxFolderPaneWidth));
+        if (save)
+        {
+            SetConfig("folderPaneWidth", FolderPaneWidth);
+        }
+    }
 
     partial void OnTileWidthChanged(double value)
     {

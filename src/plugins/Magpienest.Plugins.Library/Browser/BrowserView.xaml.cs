@@ -192,6 +192,57 @@ internal sealed partial class BrowserView : UserControl
     }
 
     /// <summary>Right-click on a folder (not "All"): edit its tags and rating without selecting it.</summary>
+    // ---- folder pane ---------------------------------------------------------------------------
+
+    /// <summary>Room kept free at the right of a folder header (vertical scroll bar, padding).</summary>
+    private const double FolderHeaderSlack = 20;
+
+    private readonly HashSet<FrameworkElement> _folderHeaders = [];
+
+    private void FolderHeader_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement header)
+        {
+            _folderHeaders.Add(header);
+            FitFolderHeader(header);
+            Dispatcher.BeginInvoke(() => FitFolderHeader(header), DispatcherPriority.Loaded);
+        }
+    }
+
+    private void FolderHeader_Unloaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement header)
+        {
+            _folderHeaders.Remove(header);
+        }
+    }
+
+    private void Folders_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        foreach (var header in _folderHeaders)
+        {
+            FitFolderHeader(header);
+        }
+    }
+
+    /// <summary>Limits a header to the tree's width minus its indent, so a long name is cut instead of widening the tree.</summary>
+    private void FitFolderHeader(FrameworkElement header)
+    {
+        if (!header.IsLoaded || !Folders.IsAncestorOf(header))
+        {
+            return;
+        }
+
+        var left = header.TransformToAncestor(Folders).Transform(default).X;
+        header.MaxWidth = Math.Max(40, Folders.ActualWidth - left - FolderHeaderSlack);
+    }
+
+    private void FolderPaneEdge_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e) =>
+        _vm.ResizeFolderPane(_vm.FolderPaneWidth + e.HorizontalChange, save: false);
+
+    private void FolderPaneEdge_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e) =>
+        _vm.ResizeFolderPane(_vm.FolderPaneWidth, save: true);
+
     private void Folders_ContextMenuOpening(object sender, ContextMenuEventArgs e)
     {
         var container = e.OriginalSource as DependencyObject;
