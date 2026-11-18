@@ -1,6 +1,6 @@
 {
   "id": "magpienest.catalogue",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "apiVersion": 1,
   "assembly": "Magpienest.Plugins.Catalogue.dll",
   "name": { "en": "Plugin store", "zh-TW": "插件商店" },
