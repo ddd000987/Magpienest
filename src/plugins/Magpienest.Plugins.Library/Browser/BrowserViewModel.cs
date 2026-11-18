@@ -54,6 +54,9 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
     private IReadOnlyList<string> _directories = [];
     private IReadOnlyList<string> _tagNames = [];
     private IReadOnlyList<FolderLabels> _folderLabels = [];
+
+    /// <summary>The sources and folders the current tree was built from (null = no tree).</summary>
+    private string? _treeShape;
     private CancellationTokenSource? _query;
     private int _refreshVersion;
     private bool _restoring;
@@ -411,9 +414,19 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
     {
         if (!ShowFolderTreeOption)
         {
+            _treeShape = null;
             FolderRoots = [];
             SelectedFolder = null;
             OnPropertyChanged(nameof(FolderRoots));
+            return;
+        }
+
+        var rootName = Loc.Get("Library.Browser.AllFolders");
+        var shape = string.Join('\n', [rootName, .. _sources.Select(s => $"{s.Id}|{s.Path}"), "", .. _directories]);
+        if (FolderRoots.FirstOrDefault() is { } current && string.Equals(shape, _treeShape, StringComparison.Ordinal))
+        {
+            // Same folders: update the labels in place, so the TreeView keeps its containers and its selection.
+            ApplyLabels([.. current.SelfAndDescendants()]);
             return;
         }
 
@@ -422,25 +435,24 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
             .ToDictionary(n => n.Key, n => n.IsExpanded, StringComparer.OrdinalIgnoreCase);
         var selectedKey = SelectedFolder?.Key ?? "";
 
-        var root = FolderTreeBuilder.Build(Loc.Get("Library.Browser.AllFolders"), _sources, _directories, expanded);
+        var root = FolderTreeBuilder.Build(rootName, _sources, _directories, expanded);
         var nodes = root.SelfAndDescendants().ToList();
-        if (_folderLabels.Count > 0)
-        {
-            var labels = _folderLabels.ToDictionary(f => f.Path, StringComparer.OrdinalIgnoreCase);
-            foreach (var node in nodes)
-            {
-                if (node.Path is { } path && labels.TryGetValue(path, out var label))
-                {
-                    node.SetLabels(label.Rating, label.Tags);
-                }
-            }
-        }
-
+        ApplyLabels(nodes);
         var selected = nodes.FirstOrDefault(n => string.Equals(n.Key, selectedKey, StringComparison.OrdinalIgnoreCase)) ?? root;
 
+        // A TreeView whose items are replaced selects its first item (the root) by itself; that selection must not
+        // reach the query, and the nodes must end up with only the kept folder selected.
         _restoring = true;
         try
         {
+            if (previous is not null)
+            {
+                foreach (var node in previous.SelfAndDescendants())
+                {
+                    node.Selected = null;
+                }
+            }
+
             selected.IsSelected = true;
             foreach (var node in nodes)
             {
@@ -448,14 +460,34 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
             }
 
             SelectedFolder = selected;
+            _treeShape = shape;
+            FolderRoots = [root];
+            OnPropertyChanged(nameof(FolderRoots));
+            foreach (var node in nodes)
+            {
+                node.IsSelected = ReferenceEquals(node, selected);
+            }
         }
         finally
         {
             _restoring = false;
         }
+    }
 
-        FolderRoots = [root];
-        OnPropertyChanged(nameof(FolderRoots));
+    private void ApplyLabels(IReadOnlyList<FolderNode> nodes)
+    {
+        var labels = _folderLabels.ToDictionary(f => f.Path, StringComparer.OrdinalIgnoreCase);
+        foreach (var node in nodes)
+        {
+            if (node.Path is { } path && labels.TryGetValue(path, out var label))
+            {
+                node.SetLabels(label.Rating, label.Tags);
+            }
+            else
+            {
+                node.SetLabels(0, []);
+            }
+        }
     }
 
     private void OnFolderSelected(FolderNode node)

@@ -61,8 +61,18 @@ internal sealed partial class FolderNode : ObservableObject
     /// <summary>Shows a folder's labels (set while the tree is built).</summary>
     public void SetLabels(int rating, IReadOnlyList<string> tags)
     {
+        if (Rating == rating && Tags.SequenceEqual(tags, StringComparer.Ordinal))
+        {
+            return;
+        }
+
         Rating = rating;
         Tags = tags;
+        OnPropertyChanged(nameof(Rating));
+        OnPropertyChanged(nameof(Tags));
+        OnPropertyChanged(nameof(HasRating));
+        OnPropertyChanged(nameof(HasTags));
+        OnPropertyChanged(nameof(ToolTip));
     }
 
     public List<FolderNode> Children { get; } = [];
