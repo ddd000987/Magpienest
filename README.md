@@ -8,7 +8,7 @@ Magpienest is a Windows desktop collection library for your **local** illustrati
 
 ## Features
 
-- **Library**: add folders and Magpienest finds everything inside them. Thumbnail walls with a folder tree, search, sorting, filters, tags, ratings, favourites, status and notes. Folders can have tags and a rating too (right-click a folder in the tree): they count for everything inside the folder and its subfolders. Missing files are marked instead of silently dropped.
+- **Library**: add folders and Magpienest finds everything inside them. Thumbnail walls with a folder tree, search, sorting (each folder remembers its own), filters, tags, ratings, favourites, status and notes. Folders can have tags and a rating too (right-click a folder in the tree): they count for everything inside the folder and its subfolders. Missing files are marked instead of silently dropped.
 - **Illustrations**: JPEG, PNG, GIF, BMP, TIFF, WebP, HEIC, AVIF, JPEG XL and more. A fast full-window viewer with zoom, rotation, preloading of the next pages and a bottom bar. Right-click a picture to open it in a borderless image window of its own (from the plugin store).
 - **Comics**: a folder of pages or a zip / cbz / rar / cbr / 7z / cb7 archive is one book. Two-page spreads, right-to-left or left-to-right reading, a cover page shown alone, a continuous strip mode, and Magpienest remembers where you stopped.
 - **Hover preview**: rest the mouse on an illustration or a comic and it shows large beside the cursor; scroll the wheel to leaf through a comic. Works in the web interface too.

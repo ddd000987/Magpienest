@@ -502,6 +502,7 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
         }
 
         SelectedFolder = node;
+        ApplySortFor(node);
         QueryChanged();
     }
 
@@ -544,7 +545,7 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
     {
         if (!_restoring)
         {
-            SetConfig("sort", value.Value.ToString());
+            RememberSort();
         }
 
         QueryChanged();
@@ -554,7 +555,7 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
     {
         if (!_restoring)
         {
-            SetConfig("descending", value);
+            RememberSort();
         }
 
         QueryChanged();
@@ -671,6 +672,7 @@ internal sealed partial class BrowserViewModel : ObservableObject, IDisposable
             {
                 root.IsSelected = true;
                 SelectedFolder = root;
+                ApplySortFor(root);
             }
         }
         finally

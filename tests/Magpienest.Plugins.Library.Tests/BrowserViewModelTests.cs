@@ -204,6 +204,74 @@ public sealed class BrowserViewModelTests
     }
 
     [Fact]
+    public async Task EachFolderRemembersItsOwnSort()
+    {
+        using var lib = new TestLibrary();
+        var folder = lib.NewFolder("pics");
+        var scanner = new FakeScanner();
+        scanner.Entries.Add(FakeScanner.Entry(Path.Combine(folder, "a", "deep", "1.png")));
+        scanner.Entries.Add(FakeScanner.Entry(Path.Combine(folder, "b", "2.png")));
+        lib.RegisterScanner(Kind, scanner);
+        var source = await lib.Service.AddSourceAsync(Kind, folder);
+        await lib.Service.ScanAsync(source.Id, ct: TestContext.Current.CancellationToken);
+        var services = BrowserHarness.Services(lib.Service);
+
+        using (var vm = new BrowserViewModel(services, lib.Context, BrowserHarness.Options()))
+        {
+            await vm.Initialization;
+            var sourceNode = vm.FolderRoots[0].Children.Single();
+            var a = sourceNode.Children.Single(n => n.Name == "a");
+            var b = sourceNode.Children.Single(n => n.Name == "b");
+
+            Select(vm, a);
+            vm.SelectedSort = vm.SortOptions.Single(o => o.Value == ItemSort.AddedAt);
+            vm.Descending = true;
+
+            Select(vm, b);
+            Assert.Equal(ItemSort.Title, vm.SelectedSort.Value); // b has none: the root's
+            Assert.False(vm.Descending);
+            vm.SelectedSort = vm.SortOptions.Single(o => o.Value == ItemSort.Rating);
+
+            Select(vm, a);
+            Assert.Equal(ItemSort.AddedAt, vm.SelectedSort.Value);
+            Assert.True(vm.Descending);
+            Assert.Equal(ItemSort.AddedAt, vm.BuildQuery().Sort);
+
+            Select(vm, a.Children.Single()); // a subfolder follows a
+            Assert.Equal(ItemSort.AddedAt, vm.SelectedSort.Value);
+            Assert.True(vm.Descending);
+
+            Select(vm, vm.FolderRoots[0]); // the root kept its own
+            Assert.Equal(ItemSort.Title, vm.SelectedSort.Value);
+            Assert.False(vm.Descending);
+            await vm.LastRefresh;
+        }
+
+        using var again = new BrowserViewModel(services, lib.Context, BrowserHarness.Options());
+        await again.Initialization;
+        var again_b = again.FolderRoots[0].Children.Single().Children.Single(n => n.Name == "b");
+        Select(again, again_b);
+        Assert.Equal(ItemSort.Rating, again.SelectedSort.Value);
+
+        // Setting a folder back to what it would inherit forgets it.
+        again.SelectedSort = again.SortOptions.Single(o => o.Value == ItemSort.Title);
+        Assert.False(services.Config.Get<Dictionary<string, string>?>($"browser.{Kind}.folderSorts", null)!
+            .ContainsKey(again_b.Path!));
+        await again.LastRefresh;
+    }
+
+    /// <summary>Selects a node the way the TreeView does: the previously selected one is deselected first.</summary>
+    private static void Select(BrowserViewModel vm, FolderNode node)
+    {
+        foreach (var other in vm.FolderRoots[0].SelfAndDescendants().Where(n => n.IsSelected && !ReferenceEquals(n, node)))
+        {
+            other.IsSelected = false;
+        }
+
+        node.IsSelected = true;
+    }
+
+    [Fact]
     public async Task SelectionSurvivesARefreshByIdAndDropsRemovedItems()
     {
         using var lib = new TestLibrary();
