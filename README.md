@@ -36,7 +36,11 @@ Everything Magpienest stores (library, thumbnail cache, settings, logs, plugins 
 
 ## Plugins
 
-Open **Settings, Plugin store** to add features: Videos, Games, Image window and Web interface. Each card shows the size; "Install" downloads the feature from the store's GitHub releases, checks it and turns it on, and "Update" appears when a newer version exists. With "Check for plugin updates at startup" on, a red dot on Settings tells you an update is waiting.
+Open **Settings, Plugin store** to add features: Videos, Games, Image window and Web interface. Each card shows the size; "Install" downloads the feature from the store's GitHub releases, checks it and turns it on, and "Update" appears when a newer version exists. With "Check for Magpienest and plugin updates at start-up" on (the default), a red dot on Settings tells you an update is waiting.
+
+## Updating Magpienest
+
+From 0.1.2 on, Magpienest tells you when a new version is out: a message with an "Update" button appears, and the plugin store shows the new version at the top. Nothing is downloaded until you press "Update". Then Magpienest downloads the new version, checks it, closes, replaces its program files and opens again; the `data\` folder (library, settings, plugins) is not touched, and if anything goes wrong the previous version is put back. When Magpienest is in a folder it cannot write to (such as Program Files), update by hand: unzip the new zip over the Magpienest folder.
 
 Open **Settings, Plugins** to see the features you have.
 

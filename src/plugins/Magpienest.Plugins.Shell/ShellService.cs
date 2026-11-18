@@ -287,11 +287,19 @@ internal sealed class ShellService : IShellService
         owner.Track(() => merged.Remove(dictionary));
     }
 
-    public void Notify(string message, NotifySeverity severity = NotifySeverity.Info)
+    public void Notify(string message, NotifySeverity severity = NotifySeverity.Info) => ShowToast(message, severity, null, null);
+
+    public void Notify(string message, NotifySeverity severity, string actionText, Action action)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        ShowToast(message, severity, actionText, action);
+    }
+
+    private void ShowToast(string message, NotifySeverity severity, string? actionText, Action? action)
     {
         if (!_ctx.Ui.CheckAccess())
         {
-            _ctx.Ui.Post(() => Notify(message, severity));
+            _ctx.Ui.Post(() => ShowToast(message, severity, actionText, action));
             return;
         }
 
@@ -300,11 +308,26 @@ internal sealed class ShellService : IShellService
             return;
         }
 
-        var toast = new ToastItem(message, severity, t => _vm.Toasts.Remove(t));
+        var toast = new ToastItem(message, severity, t => _vm.Toasts.Remove(t), actionText, action is null ? null : () =>
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                _ctx.Log.Error("A toast action failed.", ex);
+            }
+        });
         _vm.Toasts.Add(toast);
         while (_vm.Toasts.Count > MaxToasts)
         {
             _vm.Toasts.RemoveAt(0);
+        }
+
+        if (toast.HasAction)
+        {
+            return; // Stays until closed or used.
         }
 
         var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(severity == NotifySeverity.Error ? 8 : 4) };

@@ -76,10 +76,25 @@ internal sealed record CatalogueBundle(
     public string DescriptionFor(string language) => Texts.Pick(Description, language) ?? string.Empty;
 }
 
+/// <summary>The newest Magpienest release, as the catalogue's optional "app" entry lists it.</summary>
+/// <param name="Version">Version of the release.</param>
+/// <param name="Package">The release zip (id <see cref="CatalogueApp.PackageId"/>).</param>
+/// <param name="Notes">Short release notes by language.</param>
+/// <param name="Page">The release page, or null.</param>
+internal sealed record CatalogueApp(string Version, CataloguePackage Package, IReadOnlyDictionary<string, string> Notes, Uri? Page)
+{
+    /// <summary>The id the app's zip is downloaded under.</summary>
+    public const string PackageId = "magpienest";
+
+    /// <summary>Notes in <paramref name="language"/>, else English, else empty.</summary>
+    public string NotesFor(string language) => Texts.Pick(Notes, language) ?? string.Empty;
+}
+
 /// <summary>A parsed catalogue.</summary>
 /// <param name="Bundles">Valid bundles, in file order.</param>
-/// <param name="Rejected">English reasons for bundles that were left out.</param>
-internal sealed record StoreCatalogue(IReadOnlyList<CatalogueBundle> Bundles, IReadOnlyList<string> Rejected);
+/// <param name="Rejected">English reasons for entries that were left out.</param>
+/// <param name="App">The newest Magpienest release, or null when the catalogue lists none (or an invalid one).</param>
+internal sealed record StoreCatalogue(IReadOnlyList<CatalogueBundle> Bundles, IReadOnlyList<string> Rejected, CatalogueApp? App = null);
 
 /// <summary>Picks a text for a language.</summary>
 internal static class Texts
@@ -169,7 +184,20 @@ internal static partial class CatalogueParser
                 index++;
             }
 
-            return new StoreCatalogue(bundles, rejected);
+            CatalogueApp? app = null;
+            if (root.TryGetProperty("app", out var appElement))
+            {
+                try
+                {
+                    app = ReadApp(appElement);
+                }
+                catch (FormatException ex)
+                {
+                    rejected.Add($"App: {ex.Message}.");
+                }
+            }
+
+            return new StoreCatalogue(bundles, rejected, app);
         }
     }
 
@@ -224,6 +252,46 @@ internal static partial class CatalogueParser
         }
 
         return new CatalogueBundle(id, name, TextMap(element, "description"), String(element, "author"), version!.Trim(), apiVersion, packages);
+    }
+
+    /// <summary>{ "version", "size", "url", "sha256", "notes": { language: text }, "page" }.</summary>
+    private static CatalogueApp ReadApp(JsonElement element)
+    {
+        if (element.ValueKind != JsonValueKind.Object)
+        {
+            throw new FormatException("not an object");
+        }
+
+        var version = String(element, "version");
+        if (!SemVer.IsValid(version))
+        {
+            throw new FormatException("invalid version");
+        }
+
+        if (!element.TryGetProperty("size", out var sizeElement) || sizeElement.ValueKind != JsonValueKind.Number || !sizeElement.TryGetInt64(out var size) || size <= 0)
+        {
+            throw new FormatException("no valid size");
+        }
+
+        var url = String(element, "url");
+        if (url is null || !Uri.TryCreate(url, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttps && uri.Scheme != Uri.UriSchemeHttp))
+        {
+            throw new FormatException("no valid url");
+        }
+
+        var sha = String(element, "sha256");
+        if (sha is null || !HexPattern().IsMatch(sha))
+        {
+            throw new FormatException("no valid sha256");
+        }
+
+        Uri? page = null;
+        if (String(element, "page") is { } pageText && Uri.TryCreate(pageText, UriKind.Absolute, out var pageUri) && pageUri.Scheme == Uri.UriSchemeHttps)
+        {
+            page = pageUri;
+        }
+
+        return new CatalogueApp(version!.Trim(), new CataloguePackage(CatalogueApp.PackageId, size, uri, sha.ToLowerInvariant()), TextMap(element, "notes"), page);
     }
 
     private static CataloguePackage ReadPackage(string bundle, JsonElement element)

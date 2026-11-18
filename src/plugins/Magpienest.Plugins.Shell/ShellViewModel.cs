@@ -124,15 +124,27 @@ internal sealed partial class NavItem(PageDescriptor page) : ObservableObject
     public void RefreshTitle() => OnPropertyChanged(nameof(Title));
 }
 
-/// <summary>A toast card.</summary>
-internal sealed partial class ToastItem(string message, NotifySeverity severity, Action<ToastItem> close) : ObservableObject
+/// <summary>A toast card, optionally with one action button.</summary>
+internal sealed partial class ToastItem(string message, NotifySeverity severity, Action<ToastItem> close, string? actionText = null, Action? action = null)
+    : ObservableObject
 {
     public string Message { get; } = message;
 
     public NotifySeverity Severity { get; } = severity;
 
+    public string ActionText { get; } = actionText ?? string.Empty;
+
+    public bool HasAction => action is not null;
+
     [RelayCommand]
     private void Close() => close(this);
+
+    [RelayCommand]
+    private void Act()
+    {
+        close(this);
+        action?.Invoke();
+    }
 }
 
 /// <summary>A status-bar entry. Report and Dispose are callable from any thread.</summary>

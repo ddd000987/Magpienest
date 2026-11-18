@@ -68,7 +68,12 @@
             <ColumnDefinition Width="Auto" />
           </Grid.ColumnDefinitions>
           <Border x:Name="Bar" Width="4" Margin="8" CornerRadius="2" Background="{DynamicResource AccentFillColorDefaultBrush}" />
-          <TextBlock Grid.Column="1" Text="{Binding Message}" TextWrapping="Wrap" Margin="4,12" VerticalAlignment="Center" />
+          <StackPanel Grid.Column="1" Margin="4,12" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+            <Button Content="{Binding ActionText}" Command="{Binding ActCommand}" HorizontalAlignment="Left" Margin="0,8,0,0"
+                    Style="{DynamicResource AccentButtonStyle}"
+                    Visibility="{Binding HasAction, Converter={StaticResource BoolToVisibility}}" />
+          </StackPanel>
           <Button Grid.Column="2" Command="{Binding CloseCommand}" ToolTip="{sdk:Loc Shell.Toast.Close}"
                   VerticalAlignment="Top" Margin="0,4,0,0" Padding="6" Background="Transparent" BorderThickness="0">
             <TextBlock Text="&#xE711;" Style="{StaticResource GlyphText}" FontSize="12" />

@@ -101,7 +101,8 @@ internal sealed class StoreClient : IPackageDownloader, IDisposable
 
     private async Task<string> DownloadCoreAsync(CataloguePackage package, string version, string directory, IProgress<long>? progress, CancellationToken cancellationToken)
     {
-        if (!_policy.IsAllowedPackageUrl(package.Url))
+        var allowed = package.Id == CatalogueApp.PackageId ? _policy.IsAllowedAppUrl(package.Url) : _policy.IsAllowedPackageUrl(package.Url);
+        if (!allowed)
         {
             throw new StoreException(StoreError.UrlNotAllowed, $"'{package.Url}' is not in the store repository's releases.");
         }

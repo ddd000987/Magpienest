@@ -12,13 +12,18 @@ namespace Magpienest.Plugins.Catalogue;
 /// <param name="RequireHttps">False only in tests.</param>
 /// <param name="CatalogueHosts">Hosts a catalogue request may be redirected to.</param>
 /// <param name="PackageHosts">Hosts a package download may be redirected to.</param>
+/// <param name="AppPrefix">The Magpienest zip's url must start with this (or with <paramref name="PackagePrefix"/>).</param>
 internal sealed partial record StorePolicy(
     Uri CatalogueUrl,
     string PackagePrefix,
     bool RequireHttps,
     IReadOnlySet<string> CatalogueHosts,
-    IReadOnlySet<string> PackageHosts)
+    IReadOnlySet<string> PackageHosts,
+    string? AppPrefix = null)
 {
+    /// <summary>The main repository's name next to the store repository (same owner).</summary>
+    public const string AppRepositoryName = "Magpienest";
+
     private static readonly IReadOnlySet<string> GitHubCatalogueHosts =
         new[] { "raw.githubusercontent.com" }.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
 
@@ -47,7 +52,8 @@ internal sealed partial record StorePolicy(
             $"https://github.com/{text}/releases/download/",
             RequireHttps: true,
             GitHubCatalogueHosts,
-            GitHubPackageHosts);
+            GitHubPackageHosts,
+            $"https://github.com/{text.Split('/')[0]}/{AppRepositoryName}/releases/download/");
     }
 
     /// <summary>True when a package may be downloaded from <paramref name="url"/>.</summary>
@@ -57,6 +63,16 @@ internal sealed partial record StorePolicy(
         && string.IsNullOrEmpty(url.UserInfo)
         && url.AbsoluteUri.StartsWith(PackagePrefix, StringComparison.OrdinalIgnoreCase)
         && url.AbsoluteUri.Length > PackagePrefix.Length;
+
+    /// <summary>True when the Magpienest zip may be downloaded from <paramref name="url"/>.</summary>
+    public bool IsAllowedAppUrl(Uri url) =>
+        IsAllowedPackageUrl(url)
+        || (AppPrefix is not null
+            && url.IsAbsoluteUri
+            && SchemeAllowed(url)
+            && string.IsNullOrEmpty(url.UserInfo)
+            && url.AbsoluteUri.StartsWith(AppPrefix, StringComparison.OrdinalIgnoreCase)
+            && url.AbsoluteUri.Length > AppPrefix.Length);
 
     /// <summary>True when a request may follow a redirect to <paramref name="target"/>.</summary>
     public bool IsAllowedRedirect(Uri target, bool package) =>

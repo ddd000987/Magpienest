@@ -23,6 +23,34 @@
         <Button Grid.Column="1" Command="{Binding RestartNowCommand}" Content="{sdk:Loc Catalogue.Page.RestartNow}" />
       </Grid>
     </Border>
+    <!-- A newer Magpienest -->
+    <Border Visibility="{Binding HasAppUpdate, Converter={StaticResource BoolToVisibility}}"
+            Margin="0,0,0,12" Padding="16,12" BorderThickness="1"
+            Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+            BorderBrush="{DynamicResource AccentFillColorDefaultBrush}"
+            CornerRadius="{DynamicResource ControlCornerRadius}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Margin="0,0,16,0">
+          <TextBlock Text="{Binding AppTitle}" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding AppNotes}" TextWrapping="Wrap" Margin="0,4,0,0"
+                     Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+          <TextBlock Text="{Binding AppDetails}" Style="{DynamicResource CaptionTextBlockStyle}" TextWrapping="Wrap"
+                     Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
+          <TextBlock Text="{sdk:Loc Catalogue.App.Note}" Style="{DynamicResource CaptionTextBlockStyle}" TextWrapping="Wrap"
+                     Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+          <Button MinWidth="96" Command="{Binding UpdateAppCommand}" Content="{Binding AppActionText}"
+                  Style="{DynamicResource AccentButtonStyle}" />
+          <Button MinWidth="96" Margin="0,8,0,0" Command="{Binding OpenAppPageCommand}" Content="{sdk:Loc Catalogue.App.Notes}"
+                  Visibility="{Binding HasAppPage, Converter={StaticResource BoolToVisibility}}" />
+        </StackPanel>
+      </Grid>
+    </Border>
     <Grid Margin="0,0,0,12">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" />

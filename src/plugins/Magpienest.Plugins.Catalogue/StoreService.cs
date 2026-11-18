@@ -16,7 +16,7 @@ internal sealed class StoreService : IDisposable
     /// <summary>Config key: the store repository as "owner/name".</summary>
     public const string RepositoryKey = "storeRepository";
 
-    /// <summary>Config key: fetch the catalogue once at every start (default off).</summary>
+    /// <summary>Config key: fetch the catalogue once at every start, for app and plugin updates (default on).</summary>
     public const string CheckAtStartupKey = "checkUpdatesAtStartup";
 
     /// <summary>The official store repository (owner/name); a config value under <see cref="RepositoryKey"/> overrides it.</summary>
@@ -32,8 +32,11 @@ internal sealed class StoreService : IDisposable
     private readonly IPluginManager _manager;
     private StoreClient? _client;
     private string? _clientRepository;
+    private readonly AppUpdater _updater;
     private CancellationTokenSource? _install;
+    private CancellationTokenSource? _appUpdate;
     private bool _raiseQueued;
+    private bool _appUpdateAnnounced;
 
     public StoreService(IPluginContext ctx, IShellService shell, ISettingsService settings, ILocalizationService localization, IPluginManager manager)
     {
@@ -42,6 +45,7 @@ internal sealed class StoreService : IDisposable
         _settings = settings;
         _localization = localization;
         _manager = manager;
+        _updater = new AppUpdater(ctx.Environment, ctx.Log);
     }
 
     /// <summary>Raised on the UI thread whenever anything below changes.</summary>
@@ -65,12 +69,24 @@ internal sealed class StoreService : IDisposable
     /// <summary>Number of installed bundles with an update.</summary>
     public int UpdateCount => Entries.Count(e => e.State == StoreBundleState.UpdateAvailable);
 
+    /// <summary>The newer Magpienest release the catalogue lists, or null.</summary>
+    public CatalogueApp? AppUpdate => _updater.NewerThanRunning(Catalogue);
+
+    /// <summary>The running version.</summary>
+    public string AppVersion => _updater.CurrentVersion;
+
+    /// <summary>True while the new Magpienest is being downloaded and unpacked.</summary>
+    public bool IsUpdatingApp => _appUpdate is not null;
+
+    /// <summary>Downloaded share of the new Magpienest (0 to 1) while <see cref="IsUpdatingApp"/>.</summary>
+    public double AppUpdateProgress { get; private set; }
+
     /// <summary>The UI language, for bundle names and descriptions.</summary>
     public string Language => _localization.CurrentLanguage;
 
     public bool CheckAtStartup
     {
-        get => _ctx.Config.Get(CheckAtStartupKey, false);
+        get => _ctx.Config.Get(CheckAtStartupKey, true);
         set
         {
             _ctx.Config.Set(CheckAtStartupKey, value);
@@ -87,10 +103,27 @@ internal sealed class StoreService : IDisposable
             ? Loc.Format("Catalogue.Size.MB", (bytes / (1024d * 1024d)).ToString("0.0", CultureInfo.CurrentCulture))
             : Loc.Format("Catalogue.Size.KB", Math.Max(1, (bytes + 1023) / 1024).ToString(CultureInfo.CurrentCulture));
 
-    /// <summary>Fetches the catalogue at start-up when the user turned that on.</summary>
+    /// <summary>Reports how the last app update ended, then fetches the catalogue unless the user turned that off.</summary>
     public void OnAppStarted()
     {
-        if (CheckAtStartup)
+        if (_updater.TakeReport() is { } report)
+        {
+            if (report.Success)
+            {
+                _ctx.Log.Info($"Updated to Magpienest {report.Version}.");
+                _shell.Notify(Loc.Format("Catalogue.App.Updated", report.Version), NotifySeverity.Success);
+            }
+            else
+            {
+                _ctx.Log.Warn($"Updating to Magpienest {report.Version} failed: {report.Error}");
+                _ = _shell.ShowMessageAsync(Loc.Format("Catalogue.App.FailedTitle", report.Version), Loc.Get("Catalogue.App.Undone"));
+            }
+        }
+
+        // Smoke tests and screenshots never contact the network.
+        var unattended = _ctx.Environment.CommandLineArgs.Any(a =>
+            string.Equals(a, "--smoke-test", StringComparison.OrdinalIgnoreCase) || string.Equals(a, "--screenshot", StringComparison.OrdinalIgnoreCase));
+        if (CheckAtStartup && !unattended)
         {
             _ = RefreshAsync();
         }
@@ -140,6 +173,120 @@ internal sealed class StoreService : IDisposable
             IsRefreshing = false;
             Raise();
         }
+
+        AnnounceAppUpdate();
+    }
+
+    /// <summary>Downloads the new Magpienest, then closes this one so it can be replaced. Never throws.</summary>
+    public async Task UpdateAppAsync()
+    {
+        if (AppUpdate is not { } app || _appUpdate is not null)
+        {
+            return;
+        }
+
+        var title = Loc.Format("Catalogue.App.FailedTitle", app.Version);
+        if (_install is not null)
+        {
+            await _shell.ShowMessageAsync(title, Loc.Get(MessageKey(StoreError.Busy)));
+            return;
+        }
+
+        var client = Client();
+        if (client is null)
+        {
+            await _shell.ShowMessageAsync(title, Loc.Get(MessageKey(StoreError.NotConfigured)));
+            return;
+        }
+
+        _appUpdate = CancellationTokenSource.CreateLinkedTokenSource(_ctx.Deactivating);
+        AppUpdateProgress = 0;
+        Raise();
+        var task = _shell.BeginTask(_ctx, Loc.Format("Catalogue.App.Downloading", app.Version));
+        var size = Math.Max(1, app.Package.Size);
+        var lastPercent = -1;
+        var progress = new ProgressReporter<long>(bytes =>
+        {
+            var fraction = Math.Clamp(bytes / (double)size, 0, 1);
+            var percent = (int)(fraction * 100);
+            if (percent == Interlocked.Exchange(ref lastPercent, percent))
+            {
+                return;
+            }
+
+            task.Report(fraction);
+            _ctx.Ui.Post(() =>
+            {
+                AppUpdateProgress = fraction;
+                Changed?.Invoke(this, EventArgs.Empty);
+            });
+        });
+
+        string? message = null;
+        try
+        {
+            var (outcome, exe) = await _updater.PrepareAsync(app, client, progress, _appUpdate.Token);
+            task.Dispose();
+            switch (outcome)
+            {
+                case AppUpdateOutcome.Ready:
+                    _updater.Launch(exe!);
+                    return;
+                case AppUpdateOutcome.NotWritable:
+                    message = Loc.Get("Catalogue.App.NotWritable");
+                    break;
+                default:
+                    message = Loc.Get("Catalogue.App.BadPackage");
+                    break;
+            }
+        }
+        catch (StoreException ex)
+        {
+            _ctx.Log.Warn($"Downloading Magpienest {app.Version} failed: {ex.Message}");
+            message = Loc.Get(MessageKey(ex.Code));
+        }
+        catch (OperationCanceledException)
+        {
+            if (!_ctx.Deactivating.IsCancellationRequested)
+            {
+                _shell.Notify(Loc.Format("Catalogue.App.Cancelled", app.Version));
+            }
+        }
+        catch (Exception ex)
+        {
+            _ctx.Log.Error($"Updating to Magpienest {app.Version} failed.", ex);
+            message = Loc.Get("Catalogue.App.BadPackage");
+        }
+        finally
+        {
+            task.Dispose();
+            _appUpdate?.Dispose();
+            _appUpdate = null;
+            Raise();
+        }
+
+        if (message is not null)
+        {
+            await _shell.ShowMessageAsync(title, message + "\n\n" + Loc.Get("Catalogue.App.ByHand"));
+        }
+    }
+
+    /// <summary>Stops the running app download; nothing is changed.</summary>
+    public void CancelAppUpdate() => _appUpdate?.Cancel();
+
+    /// <summary>Once per run: a toast with an "Update" button when a newer Magpienest is listed.</summary>
+    private void AnnounceAppUpdate()
+    {
+        if (_appUpdateAnnounced || AppUpdate is not { } app)
+        {
+            return;
+        }
+
+        _appUpdateAnnounced = true;
+        var notes = app.NotesFor(Language);
+        var text = Loc.Format("Catalogue.App.Available", app.Version);
+        _shell.Notify(string.IsNullOrWhiteSpace(notes) ? text : text + "\n" + notes, NotifySeverity.Info,
+                      Loc.Get("Catalogue.App.Update"), () => _ = UpdateAppAsync());
     }
 
     /// <summary>Asks once, then downloads and installs the bundle. Never throws.</summary>
@@ -152,7 +299,7 @@ internal sealed class StoreService : IDisposable
 
         var bundle = entry.Bundle;
         var name = bundle.NameFor(_localization.CurrentLanguage);
-        if (_install is not null)
+        if (_install is not null || _appUpdate is not null)
         {
             await _shell.ShowMessageAsync(Loc.Format("Catalogue.Failed.Title", name), Loc.Get(MessageKey(StoreError.Busy)));
             return;
@@ -232,6 +379,7 @@ internal sealed class StoreService : IDisposable
     public void Dispose()
     {
         _install?.Cancel();
+        _appUpdate?.Cancel();
         _client?.Dispose();
         _client = null;
     }
@@ -276,7 +424,7 @@ internal sealed class StoreService : IDisposable
     /// </summary>
     public void Raise()
     {
-        _settings.SetBadge(_ctx, SectionId, UpdateCount > 0);
+        _settings.SetBadge(_ctx, SectionId, UpdateCount > 0 || AppUpdate is not null);
         Changed?.Invoke(this, EventArgs.Empty);
     }
 

@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Threading;
 using Magpienest.Core;
+using Magpienest.Core.Update;
 using Magpienest.Sdk;
 using Magpienest.Sdk.Shell;
 
@@ -23,7 +24,12 @@ internal static class Program
     private static int Main(string[] args)
     {
         var appDirectory = Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory);
-        var (dataDirectoryArg, waitPid, passThrough) = ParseArgs(args);
+        var (dataDirectoryArg, waitPid, update, passThrough) = ParseArgs(args);
+        if (update.Target is not null)
+        {
+            return ApplyUpdate(appDirectory, update.Target, update.ResultFile, waitPid, dataDirectoryArg, passThrough);
+        }
+
         if (waitPid is not null)
         {
             WaitForExit(waitPid.Value);
@@ -192,30 +198,126 @@ internal static class Program
     }
 
     /// <summary>
-    /// Waits (up to 30 s) for the process that is restarting Magpienest to exit, so it has released the
-    /// single-instance lock before this instance tries to take it.
+    /// Waits (up to 30 s by default) for the process that is restarting Magpienest to exit, so it has released
+    /// the single-instance lock before this instance tries to take it. True when it is gone.
     /// </summary>
-    private static void WaitForExit(int processId)
+    private static bool WaitForExit(int processId, int milliseconds = 30000)
     {
         try
         {
             using var process = Process.GetProcessById(processId);
-            process.WaitForExit(30000);
+            return process.WaitForExit(milliseconds);
         }
         catch (ArgumentException)
         {
-            // Already gone.
+            return true; // Already gone.
         }
         catch (InvalidOperationException)
         {
-            // Already gone.
+            return true; // Already gone.
         }
     }
 
-    private static (string? DataDirectory, int? WaitPid, List<string> PassThrough) ParseArgs(string[] args)
+    /// <summary>
+    /// --apply-update: this exe is a new version unpacked by the store plugin. Waits for the old app to exit,
+    /// copies this folder over <paramref name="target"/>, writes the outcome for the store plugin to read, and
+    /// starts the installed exe again (the new version, or the old one when the update was undone).
+    /// </summary>
+    private static int ApplyUpdate(string appDirectory, string target, string? resultFile, int? waitPid, string? dataDirectory, List<string> passThrough)
+    {
+        var logFile = resultFile is null ? null : Path.Combine(Path.GetDirectoryName(Path.GetFullPath(resultFile))!, "apply.log");
+        void Log(string line)
+        {
+            try
+            {
+                if (logFile is not null)
+                {
+                    File.AppendAllText(logFile, $"{DateTimeOffset.Now:O} {line}{Environment.NewLine}", new UTF8Encoding(false));
+                }
+            }
+            catch (IOException)
+            {
+                // Logging must never stop the update.
+            }
+        }
+
+        var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString(3) ?? "?";
+        Log($"Applying Magpienest {version} from '{appDirectory}' to '{target}'.");
+        UpdateApplyResult result;
+        if (waitPid is not null && !WaitForExit(waitPid.Value, 120000))
+        {
+            result = new UpdateApplyResult(false, "The running Magpienest did not exit.");
+            Log(result.Error!);
+            WriteUpdateResult(resultFile, version, result);
+            return 1;
+        }
+
+        var backup = Path.Combine(Path.GetDirectoryName(appDirectory) ?? appDirectory, "backup");
+        if (resultFile is not null)
+        {
+            backup = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(resultFile))!, "backup");
+        }
+
+        try
+        {
+            result = UpdateApplier.Apply(appDirectory, target, backup, Log);
+        }
+        catch (Exception ex)
+        {
+            result = new UpdateApplyResult(false, ex.Message);
+        }
+
+        Log(result.Success ? "Update applied." : $"Update failed: {result.Error}");
+        WriteUpdateResult(resultFile, version, result);
+        try
+        {
+            var info = new ProcessStartInfo(Path.Combine(target, UpdateApplier.ExeName)) { UseShellExecute = false, WorkingDirectory = target };
+            if (!string.IsNullOrWhiteSpace(dataDirectory))
+            {
+                info.ArgumentList.Add("--data-dir");
+                info.ArgumentList.Add(dataDirectory);
+            }
+
+            foreach (var argument in passThrough)
+            {
+                info.ArgumentList.Add(argument);
+            }
+
+            using var started = Process.Start(info);
+        }
+        catch (Exception ex)
+        {
+            Log($"Starting '{target}' failed: {ex.Message}");
+            return 1;
+        }
+
+        return result.Success ? 0 : 1;
+    }
+
+    private static void WriteUpdateResult(string? resultFile, string version, UpdateApplyResult result)
+    {
+        if (resultFile is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var json = JsonSerializer.Serialize(new { version, success = result.Success, error = result.Error });
+            File.WriteAllText(resultFile, json, new UTF8Encoding(false));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // The store plugin then reports nothing; the files are as the log says.
+        }
+    }
+
+    private static (string? DataDirectory, int? WaitPid, (string? Target, string? ResultFile) Update, List<string> PassThrough) ParseArgs(string[] args)
     {
         string? dataDirectory = null;
         int? waitPid = null;
+        string? updateTarget = null;
+        string? updateResult = null;
         var passThrough = new List<string>();
         for (var i = 0; i < args.Length; i++)
         {
@@ -230,13 +332,21 @@ internal static class Program
                     waitPid = pid;
                 }
             }
+            else if (string.Equals(args[i], "--apply-update", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+            {
+                updateTarget = args[++i];
+            }
+            else if (string.Equals(args[i], "--update-result", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+            {
+                updateResult = args[++i];
+            }
             else
             {
                 passThrough.Add(args[i]);
             }
         }
 
-        return (dataDirectory, waitPid, passThrough);
+        return (dataDirectory, waitPid, (updateTarget, updateResult), passThrough);
     }
 
     /// <summary>Resolves the data folder: --data-dir, MAGPIENEST_DATA_DIR, portable.txt, %APPDATA%\Magpienest.</summary>

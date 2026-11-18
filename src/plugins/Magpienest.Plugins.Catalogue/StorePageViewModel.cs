@@ -42,6 +42,28 @@ internal sealed partial class StorePageViewModel : ObservableObject
     [ObservableProperty]
     public partial bool ShowRestartBar { get; set; }
 
+    /// <summary>A newer Magpienest is listed: the card at the top.</summary>
+    [ObservableProperty]
+    public partial bool HasAppUpdate { get; set; }
+
+    [ObservableProperty]
+    public partial string AppTitle { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string AppNotes { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string AppDetails { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string AppActionText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsUpdatingApp { get; set; }
+
+    [ObservableProperty]
+    public partial bool HasAppPage { get; set; }
+
     public bool CheckAtStartup
     {
         get => _service.CheckAtStartup;
@@ -60,6 +82,20 @@ internal sealed partial class StorePageViewModel : ObservableObject
         HasStatus = key is not null;
         ShowRestartBar = _manager.RestartRequired;
         OnPropertyChanged(nameof(CheckAtStartup));
+
+        var app = _service.AppUpdate;
+        HasAppUpdate = app is not null;
+        IsUpdatingApp = _service.IsUpdatingApp;
+        if (app is not null)
+        {
+            AppTitle = Loc.Format("Catalogue.App.CardTitle", app.Version);
+            AppNotes = app.NotesFor(_service.Language);
+            AppDetails = IsUpdatingApp
+                ? Loc.Format("Catalogue.App.Progress", Math.Round(_service.AppUpdateProgress * 100).ToString("0", System.Globalization.CultureInfo.CurrentCulture))
+                : Loc.Format("Catalogue.App.Details", _service.AppVersion, StoreService.FormatSize(app.Package.Size));
+            AppActionText = Loc.Get(IsUpdatingApp ? "Catalogue.Page.Action.Cancel" : "Catalogue.App.Update");
+            HasAppPage = app.Page is not null;
+        }
 
         var language = _service.Language;
         var entries = _service.Entries;
@@ -105,6 +141,37 @@ internal sealed partial class StorePageViewModel : ObservableObject
 
     [RelayCommand]
     private Task RefreshAsync() => _service.RefreshAsync();
+
+    [RelayCommand]
+    private void UpdateApp()
+    {
+        if (_service.IsUpdatingApp)
+        {
+            _service.CancelAppUpdate();
+        }
+        else
+        {
+            _ = _service.UpdateAppAsync();
+        }
+    }
+
+    [RelayCommand]
+    private void OpenAppPage()
+    {
+        if (_service.AppUpdate?.Page is not { } page)
+        {
+            return;
+        }
+
+        try
+        {
+            using var started = Process.Start(new ProcessStartInfo(page.AbsoluteUri) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            _ctx.Log.Warn($"Opening '{page}' failed: {ex.Message}");
+        }
+    }
 
     [RelayCommand]
     private void RestartNow()

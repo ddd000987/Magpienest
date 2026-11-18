@@ -59,6 +59,16 @@ public interface IShellService
     /// <param name="severity">Severity.</param>
     void Notify(string message, NotifySeverity severity = NotifySeverity.Info);
 
+    /// <summary>
+    /// Shows a toast with one button; it stays until it is closed or the button is pressed (which closes it and
+    /// runs <paramref name="action"/> on the UI thread). Callable from any thread. A shell without buttons shows the text only.
+    /// </summary>
+    /// <param name="message">Localized text.</param>
+    /// <param name="severity">Severity.</param>
+    /// <param name="actionText">Localized button text.</param>
+    /// <param name="action">Runs when the button is pressed.</param>
+    void Notify(string message, NotifySeverity severity, string actionText, Action action) => Notify(message, severity);
+
     /// <summary>Adds a status-bar entry; dispose the result when finished.</summary>
     /// <param name="owner">Registering plugin.</param>
     /// <param name="title">Localized title.</param>

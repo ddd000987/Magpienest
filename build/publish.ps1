@@ -18,6 +18,9 @@
 .NOTES
   Output: artifacts\Magpienest-<version>-win-x64.zip (without the store bundles), and artifacts\store\ with one
   <plugin id>-<version>.zip per store plugin, catalog.json and the store repository's READMEs.
+  catalog.json also lists the main zip under "app" (its address is the main repository's v<version> release,
+  with the first paragraph of each language in docs\release-notes\<version>.md as notes): the app offers it
+  as an update once that release and the catalogue are published.
   The script never contacts the network.
   Never enable PublishTrimmed, PublishSingleFile or PublishAot: they break WPF,
   reflection-based plugin discovery and per-plugin loading.
@@ -276,9 +279,7 @@ foreach ($bundle in $storeBundles.Keys) {
     $catalogueBundles += $entry
 }
 
-$catalogue = [ordered]@{ schema = 1; bundles = $catalogueBundles }
-$json = ConvertTo-Json -InputObject $catalogue -Depth 10
-[System.IO.File]::WriteAllText((Join-Path $storeDir 'catalog.json'), $json.Replace("`r`n", "`n") + "`n", $utf8)
+# catalog.json itself is written after the main zip exists (step 7), with the "app" entry.
 
 $mainUrl = 'https://github.com/{0}/Magpienest' -f $StoreRepository.Split('/')[0]
 foreach ($readme in 'README.md', 'README.zh-TW.md') {
@@ -340,6 +341,44 @@ if (Test-Path -LiteralPath $zipPath) {
 }
 [System.IO.Compression.ZipFile]::CreateFromDirectory($publishDir, $zipPath, [System.IO.Compression.CompressionLevel]::Optimal, $true)
 
+# The catalogue, with the main zip as the "app" entry. Notes: the first paragraph after each
+# "# Magpienest <version>" heading of the release notes (English first, then Traditional Chinese).
+$appNotes = [ordered]@{}
+$notesPath = Join-Path $root "docs\release-notes\$Version.md"
+if (Test-Path -LiteralPath $notesPath) {
+    $languages = @('en', 'zh-TW')
+    $found = 0
+    $lines = [System.IO.File]::ReadAllLines($notesPath, $utf8)
+    for ($i = 0; $i -lt $lines.Count -and $found -lt $languages.Count; $i++) {
+        if ($lines[$i] -match '^# Magpienest ') {
+            for ($j = $i + 1; $j -lt $lines.Count; $j++) {
+                $line = $lines[$j].Trim()
+                if ($line -and -not $line.StartsWith('#')) {
+                    $appNotes[$languages[$found]] = $line
+                    break
+                }
+            }
+            $found++
+        }
+    }
+}
+else {
+    Write-Warning "No docs\release-notes\$Version.md; the app update has no notes."
+}
+$owner = $StoreRepository.Split('/')[0]
+$appEntry = [ordered]@{
+    version = $Version
+    size    = (Get-Item -LiteralPath $zipPath).Length
+    url     = 'https://github.com/{0}/Magpienest/releases/download/v{1}/{2}' -f $owner, $Version, (Split-Path -Leaf $zipPath)
+    sha256  = (Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash.ToLowerInvariant()
+    notes   = $appNotes
+    page    = 'https://github.com/{0}/Magpienest/releases/tag/v{1}' -f $owner, $Version
+}
+$catalogue = [ordered]@{ schema = 1; bundles = $catalogueBundles; app = $appEntry }
+$json = ConvertTo-Json -InputObject $catalogue -Depth 10
+[System.IO.File]::WriteAllText((Join-Path $storeDir 'catalog.json'), $json.Replace("`r`n", "`n") + "`n", $utf8)
+
 $sizeMb = [math]::Round((Get-Item -LiteralPath $zipPath).Length / 1MB, 1)
 Write-Host "Done: $zipPath ($sizeMb MB)"
 Write-Host "Store: $storeDir (catalog.json, README.md, README.zh-TW.md and $($storePackages.Count) packages)"
+Write-Host "Publish in this order: the store bundle releases, the main release v$Version with the zip, then catalog.json (its app entry points at that zip)."
